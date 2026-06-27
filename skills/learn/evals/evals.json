@@ -1,0 +1,29 @@
+{
+  "skill_name": "learn",
+  "evals": [
+    {
+      "id": 0,
+      "name": "route-ambiguous-entry",
+      "prompt": "我想学这个，帮我搞懂：https://arxiv.org/abs/1706.03762",
+      "expected_output": "Detects the source is a single arXiv paper and routes to paper-learn (invokes it with the link), rather than treating it as a repo, topic, or book. If anything were ambiguous it would ask one quick question first.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "build-library-hub",
+      "prompt": "把我做过的这些学习页汇总成一个能离线打开的学习库首页。",
+      "expected_output": "Finds the library root, runs build-hub.py over it, and produces a self-contained learn-hub/index.html that indexes every *-learn page grouped by type (github-project / domain / textbook / paper / other), with type filters, search, thumbnails from each page's assets, relative links, and a per-page learn-status toggle persisted in the hub's localStorage. Opens it and explains how to refresh. Does not invent pages that aren't on disk.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "disambiguate-pdf",
+      "prompt": "我这有个 PDF 想学，帮我做成学习页。（一个 PDF 文件）",
+      "expected_output": "Asks one quick question to tell whether the PDF is a single paper (→ paper-learn) or a full textbook (→ textbook-learn) — using length/structure as the hint — then routes accordingly instead of guessing.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

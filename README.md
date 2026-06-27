@@ -53,6 +53,8 @@
 | **[textbook-learn](skills/textbook-learn)** | 一本技术书 / PDF，按章拆成课程，配例题精讲与主动回忆测验，带进度追踪 | ✅ 已完成 |
 | **[paper-learn](skills/paper-learn)** | 一篇论文 / arXiv，逐图拆方法 + 公式离线渲染 + 可交互机制 demo + 「已证实 vs 只是假设」批判性阅读 | ✅ 已完成 |
 
+不想记四个名字？一个总入口 **[`/learn`](skills/learn)** 就够了——丢给它任何来源（GitHub 链接 / arXiv / 一本书 / 一个领域），它**自动判型**分流到上面对应的 skill；模糊时先问一句再分流。它还负责**学习库 hub**：把你生成过的所有学习页[聚合成一个离线首页](samples/learn-hub/index.html)，按类型筛选、记录每页的学习状态。
+
 每个 skill **独立自包含、可单独安装**——用其中一个，不需要整个仓库。
 
 ## 效果预览
@@ -126,9 +128,10 @@ skill。详见 [docs/adding-a-new-skill.md](docs/adding-a-new-skill.md)。
 - [x] `domain-learn` —— 网络调研的领域学习路线（建立在严谨、可溯源的调研之上）+ 可交互 demo（样例：[3DGS](samples/domain-learn/3dgs-learn/index.html)、[扩散模型](samples/domain-learn/diffusion-models-learn/index.html)）
 - [x] `textbook-learn` —— 书 / PDF 的课程化学习，含例题精讲 + 主动回忆测验 + 进度追踪（样例：[《动手学深度学习》](samples/textbook-learn/d2l-learn/index.html)）
 - [x] `paper-learn` —— 单篇论文精读：逐图拆方法 + 离线公式 + 可交互机制 demo + 批判性阅读（样例：[Attention Is All You Need](samples/paper-learn/attention-learn/index.html)）
-- [ ] 元层：`learn` 路由入口（自动判型分流）+ 学习库 hub（聚合所有产物、跨页跳转、总进度）
+- [x] 元层：`learn` 路由入口（丢任何来源自动判型分流到四个 skill）+ 学习库 hub（聚合所有产物、按类型筛选、库级学习状态；样例：[学习库](samples/learn-hub/index.html)）
 - [ ] 往深做：textbook 测验导出 Anki / 间隔重复；多源融合（一个主题 = 论文 + repo + 领域）
-- [ ] 四个 skill 已就位后，再抽出真正共享的内核（页面外壳已共享，研究/教学法层待看）
+- [ ] 新来源候选：video/course-learn（视频/讲座→转录笔记+时间戳）、docs-learn（文档站）
+- [ ] 抽出真正共享的内核（页面外壳已共享，研究/教学法层待看）
 
 ## 许可证
 

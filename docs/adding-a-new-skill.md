@@ -23,6 +23,16 @@ See `shared/learning-page-design.md` for the page shell and component library.
 
 All four are now built — see `skills/<name>/` and a real sample under `samples/<name>/`.
 
+## The meta layer: `learn` (front door + library hub)
+On top of the four source skills sits **`skills/learn/`** — not a generator, a **router + hub**.
+It detects a source's type and hands off to the right sibling (so users get one `/learn`
+entry), and it builds the **library hub** (`scripts/build-hub.py` + `assets/hub-template.html`)
+that indexes every generated `*-learn/` page. When you add a new source skill, update
+`learn`'s `references/routing.md` (the decision table) and the hub's classifier in
+`build-hub.py` (`SKILLS` list + heuristics) so the new type routes and shows up in the hub.
+A new sibling self-classifies cleanly if its pages sit under a `…/<skill>/<name>/` folder or
+emit a `<meta name="learn:type" content="<skill>">` tag.
+
 ## Conventions
 - **Folder**: `skills/<name>/` with `SKILL.md` + `references/` + `scripts/` + `assets/`.
 - **Naming**: keep the family legible (e.g. `*-learn`). Make the SKILL.md `description`

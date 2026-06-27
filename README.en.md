@@ -62,6 +62,8 @@ from a real fetch.
 | **[textbook-learn](skills/textbook-learn)** | A specific technical book / PDF — turned into a chapter course with worked examples, active-recall quizzes, and a progress tracker | ✅ Done |
 | **[paper-learn](skills/paper-learn)** | A single paper / arXiv — a figure-by-figure method walk, offline-rendered equations, an interactive mechanism demo, and a "demonstrated vs hypothesized" critical-reading pass | ✅ Done |
 
+Don't want to remember four names? One front door, **[`/learn`](skills/learn)**, is enough — hand it any source (a GitHub link, an arXiv paper, a book, a topic) and it **auto-detects the type** and routes to the right skill above (asking one question first when it's ambiguous). It also builds the **library hub**: an [offline index page](samples/learn-hub/index.html) aggregating every learning page you've generated, with type filters and per-page learn status.
+
 Each skill is **self-contained and individually installable** — you don't need the whole repo to use one.
 
 ## Preview
@@ -136,9 +138,10 @@ truth** — improve the design system here, then re-sync into each skill. See
 - [x] `domain-learn` — web-researched topic roadmaps with interactive demos (built on rigorous, cited research) — examples: [3DGS](samples/domain-learn/3dgs-learn/index.html), [diffusion models](samples/domain-learn/diffusion-models-learn/index.html)
 - [x] `textbook-learn` — book/PDF courses with worked examples + active-recall quizzes + a progress tracker (example: [Dive into Deep Learning](samples/textbook-learn/d2l-learn/index.html))
 - [x] `paper-learn` — single-paper close reading: figure-by-figure method walk + offline equations + interactive mechanism demo + critical-reading claim check (example: [Attention Is All You Need](samples/paper-learn/attention-learn/index.html))
-- [ ] Meta layer: a `learn` router (auto-detect the source type) + a learning-library hub (aggregate all outputs, cross-link, combined progress)
+- [x] Meta layer: a [`learn`](skills/learn) router (auto-detect the source type and route) + a learning-library hub (aggregate all outputs, filter by type, per-page learn status; example: [library](samples/learn-hub/index.html))
 - [ ] Go deeper: export textbook quizzes to Anki / spaced repetition; multi-source blends (one topic = paper + repo + field)
-- [ ] With four skills in place, extract the shared core (the page shell is already shared; revisit the research/pedagogy layer)
+- [ ] Candidate new sources: video/course-learn (lecture series → transcript notes + timestamps), docs-learn (doc sites)
+- [ ] Extract the shared core (the page shell is already shared; revisit the research/pedagogy layer)
 
 ## License
 

@@ -17,8 +17,10 @@ samples/
 │   └── diffusion-models-learn/  # 扩散模型
 ├── textbook-learn/         # 学一本技术书 / PDF
 │   └── d2l-learn/           # 《动手学深度学习》逐章 + 测验
-└── paper-learn/            # 精读一篇论文 / arXiv
-    └── attention-learn/     # Attention Is All You Need 逐图 + 交互 + 批判性阅读
+├── paper-learn/            # 精读一篇论文 / arXiv
+│   └── attention-learn/     # Attention Is All You Need 逐图 + 交互 + 批判性阅读
+└── learn-hub/              # 学习库 hub —— 上面所有页的离线聚合首页（由 learn 生成）
+    └── index.html
 ```
 
 ## `github-project-learn/` — 学一个 GitHub 仓库或组织
@@ -85,6 +87,18 @@ seq2seq 架构图）/ 技术原理 / **代码结构与技术栈** / 部署。适
 数字均出自原文、逐节标注；取不到的（如实时引用数）如实标注「未核实」，不编造。
 
 ![attention-learn 交互注意力 demo 预览](../docs/images/paper-demo.png)
+
+## `learn-hub/` — 学习库 hub（元层 `learn` 的产物）
+
+| 案例 | 来源 | 亮点 | 怎么看 |
+|------|------|------|--------|
+| [`learn-hub/`](learn-hub/index.html) | 上面 7 个样例页 | **离线聚合首页**：按类型筛选 + 搜索 + 每页学习状态（未开始/在学/学完，存本地） | 双击 `index.html` |
+
+**learn-hub** —— 由 `learn` 的 `build-hub.py` 扫描本 `samples/` 目录**真实生成**：把 7 个学习页按来源类型
+（GitHub 项目 / 开放领域 / 技术书 / 论文）归类成卡片，每张卡带缩略图（取自该页自己的 assets）、类型徽章、
+「打开 →」链接，以及一个三态学习状态。顶部可按类型筛选、搜索；状态存在浏览器本地。重跑脚本即可刷新。
+
+![learn-hub 学习库首页预览](../docs/images/learn-hub.png)
 
 > 提示：这些页面是**自包含 HTML + 本地 assets**，直接双击 `index.html` 即可，无需联网、无需构建。
 > Tip: each page is self-contained HTML + a local `assets/` folder — just double-click `index.html`.
