@@ -1,25 +1,29 @@
 ---
 name: learn
 description: >-
-  The front door to the ai-learning-skills family. Two jobs. (1) ROUTER: given anything the
-  user wants to learn — a GitHub repo/org URL, an arXiv link / paper / PDF, a technical book,
-  or a bare topic/field — detect the source type and hand off to the right family skill
-  (github-project-learn / paper-learn / textbook-learn / domain-learn). (2) LIBRARY HUB: build
-  or refresh an offline "learning library" index page that aggregates every learning page
-  you've generated, grouped by type, with per-page learn status. Use this when the user types
-  /learn, says "我想学这个 / 帮我学习…" without it being obvious which skill fits, asks to learn
-  something but isn't sure how, or asks to "建/打开我的学习库 / build my learning hub / show all
-  my learning pages / 把我做的学习页汇总". If the user's input ALREADY clearly matches one
-  specific family skill (a plain GitHub URL, a clear arXiv link, a named textbook, a bare
-  field name), that skill can trigger directly — this router is for the unified entry point,
-  ambiguous inputs, and the hub. Not for: generic web apps or answering a one-off question.
+  The front door to the ai-learning-skills family — mainly a ROUTER: given anything the user
+  wants to learn — a GitHub repo/org URL, an arXiv link / paper / PDF, a technical book, or a
+  bare topic/field — detect the source type and hand off to the right family skill
+  (github-project-learn / paper-learn / textbook-learn / domain-learn), asking one quick
+  question when it's ambiguous. Use this when the user types /learn, says "我想学这个 / 帮我
+  学习…" without it being obvious which skill fits, or asks to learn something but isn't sure
+  how. If the input ALREADY clearly matches one specific family skill (a plain GitHub URL, a
+  clear arXiv link, a named textbook, a bare field name), that skill can trigger directly —
+  this router is for the unified entry point and ambiguous inputs. It ALSO has an OPTIONAL
+  secondary capability — a library hub that aggregates all the learning pages you've generated
+  into one offline index — worth building only once you've accumulated many pages; trigger it
+  only on an explicit "建/打开我的学习库 / build my learning hub / 把我做的学习页汇总". Not for:
+  generic web apps or answering a one-off question.
 ---
 
-# learn — family front door (router + library hub)
+# learn — family front door (router; + optional library hub)
 
-The single entry point to the `ai-learning-skills` family. It does two things: **routes** any
-"I want to learn X" to the right sibling skill, and **builds the offline library hub** that
-collects everything you've generated.
+The single entry point to the `ai-learning-skills` family. Its **main job is routing**: send
+any "I want to learn X" to the right sibling skill. It **also** has an **optional** library hub
+(Mode B) that collects everything you've generated into one offline index — useful only once
+you've accumulated many pages, so treat it as a bonus, not the headline. (The hub can't read a
+page's internal progress across `file://` origins, so it tracks only library-level status you
+set on the hub — another reason it's a nice-to-have, not core.)
 
 The four siblings, by source:
 - **github-project-learn** — a GitHub repo or whole organization.
@@ -45,9 +49,12 @@ The four siblings, by source:
    That skill owns the actual build (research → page → verify). Don't re-implement it here.
 4. **After it finishes**, offer to add the new page to the library hub (Mode B).
 
-## Mode B — Build / refresh the library hub
+## Mode B — Build / refresh the library hub (optional)
 
-When the user asks to build/open their learning library, or after generating pages:
+This is a bonus, not the point of the skill — only worth doing once the user has accumulated
+many learning pages and wants one place to see them. Don't push it for a handful of pages (a
+folder or `samples/README` already does that job). When the user explicitly asks to build/open
+their learning library:
 
 1. **Find the library root** — the folder under which their `*-learn/` pages live (ask if
    unknown; default to the current project or a `~/learning` style folder).
