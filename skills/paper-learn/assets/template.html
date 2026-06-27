@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>论文精读 · Attention Is All You Need (Transformer)</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#161922; --panel:#1b1f2a; --panel2:#212636;
+    --line:#2a3042; --txt:#e6e8ee; --muted:#9aa3b5; --dim:#717b90;
+    --accent:#7c5cff; --accent2:#22d3ee; --amber:#f5b94d; --green:#46c98b; --pink:#ff7eb6; --red:#ff6b6b;
+    --maxw:1500px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:15.5px;}
+  a{color:var(--accent2); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:"SF Mono",Consolas,"Fira Code",monospace; background:#0c0e14; border:1px solid var(--line); padding:1px 6px; border-radius:5px; font-size:.86em; color:#ffd9a8}
+  pre{margin:0}
+  pre code{display:block; padding:16px 18px; overflow-x:auto; line-height:1.6; color:#d6deea; background:#0a0c12}
+  .eq{display:block;background:#0c0e14;border:1px solid var(--line);border-left:3px solid var(--accent2);border-radius:0 9px 9px 0;padding:11px 16px;margin:13px 0;font-family:"SF Mono",Consolas,monospace;font-size:14px;color:#dfe7f3;overflow-x:auto}
+  .eq .tag{float:right;color:var(--dim);font-size:12px}
+  .m{font-family:"SF Mono",Consolas,monospace;color:#ffd9a8;background:#0c0e14;border:1px solid var(--line);padding:0 5px;border-radius:4px;font-size:.9em}
+
+  .wrap{display:flex; max-width:var(--maxw); margin:0 auto; min-height:100vh}
+  .side{width:300px; flex:0 0 300px; position:sticky; top:0; height:100vh; overflow-y:auto;
+    background:var(--bg2); border-right:1px solid var(--line); padding:26px 18px 40px;}
+  .side::-webkit-scrollbar{width:8px}
+  .side::-webkit-scrollbar-thumb{background:#2c3244; border-radius:8px}
+  .brand{display:flex; align-items:center; gap:11px; margin-bottom:6px}
+  .brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex:0 0 38px}
+  .brand h1{font-size:15px;margin:0;line-height:1.25}
+  .brand p{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
+  .navsec{margin-top:20px; font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--dim); padding:0 10px 6px}
+  nav a{display:flex; gap:10px; align-items:baseline; padding:8px 11px; border-radius:9px;
+    color:var(--muted); font-size:14px; margin:2px 0; border:1px solid transparent;}
+  nav a .n{color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; min-width:22px}
+  nav a:hover{background:var(--panel); color:var(--txt); text-decoration:none}
+  nav a.active{background:linear-gradient(90deg,rgba(124,92,255,.18),rgba(34,211,238,.06)); color:#fff; border-color:#3a3560}
+  nav a.active .n{color:var(--accent2)}
+  .sidefoot{margin-top:24px;padding:14px 11px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .sidefoot a{color:var(--muted)}
+
+  main{flex:1; min-width:0; padding:46px 56px 120px; max-width:1040px}
+  section{padding-top:30px; margin-top:10px; scroll-margin-top:24px}
+  section > h2{font-size:27px; margin:0 0 4px; letter-spacing:-.01em; display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  section > h2 .kbd{font-size:13px;color:var(--accent2);background:rgba(34,211,238,.1);border:1px solid #244b55;border-radius:7px;padding:2px 9px;font-family:monospace}
+  .lead{color:var(--muted); font-size:16px; margin:6px 0 22px; max-width:80ch}
+  h3{font-size:18px;margin:30px 0 10px;color:#fff}
+  h4{font-size:15px;margin:20px 0 8px;color:#cdd4e2}
+  p{max-width:80ch}
+  hr.div{border:0;border-top:1px solid var(--line);margin:42px 0}
+
+  .hero{background:radial-gradient(120% 140% at 0% 0%,rgba(124,92,255,.22),transparent 50%),radial-gradient(120% 140% at 100% 0%,rgba(34,211,238,.14),transparent 45%),var(--panel);border:1px solid var(--line); border-radius:18px; padding:30px 32px; margin-bottom:8px}
+  .hero h2{border:0;font-size:30px;margin:0 0 4px}
+  .hero .authors{color:var(--muted);font-size:13.5px;margin:0 0 12px}
+  .hero .lead{margin-bottom:18px}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:118px}
+  .stat b{display:block;font-size:20px;color:#fff;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1100px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .card h4{margin-top:0;display:flex;align-items:center;gap:8px}
+  .card p{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);background:var(--bg2)}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;margin:3px 5px 3px 0}
+  .pill.a{background:rgba(124,92,255,.14);color:#c3b4ff;border:1px solid #3a3560}
+  .pill.b{background:rgba(34,211,238,.12);color:#9fe9f5;border:1px solid #1f5562}
+  .pill.c{background:rgba(70,201,139,.12);color:#9fe9c4;border:1px solid #1f5a44}
+  .pill.d{background:rgba(245,185,77,.12);color:#f5d49a;border:1px solid #5a4a23}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}
+  tr:hover td{background:rgba(124,92,255,.04)}
+  td .s{color:var(--amber);font-variant-numeric:tabular-nums;font-weight:600}
+  td .mono{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;color:#cdd4e2}
+
+  figure{margin:20px 0;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;position:relative}
+  figure img{display:block;width:100%;height:auto;cursor:zoom-in;padding:10px}
+  figure::after{content:"🔍 点击放大";position:absolute;top:8px;right:8px;background:rgba(15,17,23,.78);color:#e6e8ee;font-size:11px;padding:3px 9px;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+  figure:hover::after{opacity:1}
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(6,7,11,.92);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;backdrop-filter:blur(3px)}
+  .lb.open{display:flex}
+  .lb img{max-width:94vw;max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6);cursor:default;animation:lbin .18s ease;background:#fff}
+  @keyframes lbin{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .lb .cap{color:#cdd4e2;font-size:13.5px;margin-top:14px;max-width:80vw;text-align:center}
+  .lb .x{position:absolute;top:18px;right:24px;color:#fff;font-size:30px;line-height:1;cursor:pointer;opacity:.8}
+  .lb .x:hover{opacity:1}
+  figure figcaption{background:var(--panel);color:var(--muted);font-size:12.5px;padding:9px 14px;border-top:1px solid var(--line)}
+  .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  @media(max-width:900px){.imgrow{grid-template-columns:1fr}}
+
+  .note{border-left:3px solid var(--accent);background:var(--panel);border-radius:0 11px 11px 0;padding:13px 16px;margin:16px 0;font-size:14px}
+  .note.warn{border-color:var(--amber)}
+  .note.ok{border-color:var(--green)}
+  .note.src{border-color:var(--accent2);font-size:13px;color:var(--muted)}
+  .note b{color:#fff}
+
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+  ol.steps li{position:relative;padding:0 0 4px 40px;margin-bottom:18px}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:#fff}
+
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;font-family:monospace;font-size:13px}
+  .flow .node{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:#cdd4e2}
+  .flow .arr{color:var(--accent);font-size:16px}
+  ul.clean{list-style:none;padding:0}
+  ul.clean li{padding:6px 0 6px 24px;position:relative;border-bottom:1px solid rgba(42,48,66,.5)}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;color:var(--accent)}
+
+  .copybtn{float:right;font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:3px 9px;cursor:pointer;margin:-2px 0 6px}
+  .copybtn:hover{color:#fff;border-color:var(--accent)}
+  .codewrap{position:relative;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:14px 0}
+  .codewrap .bar{background:var(--panel);padding:7px 13px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:50;width:0}
+
+  /* worked example */
+  .worked{border:1px solid #3a3560;border-radius:13px;background:linear-gradient(180deg,rgba(124,92,255,.07),var(--panel));margin:18px 0;overflow:hidden}
+  .worked .wh{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:rgba(124,92,255,.08)}
+  .worked .wh b{color:#fff;font-size:15px}
+  .worked .wb{padding:6px 18px 16px}
+  .worked .prompt{color:#dfe3ee;font-size:14.5px;margin:12px 0}
+  .reveal-btn{display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:var(--panel2);border:1px solid var(--accent);color:#cdb4ff;border-radius:9px;padding:8px 15px;font-size:13.5px;margin:6px 0 2px}
+  .reveal-btn:hover{background:rgba(124,92,255,.18);color:#fff}
+  .solution{display:none;margin-top:12px;animation:fade .25s ease}
+  .solution.open{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+  /* interactive attention demo */
+  .demo{border:1px solid #1f5562;border-radius:14px;background:linear-gradient(180deg,rgba(34,211,238,.06),var(--panel));margin:18px 0;overflow:hidden}
+  .demo .dh{padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(34,211,238,.07);display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:15px}
+  .demogrid{display:grid;grid-template-columns:300px 1fr;gap:0}
+  @media(max-width:820px){.demogrid{grid-template-columns:1fr}}
+  .ctrl{padding:16px 18px;border-right:1px solid var(--line)}
+  @media(max-width:820px){.ctrl{border-right:0;border-bottom:1px solid var(--line)}}
+  .ctrl label{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 5px}
+  .ctrl input[type=range]{width:100%;accent-color:var(--accent2)}
+  .ctrl .val{color:#fff;font-variant-numeric:tabular-nums;font-family:monospace}
+  .toggle{display:flex;align-items:center;gap:9px;margin-top:16px;cursor:pointer;font-size:13.5px;color:#cdd4e2;user-select:none}
+  .toggle input{width:17px;height:17px;accent-color:var(--green)}
+  .viz{padding:16px 18px}
+  .krow{display:grid;grid-template-columns:54px 1fr 64px;align-items:center;gap:10px;margin:9px 0}
+  .krow .klab{font-family:monospace;font-size:12.5px;color:#9fe9f5}
+  .kbar{height:22px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);overflow:hidden;position:relative}
+  .kbar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:width .12s}
+  .krow .kw{font-family:monospace;font-size:12.5px;color:#fff;text-align:right;font-variant-numeric:tabular-nums}
+  .vizout{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-family:monospace;font-size:13px;color:#dfe7f3}
+  .vizout b{color:var(--accent2)}
+  .demo .cap{padding:10px 16px;border-top:1px solid var(--line);background:var(--bg2);color:var(--dim);font-size:12px}
+
+  /* critical-reading claim cards */
+  .recall{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  @media(max-width:760px){.recall{grid-template-columns:1fr}}
+  .rcard{cursor:pointer;border:1px solid var(--line);border-radius:12px;background:var(--bg2);padding:14px 16px;min-height:120px;display:flex;flex-direction:column;transition:.15s}
+  .rcard:hover{border-color:var(--accent2)}
+  .rcard .claim{color:#eef1f6;font-weight:600;font-size:14px}
+  .rcard .verdict{display:inline-block;margin-top:9px;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;width:max-content}
+  .rcard .ans{display:none;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);color:#cdd4e2;font-size:13px}
+  .rcard.flip .ans{display:block;animation:fade .2s ease}
+  .rcard .hint{color:var(--dim);font-size:11.5px;margin-top:auto;padding-top:8px}
+  .rcard.flip .hint{display:none}
+  .vd-ok{background:rgba(70,201,139,.14);color:#9fe9c4;border:1px solid #1f5a44}
+  .vd-hyp{background:rgba(245,185,77,.14);color:#f5d49a;border:1px solid #5a4a23}
+  .vd-part{background:rgba(34,211,238,.12);color:#9fe9f5;border:1px solid #1f5562}
+
+  .gsearch{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:12px 16px;font-size:15px;margin:8px 0 18px}
+  .gsearch:focus{outline:none;border-color:var(--accent)}
+  .gitem{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px;margin:9px 0}
+  .gitem .term{font-weight:700;color:#fff;font-size:15px}
+  .gitem .en{color:var(--accent2);font-size:12.5px;font-family:monospace;margin-left:8px}
+  .gitem .def{color:var(--muted);font-size:14px;margin-top:5px}
+  .gitem .gcat{float:right;font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+  .gnone{color:var(--dim);padding:16px 0}
+  .mob{display:none}
+  @media(max-width:980px){
+    .side{display:none}
+    .mob{display:flex;position:sticky;top:0;z-index:40;background:var(--bg2);border-bottom:1px solid var(--line);padding:12px 18px;gap:10px;align-items:center}
+    main{padding:24px 20px 90px}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">∑a</div>
+      <div><h1>Attention Is All You Need</h1><p>Transformer 论文精读 · Vaswani et al., 2017</p></div>
+    </div>
+    <div class="navsec">理解这篇</div>
+    <nav id="nav">
+      <a href="#s0"><span class="n">0</span>30 秒速览</a>
+      <a href="#s1"><span class="n">1</span>它解决什么问题</a>
+      <a href="#s2"><span class="n">2</span>背景与动机</a>
+    </nav>
+    <div class="navsec">方法精读（逐图）</div>
+    <nav id="nav2">
+      <a href="#s3"><span class="n">3</span>整体架构</a>
+      <a href="#s4"><span class="n">4</span>注意力机制 + 公式</a>
+      <a href="#s5"><span class="n">5</span>例题精讲</a>
+      <a href="#s6"><span class="n">6</span>交互：注意力 demo</a>
+    </nav>
+    <div class="navsec">评估 &amp; 参考</div>
+    <nav id="nav3">
+      <a href="#s7"><span class="n">7</span>实验与结果</a>
+      <a href="#s8"><span class="n">8</span>怎么复现 / 读代码</a>
+      <a href="#s9"><span class="n">9</span>影响 &amp; 批判性阅读</a>
+      <a href="#s10"><span class="n">10</span>术语表</a>
+    </nav>
+    <div class="sidefoot">
+      原文<br>
+      <a href="https://arxiv.org/abs/1706.03762" target="_blank">arXiv:1706.03762</a><br>
+      <a href="https://ar5iv.labs.arxiv.org/abs/1706.03762" target="_blank">ar5iv 全文(带图)</a> ·
+      <a href="https://github.com/tensorflow/tensor2tensor" target="_blank">官方代码</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mob"><strong>Attention Is All You Need · 精读</strong><span style="color:var(--muted);font-size:13px">— 屏幕较窄，目录已折叠</span></div>
+
+    <!-- ===== 0 ===== -->
+    <section id="s0">
+      <div class="hero">
+        <h2>Attention Is All You Need</h2>
+        <p class="authors">Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, Illia Polosukhin · Google Brain / Google Research / U. Toronto · NeurIPS 2017</p>
+        <p class="lead">一句话贡献(原文摘要)：提出 <strong>Transformer</strong>——一个<strong>完全基于注意力</strong>、<strong>彻底抛弃循环与卷积</strong>的序列转换架构。它更易并行、训练更快，并在机器翻译上刷新了当时的最好成绩。这一页带你从「它解决什么问题」一路读到「逐图拆方法 + 亲手算一遍注意力 + 它到底证明了什么」。</p>
+        <div class="stats">
+          <div class="stat"><b>NeurIPS&nbsp;2017</b><span>发表会议</span></div>
+          <div class="stat"><b>纯注意力</b><span>无 RNN / 无 CNN</span></div>
+          <div class="stat"><b>28.4</b><span>BLEU · WMT14 英→德</span></div>
+          <div class="stat"><b>41.8</b><span>BLEU · WMT14 英→法</span></div>
+          <div class="stat"><b>8×P100 · 3.5天</b><span>大模型训练成本</span></div>
+        </div>
+      </div>
+      <div class="note">怎么读这页：<b>0→2</b> 建立动机(为什么要抛弃循环)；<b>3→6</b> 是方法核心，配论文原图、关键公式、一道<b>例题精讲</b>和一个<b>可交互的注意力 demo</b>；<b>7→9</b> 看它证明了什么、怎么复现、以及一个<b>批判性阅读</b>环节(分清「已证实」与「只是假设」)。</div>
+      <div class="note src">出处：<a href="https://arxiv.org/abs/1706.03762" target="_blank">arXiv:1706.03762</a>（v1 2017-06-12，最新 v7 2023-08-02）、全文经 <a href="https://ar5iv.labs.arxiv.org/abs/1706.03762" target="_blank">ar5iv</a> 渲染。所有公式、图、数字均出自原文，逐节标注。<b>实时引用数</b>本次未能从公开 API 取得(Semantic Scholar / OpenAlex 限流或数据分裂)，故不写具体数字——这是学界被引最高的论文之一，但此处不编造精确值。</div>
+    </section>
+
+    <!-- ===== 1 ===== -->
+    <section id="s1">
+      <h2>1 · 它解决什么问题</h2>
+      <p class="lead">2017 年，序列转换(翻译、摘要…)的主流是 <strong>RNN / LSTM 编码器-解码器 + 注意力</strong>。瓶颈在「循环」本身。</p>
+      <div class="grid g2" style="margin:16px 0">
+        <div class="card"><h4>😣 循环的痛</h4><p>RNN 必须<b>按时间步一个接一个</b>算 <span class="m">h_t = f(h_{t-1}, x_t)</span>，<b>无法在序列长度方向并行</b>，长序列尤其慢、显存吃紧。</p></div>
+        <div class="card"><h4>🛣️ 长程依赖的远</h4><p>两个相距很远的词要互相影响，信号得穿过<b>很多步</b>，路径长、易衰减——学长距离关系难。</p></div>
+        <div class="card"><h4>💡 论文的主张</h4><p>注意力本就能「一步」把任意两个位置连起来。那<b>能不能干脆只用注意力</b>，把循环和卷积全扔掉？</p></div>
+        <div class="card"><h4>✅ 结果</h4><p>能。Transformer 不但更易并行、训练更快，<b>翻译质量还更高</b>(英→德 28.4 BLEU，超此前最好成绩含集成 &gt;2 BLEU)。</p></div>
+      </div>
+      <div class="note src">出处：摘要 + 第 1 节 Introduction。「dispensing with recurrence and convolutions entirely」为原文原话。</div>
+    </section>
+
+    <!-- ===== 2 ===== -->
+    <section id="s2">
+      <h2>2 · 背景与动机：为什么自注意力更划算</h2>
+      <p class="lead">论文第 4 节用一张表(Table 1)把「自注意力 vs 循环 vs 卷积」摆在三个维度上比——这是「为什么这么设计」的硬核论据。</p>
+      <table>
+        <thead><tr><th>层类型</th><th>每层复杂度</th><th>串行操作数</th><th>最大路径长度</th></tr></thead>
+        <tbody>
+          <tr><td><b>自注意力 Self-Attention</b></td><td class="mono">O(n²·d)</td><td class="mono"><span class="s">O(1)</span></td><td class="mono"><span class="s">O(1)</span></td></tr>
+          <tr><td>循环 Recurrent</td><td class="mono">O(n·d²)</td><td class="mono">O(n)</td><td class="mono">O(n)</td></tr>
+          <tr><td>卷积 Convolutional</td><td class="mono">O(k·n·d²)</td><td class="mono">O(1)</td><td class="mono">O(log_k n)</td></tr>
+          <tr><td>自注意力(受限 r 邻域)</td><td class="mono">O(r·n·d)</td><td class="mono">O(1)</td><td class="mono">O(n/r)</td></tr>
+        </tbody>
+      </table>
+      <ul class="clean">
+        <li><b>串行操作 O(1)：</b>自注意力一层内所有位置<b>同时</b>算完，天然并行——这是训练快的根。</li>
+        <li><b>最大路径长度 O(1)：</b>任意两个位置<b>一步</b>直连，长程依赖好学(循环要走 O(n) 步)。</li>
+        <li><b>代价：</b>每层 O(n²·d)——<b>随序列长度平方增长</b>。短序列很划算，长序列是真实约束(论文也提可退而用「受限注意力」)。</li>
+      </ul>
+      <div class="note src">出处：第 4 节「Why Self-Attention」+ Table 1。<span class="m">n</span>=序列长度，<span class="m">d</span>=表示维度，<span class="m">k</span>=卷积核宽，<span class="m">r</span>=受限邻域。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 3 ===== -->
+    <section id="s3">
+      <h2>3 · 整体架构 <span class="kbd">逐图精读开始</span></h2>
+      <p class="lead">经典的<strong>编码器-解码器</strong>，但每一块都是「注意力 + 前馈」的堆叠。先看全貌，再逐个零件拆。</p>
+
+      <div class="imgrow">
+        <figure style="max-width:340px;margin:20px auto"><img src="assets/fig1-architecture.png" alt="Transformer 架构图"><figcaption>图 1：Transformer 模型架构。左=编码器(N=6 层)，右=解码器(N=6 层)。原文标题「The Transformer - model architecture」。</figcaption></figure>
+        <div>
+          <h4>编码器(左)</h4>
+          <p>N=6 个相同层，每层两个子层：① <b>多头自注意力</b> → ② <b>逐位置前馈网络(FFN)</b>。每个子层都包一层<b>残差 + LayerNorm</b>：<span class="m">LayerNorm(x + Sublayer(x))</span>，全程维度 <span class="m">d_model=512</span>。</p>
+          <h4>解码器(右)</h4>
+          <p>也是 6 层，但每层多一个<b>第三子层</b>：对编码器输出做<b>编码器-解码器注意力</b>。它的自注意力还要<b>加掩码</b>(masked)，防止位置 <span class="m">i</span> 看到 <span class="m">i</span> 之后的词，保住自回归性质。</p>
+          <h4>两端</h4>
+          <p>底部：输入/输出<b>词嵌入 + 位置编码</b>(解码端输入「右移一位」)；顶部：<b>Linear → Softmax</b> 输出下一个词的概率。</p>
+        </div>
+      </div>
+
+      <h4>数据怎么流过编码器一层</h4>
+      <div class="flow">
+        <span class="node">输入 x</span><span class="arr">→</span>
+        <span class="node">多头自注意力</span><span class="arr">→</span>
+        <span class="node">Add &amp; Norm</span><span class="arr">→</span>
+        <span class="node">FFN</span><span class="arr">→</span>
+        <span class="node">Add &amp; Norm</span><span class="arr">→</span>
+        <span class="node">下一层</span>
+      </div>
+      <div class="note src">出处：第 3.1 节。残差包裹与维度 512 为原文原话「LayerNorm(x+Sublayer(x))」「d_model=512」。</div>
+    </section>
+
+    <!-- ===== 4 ===== -->
+    <section id="s4">
+      <h2>4 · 注意力机制 + 关键公式</h2>
+      <p class="lead">整篇的心脏：<strong>缩放点积注意力</strong>，再把它并行成<strong>多头</strong>。</p>
+
+      <div class="imgrow">
+        <figure style="max-width:230px;margin:20px auto"><img src="assets/fig2-scaled-dot.png" alt="缩放点积注意力"><figcaption>图 2(左)：缩放点积注意力。MatMul(Q,K) → Scale(÷√d_k) → (Mask) → SoftMax → 与 V 相乘。</figcaption></figure>
+        <figure style="max-width:300px;margin:20px auto"><img src="assets/fig2-multihead.png" alt="多头注意力"><figcaption>图 2(右)：多头注意力——h 个注意力层并行，各自线性投影 Q/K/V，结果拼接后再过一层 Linear。</figcaption></figure>
+      </div>
+
+      <h3>① 缩放点积注意力</h3>
+      <p>用<b>查询 Q</b> 去和每个<b>键 K</b> 算相似度(点积)，缩放后过 softmax 得权重，再对<b>值 V</b> 加权求和：</p>
+      <div class="eq">Attention(Q, K, V) = softmax( Q&nbsp;K<sup>⊤</sup> / √d<sub>k</sub> )&nbsp;V <span class="tag">(1)</span></div>
+      <div class="note warn"><b>为什么要除以 √d_k？</b>当 <span class="m">d_k</span> 大时，<span class="m">Q·K</span> 的点积会变得很大(原文footnote：若各分量独立、均值0方差1，则点积方差为 <span class="m">d_k</span>)，把 softmax 推到<b>梯度极小</b>的饱和区。除以 <span class="m">√d_k</span> 把方差拉回 ~1，训练才稳。<span style="color:var(--dim)">(第 3.2.1 节)</span></div>
+
+      <h3>② 多头注意力</h3>
+      <p>与其用一个大注意力，不如把 Q/K/V 投影到 <span class="m">h</span> 个低维子空间各算一次，让模型<b>同时关注不同位置、不同表示子空间</b>，再拼接：</p>
+      <div class="eq">MultiHead(Q,K,V) = Concat(head<sub>1</sub>, …, head<sub>h</sub>)&nbsp;W<sup>O</sup><br>where&nbsp;&nbsp;head<sub>i</sub> = Attention(Q W<sub>i</sub><sup>Q</sup>, K W<sub>i</sub><sup>K</sup>, V W<sub>i</sub><sup>V</sup>) <span class="tag">(3.2.2)</span></div>
+      <p style="font-size:14px;color:var(--muted)">基础模型：<span class="m">h=8</span>，<span class="m">d_k=d_v=d_model/h=64</span>，<span class="m">d_model=512</span>。</p>
+
+      <h3>③ 注意力在模型里的三种用法（第 3.2.3 节）</h3>
+      <div class="grid g3">
+        <div class="card"><span class="tag">编码-解码注意力</span><p style="margin-top:8px"><b>Q</b> 来自解码器上一层，<b>K/V</b> 来自编码器输出——让解码端每个位置都能看输入全序列。</p></div>
+        <div class="card"><span class="tag">编码器自注意力</span><p style="margin-top:8px">Q/K/V <b>同源</b>(编码器上一层)，每个位置可关注上一层所有位置。</p></div>
+        <div class="card"><span class="tag">解码器掩码自注意力</span><p style="margin-top:8px">同源，但把「看向未来」的连接在 softmax 前<b>置 −∞ 掩掉</b>，保住自回归。</p></div>
+      </div>
+
+      <h3>④ 位置编码 &amp; 前馈网络</h3>
+      <p>注意力本身<b>不含顺序信息</b>，所以给嵌入加上<b>正弦位置编码</b>；每层还有一个对每个位置独立作用的两层 FFN：</p>
+      <div class="eq">PE(pos, 2i)   = sin( pos / 10000<sup>2i/d_model</sup> )<br>PE(pos, 2i+1) = cos( pos / 10000<sup>2i/d_model</sup> ) <span class="tag">(3.5)</span></div>
+      <div class="eq">FFN(x) = max(0, x W<sub>1</sub> + b<sub>1</sub>) W<sub>2</sub> + b<sub>2</sub>&nbsp;&nbsp;&nbsp;(d<sub>ff</sub>=2048) <span class="tag">(3.3)</span></div>
+      <div class="note src">出处：第 3.2–3.5 节。公式形式与原文一致；超参数取自 Table 3 / 第 3 节。</div>
+    </section>
+
+    <!-- ===== 5 ===== -->
+    <section id="s5">
+      <h2>5 · 例题精讲 · 手算一次注意力</h2>
+      <p class="lead">把公式 (1) 走一遍，注意力就不再抽象了。</p>
+      <div class="worked">
+        <div class="wh"><span>📝</span><b>例题 · 单个查询对 3 个键值做缩放点积注意力</b></div>
+        <div class="wb">
+          <p class="prompt">设 <span class="m">d_k=4</span>(故 <span class="m">√d_k=2</span>)。查询 <span class="m">q=[1,0,1,0]</span>；键 <span class="m">k₁=[1,0,1,0], k₂=[0,1,0,1], k₃=[1,1,0,0]</span>；值 <span class="m">v₁=[1,0], v₂=[0,1], v₃=[1,1]</span>。求 <span class="m">Attention(q,K,V)</span>。</p>
+          <div class="reveal-btn" onclick="reveal(this)">▸ 展开解答</div>
+          <div class="solution">
+            <ol class="steps">
+              <li><b>点积 q·kⱼ：</b><span class="m">q·k₁=2, q·k₂=0, q·k₃=1</span>。</li>
+              <li><b>除以 √d_k=2：</b><span class="m">[1.0, 0.0, 0.5]</span>。</li>
+              <li><b>softmax：</b><span class="m">e^1,e^0,e^0.5 ≈ [2.718,1.000,1.649]</span>，和 ≈ <span class="m">5.367</span> → 权重 ≈ <span class="m">[0.506, 0.186, 0.307]</span>。</li>
+              <li><b>对 V 加权求和：</b><span class="m">0.506·[1,0]+0.186·[0,1]+0.307·[1,1] ≈ [0.813, 0.493]</span>。</li>
+            </ol>
+            <div class="note ok"><b>读法：</b>输出最偏向 <span class="m">v₁</span>(因为 <span class="m">k₁</span> 与 <span class="m">q</span> 最像)，再混入一点 <span class="m">v₃/v₂</span>。这正是公式 (1) 做的：相似度→缩放→softmax→对值加权。<span style="color:var(--dim)">(这组数字是为教学构造的演算示例，论文中并无此例。)</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 6 ===== -->
+    <section id="s6">
+      <h2>6 · 交互：亲手调一调注意力 <span class="kbd">demo</span></h2>
+      <p class="lead">拖动查询向量 <span class="m">q</span>，看它和 4 个固定键的点积如何经 <strong>缩放 + softmax</strong> 变成注意力权重，并加权出输出。<b>试试关掉「除以 √d_k」</b>，感受 softmax 为什么会变「尖」。</p>
+
+      <div class="demo">
+        <div class="dh"><span>🎛️</span>缩放点积注意力 · 玩具 2 维演示</div>
+        <div class="demogrid">
+          <div class="ctrl">
+            <label>查询 q.x = <span class="val" id="vqx">1.5</span></label>
+            <input type="range" id="qx" min="-3" max="3" step="0.1" value="1.5" oninput="runDemo()">
+            <label>查询 q.y = <span class="val" id="vqy">0.5</span></label>
+            <input type="range" id="qy" min="-3" max="3" step="0.1" value="0.5" oninput="runDemo()">
+            <label class="toggle"><input type="checkbox" id="scale" checked onchange="runDemo()"> 除以 √d_k （d_k=2）</label>
+            <div style="margin-top:16px;font-size:12px;color:var(--dim);line-height:1.6">
+              固定键 / 值：<br>
+              k₁=(2,0) v₁=(1,0)<br>
+              k₂=(0,2) v₂=(0,1)<br>
+              k₃=(1.4,1.4) v₃=(1,1)<br>
+              k₄=(−2,0) v₄=(−1,0)
+            </div>
+          </div>
+          <div class="viz">
+            <div style="font-size:12.5px;color:var(--muted);margin-bottom:6px">注意力权重 softmax( q·kⱼ / √d_k )</div>
+            <div id="bars"></div>
+            <div class="vizout" id="out"></div>
+          </div>
+        </div>
+        <div class="cap">诚实说明：这是注意力<b>机制本身</b>的数学演示(2 维玩具向量)，<b>不是</b>某个训练好模型在真实句子上的注意力权重。它要传达的是公式 (1) 的因果：点积越大 → 缩放后 → softmax 权重越高 → 输出越偏那个值；关掉缩放会让权重更极端。</div>
+      </div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 7 ===== -->
+    <section id="s7">
+      <h2>7 · 实验与结果</h2>
+      <p class="lead">主战场是 WMT 2014 机器翻译。两个尺寸：base 与 big。</p>
+      <table>
+        <thead><tr><th>模型</th><th>英→德 BLEU</th><th>英→法 BLEU</th><th>训练</th></tr></thead>
+        <tbody>
+          <tr><td>Transformer (base)</td><td class="mono">27.3</td><td class="mono">38.1</td><td class="mono">~12 小时 / 10 万步</td></tr>
+          <tr><td><b>Transformer (big)</b></td><td class="mono"><span class="s">28.4</span></td><td class="mono"><span class="s">41.8</span></td><td class="mono">3.5 天 / 30 万步</td></tr>
+        </tbody>
+      </table>
+      <ul class="clean">
+        <li><b>英→德 28.4：</b>超过此前所有最好成绩(<b>包括集成模型</b>) &gt;2 BLEU。</li>
+        <li><b>英→法 41.8：</b>当时<b>单模型</b>新最佳。</li>
+        <li><b>成本：</b>big 模型 8 块 NVIDIA P100、3.5 天——相对当时的高分模型训练量小得多。</li>
+      </ul>
+      <h4>关键超参数(base / big)</h4>
+      <div>
+        <span class="pill a">N=6 层</span><span class="pill b">d_model=512 / 1024</span><span class="pill c">h=8 / 16 头</span>
+        <span class="pill d">d_k=d_v=64</span><span class="pill a">d_ff=2048 / 4096</span><span class="pill b">dropout=0.1 / 0.3</span><span class="pill c">label smoothing 0.1</span>
+      </div>
+      <div class="note src">出处：第 6.1 节 + Table 2 / Table 3。数字为原文报告值。</div>
+    </section>
+
+    <!-- ===== 8 ===== -->
+    <section id="s8">
+      <h2>8 · 怎么复现 / 读代码 <span class="kbd">动手</span></h2>
+      <p class="lead">论文给了官方实现；社区也有最适合「对着论文读」的逐行版本。</p>
+      <div class="grid g3">
+        <div class="card"><h4>📦 官方 · tensor2tensor</h4><p>论文指向的官方代码库(TensorFlow)，含 Transformer 的训练配置。<br><a href="https://github.com/tensorflow/tensor2tensor" target="_blank">github.com/tensorflow/tensor2tensor</a></p></div>
+        <div class="card"><h4>📖 The Annotated Transformer</h4><p>哈佛 NLP 的<b>逐行注释实现</b>——左论文、右 PyTorch，精读首选。<br><a href="https://nlp.seas.harvard.edu/annotated-transformer/" target="_blank">nlp.seas.harvard.edu</a></p></div>
+        <div class="card"><h4>🤗 现代实践 · transformers</h4><p>真要用，直接上 HuggingFace；本论文是其全部架构的鼻祖。</p></div>
+      </div>
+      <div class="codewrap"><div class="bar"><span>对着论文读代码的建议顺序</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 1. 先跑通 Annotated Transformer 的 scaled dot-product attention 一段，
+#    对照本页第 4 节公式 (1)。
+# 2. 看 MultiHeadedAttention：h 个投影 + Concat + 最后 Linear(W^O)。
+# 3. 看 PositionalEncoding：正弦/余弦那两行，对照公式 (3.5)。
+# 4. 看 EncoderLayer / DecoderLayer：两/三个子层 + Add&Norm 残差包裹。
+# 5. 最后看 mask：解码器自注意力为什么要 subsequent_mask。</code></pre></div>
+      <div class="note warn">注意：官方 tensor2tensor 已进入维护停滞状态(被 Google 后续框架取代)。学原理它很好；要上生产，用 HuggingFace transformers 等现代实现。</div>
+    </section>
+
+    <!-- ===== 9 ===== -->
+    <section id="s9">
+      <h2>9 · 影响 &amp; 批判性阅读</h2>
+      <p class="lead">先看它点燃了什么，再做一件读论文最该练的事：<strong>分清「论文证明了的」与「论文只是假设/未覆盖的」</strong>。</p>
+
+      <h3>这篇之后（背景，非本文结论）</h3>
+      <p>Transformer 成了后续几乎所有大模型的底座：<b>BERT</b>(2018，双向编码器)、<b>GPT 系列</b>(解码器自回归)、<b>ViT</b>(2020，把图像切块当 token)。<span style="color:var(--dim)">这一段是后续发展的常识性背景，不是本论文自身的结论。</span></p>
+
+      <h3>声明核查（点击翻面看判定）</h3>
+      <p style="font-size:14px;color:var(--muted)">读顶会论文的关键技能：一句主张，到底是<b>实验证实</b>、<b>只是假设</b>，还是<b>有条件成立</b>？</p>
+      <div class="recall">
+        <div class="rcard" onclick="flip(this)">
+          <div class="claim">「Transformer 不用循环/卷积也能拿到 SOTA。」</div>
+          <span class="verdict vd-ok">已证实 ✓</span>
+          <div class="ans">WMT14 英→德 28.4 / 英→法 41.8 BLEU 确实是当时最好(第 6.1 节)。但注意：<b>证据集中在机器翻译</b>(外加一个英文句法分析的泛化实验)，并非「所有任务」。</div>
+          <div class="hint">点击翻面</div>
+        </div>
+        <div class="rcard" onclick="flip(this)">
+          <div class="claim">「正弦位置编码比『学习式』位置嵌入更好。」</div>
+          <span class="verdict vd-hyp">只是假设 ⚠</span>
+          <div class="ans">原文实测两者<b>几乎相同</b>(第 3.5 / 6.2 节，Table 3 行 E)。选正弦是出于一个<b>猜测</b>——也许能外推到训练时没见过的更长序列，<b>并非测出来的质量优势</b>。</div>
+          <div class="hint">点击翻面</div>
+        </div>
+        <div class="rcard" onclick="flip(this)">
+          <div class="claim">「自注意力总是比循环层更高效。」</div>
+          <span class="verdict vd-part">有条件 ◐</span>
+          <div class="ans">每层串行 O(1)、路径 O(1) 确实强；但每层复杂度 <b>O(n²·d) 随序列长度平方增长</b>。序列很长时这是真实成本，论文自己也提可改用「受限邻域」自注意力(第 4 节)。</div>
+          <div class="hint">点击翻面</div>
+        </div>
+        <div class="rcard" onclick="flip(this)">
+          <div class="claim">「多头让模型关注不同的表示子空间。」</div>
+          <span class="verdict vd-part">主张 + 定性证据 ◐</span>
+          <div class="ans">这是论文的设计<b>动机</b>，并有<b>定性</b>注意力可视化佐证(图 3–5，不同头确有不同模式)，但不是严格的量化证明。属「合理且有插图支持」，非「定理」。</div>
+          <div class="hint">点击翻面</div>
+        </div>
+      </div>
+
+      <figure style="max-width:560px"><img src="assets/fig3-attn-longdist.png" alt="注意力可视化"><figcaption>图 3：某个注意力头学到的长距离依赖——很多头在「making…more difficult」这类跨度上对齐。这是「多头关注不同模式」的<b>定性</b>证据。</figcaption></figure>
+      <div class="note src">出处：第 3.5 / 6.2 节、Table 1/3、图 3–5。「已证实 / 假设 / 有条件」是基于原文措辞的阅读判断，便于练习区分证据强度。</div>
+    </section>
+
+    <!-- ===== 10 ===== -->
+    <section id="s10">
+      <h2>10 · 术语表</h2>
+      <p class="lead">本文高频术语速查，输入关键词实时过滤。</p>
+      <input class="gsearch" id="gsearch" placeholder="🔍 搜索术语，如 注意力、多头、位置编码、BLEU…" oninput="gfilter()">
+      <div id="glist"></div>
+    </section>
+
+  </main>
+</div>
+
+<div class="lb" id="lb" onclick="closeLb()"><span class="x">&times;</span><img id="lbimg" src="" onclick="event.stopPropagation()"><div class="cap" id="lbcap"></div></div>
+
+<script>
+/* ===== glossary ===== */
+const GLOSSARY=[
+  {t:"Transformer",en:"Transformer",c:"架构",d:"完全基于注意力的序列转换架构，无循环、无卷积；本文提出。"},
+  {t:"自注意力",en:"Self-Attention",c:"机制",d:"Q/K/V 同源，让序列里每个位置直接关注同序列所有位置。"},
+  {t:"缩放点积注意力",en:"Scaled Dot-Product Attention",c:"机制",d:"Attention(Q,K,V)=softmax(QKᵀ/√d_k)V，公式(1)。"},
+  {t:"多头注意力",en:"Multi-Head Attention",c:"机制",d:"把 Q/K/V 投影到 h 个子空间各算一次注意力，拼接后再线性变换。"},
+  {t:"查询/键/值",en:"Query / Key / Value",c:"机制",d:"Q 与 K 算相似度得权重，对 V 加权求和；注意力的三要素。"},
+  {t:"为什么除以 √d_k",en:"Scaling",c:"机制",d:"d_k 大时点积方差为 d_k、softmax 饱和梯度极小；除以 √d_k 把方差拉回~1。"},
+  {t:"位置编码",en:"Positional Encoding",c:"组件",d:"用正弦/余弦给嵌入注入顺序信息，因注意力本身不含位置。"},
+  {t:"前馈网络",en:"FFN",c:"组件",d:"逐位置的两层全连接 max(0,xW₁+b₁)W₂+b₂，d_ff=2048。"},
+  {t:"残差 + 层归一化",en:"Add & Norm",c:"组件",d:"每个子层输出 LayerNorm(x+Sublayer(x))，稳训练、助梯度。"},
+  {t:"编码器-解码器",en:"Encoder-Decoder",c:"架构",d:"编码器读输入、解码器自回归生成；各 N=6 层堆叠。"},
+  {t:"掩码自注意力",en:"Masked Self-Attention",c:"机制",d:"解码器把指向未来位置的连接在 softmax 前置 −∞，保自回归。"},
+  {t:"BLEU",en:"BLEU",c:"评测",d:"机器翻译质量指标；本文 big 模型英→德 28.4、英→法 41.8。"},
+  {t:"最大路径长度",en:"Max Path Length",c:"分析",d:"信息在两位置间传播要走的步数；自注意力 O(1)，循环 O(n)。"},
+  {t:"d_model / h / d_k",en:"hyperparams",c:"超参",d:"模型维度512、头数8、每头维度64(=512/8)；big 为1024/16/64。"},
+  {t:"自回归",en:"Auto-regressive",c:"概念",d:"逐位置生成，第 i 个输出只依赖已生成的 <i 个；靠掩码保证。"},
+];
+function gcard(g){return `<div class="gitem"><span class="gcat">${g.c}</span><span class="term">${g.t}</span><span class="en">${g.en}</span><div class="def">${g.d}</div></div>`}
+function renderG(list){const e=document.getElementById('glist');e.innerHTML=list.length?list.map(gcard).join(''):'<div class="gnone">没有匹配的术语</div>'}
+function gfilter(){const q=document.getElementById('gsearch').value.trim().toLowerCase();renderG(!q?GLOSSARY:GLOSSARY.filter(g=>(g.t+g.en+g.d+g.c).toLowerCase().includes(q)))}
+renderG(GLOSSARY);
+
+/* ===== lightbox ===== */
+function openLb(img){document.getElementById('lbimg').src=img.src;const f=img.closest('figure');const cap=f&&f.querySelector('figcaption');document.getElementById('lbcap').textContent=cap?cap.textContent:'';document.getElementById('lb').classList.add('open')}
+function closeLb(){document.getElementById('lb').classList.remove('open')}
+document.querySelectorAll('figure img').forEach(i=>i.addEventListener('click',()=>openLb(i)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb()});
+
+/* ===== copy ===== */
+function cp(btn){const code=btn.closest('.codewrap').querySelector('code').innerText;navigator.clipboard.writeText(code).then(()=>{const o=btn.textContent;btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent=o,1400)})}
+
+/* ===== worked reveal + flip cards ===== */
+function reveal(btn){const s=btn.nextElementSibling;const open=s.classList.toggle('open');btn.textContent=(open?'▾ 收起解答':'▸ 展开解答')}
+function flip(card){card.classList.toggle('flip')}
+
+/* ===== interactive attention demo ===== */
+const KEYS=[{k:[2,0],v:[1,0]},{k:[0,2],v:[0,1]},{k:[1.4,1.4],v:[1,1]},{k:[-2,0],v:[-1,0]}];
+const SQRT_DK=Math.sqrt(2);
+function runDemo(){
+  const qx=parseFloat(document.getElementById('qx').value), qy=parseFloat(document.getElementById('qy').value);
+  const scale=document.getElementById('scale').checked;
+  document.getElementById('vqx').textContent=qx.toFixed(1);
+  document.getElementById('vqy').textContent=qy.toFixed(1);
+  const logits=KEYS.map(o=>{let d=qx*o.k[0]+qy*o.k[1]; return scale? d/SQRT_DK : d;});
+  const mx=Math.max.apply(null,logits);
+  const ex=logits.map(l=>Math.exp(l-mx));
+  const sum=ex.reduce((a,b)=>a+b,0);
+  const w=ex.map(e=>e/sum);
+  let bars='';
+  for(let j=0;j<KEYS.length;j++){
+    bars+=`<div class="krow"><span class="klab">k${j+1}</span><div class="kbar"><i style="width:${(w[j]*100).toFixed(1)}%"></i></div><span class="kw">${w[j].toFixed(3)}</span></div>`;
+  }
+  document.getElementById('bars').innerHTML=bars;
+  const ox=w.reduce((a,e,j)=>a+e*KEYS[j].v[0],0);
+  const oy=w.reduce((a,e,j)=>a+e*KEYS[j].v[1],0);
+  document.getElementById('out').innerHTML=`输出 = Σ wⱼ·vⱼ = <b>[${ox.toFixed(3)}, ${oy.toFixed(3)}]</b>`;
+}
+runDemo();
+
+/* ===== scroll progress + spy ===== */
+const secs=[...document.querySelectorAll('section')];const links=[...document.querySelectorAll('nav a')];
+function onScroll(){
+  const sc=document.documentElement.scrollTop||document.body.scrollTop;
+  const h=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+  document.getElementById('progress').style.width=(h>0?sc/h*100:0)+'%';
+  let cur=secs[0]?secs[0].id:'';
+  for(const s of secs){if(s.getBoundingClientRect().top<=120)cur=s.id}
+  links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+onScroll();
+</script>
+</body>
+</html>

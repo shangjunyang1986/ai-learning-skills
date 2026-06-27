@@ -14,14 +14,14 @@ skill keeps the same output shell and principles, and differs in three places:
 See `shared/learning-page-design.md` for the page shell and component library.
 
 ## What each skill customizes
-| Dimension | github-project-learn | domain-learn | textbook-learn |
-|-----------|----------------------|------------------------|--------------------------|
-| Source | repo / org (GitHub API) | open web (papers, blogs, repos, videos) | one book / PDF |
-| Research | README + API + diagrams | multi-source + **citation & verification** (lean on a deep-research pattern) | **parse the book's TOC + chapters + exercises, sourced to a page** |
-| Pedagogy | understand & onboard | **roadmap: beginner → advanced → hands-on** | **course: chapter map + deep-dive chapters + active recall** |
-| Interactivity | TOC, zoom, glossary search | **+ runnable demos / parameter sliders** | **+ self-grading quizzes, worked-example reveals, localStorage progress tracker** |
+| Dimension | github-project-learn | domain-learn | textbook-learn | paper-learn |
+|-----------|----------------------|--------------|----------------|-------------|
+| Source | repo / org (GitHub API) | open web (papers, blogs, repos, videos) | one book / PDF | one paper / arXiv |
+| Research | README + API + diagrams | multi-source + **citation & verification** (lean on a deep-research pattern) | **parse the book's TOC + chapters + exercises, sourced to a page** | **extract figures + equations + results, sourced to a section; sort claims by evidence** |
+| Pedagogy | understand & onboard | **roadmap: beginner → advanced → hands-on** | **course: chapter map + deep-dive chapters + active recall** | **read-a-paper: motivation → figure-by-figure method → critical reading** |
+| Interactivity | TOC, zoom, glossary search | **+ runnable demos / parameter sliders** | **+ self-grading quizzes, worked-example reveals, localStorage progress tracker** | **+ a mechanism demo, worked-example reveal, demonstrated/hypothesized claim-check cards** |
 
-All three are now built — see `skills/<name>/` and a real sample under `samples/<name>/`.
+All four are now built — see `skills/<name>/` and a real sample under `samples/<name>/`.
 
 ## Conventions
 - **Folder**: `skills/<name>/` with `SKILL.md` + `references/` + `scripts/` + `assets/`.

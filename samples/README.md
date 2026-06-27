@@ -15,8 +15,10 @@ samples/
 ├── domain-learn/           # 学一个开放领域
 │   ├── 3dgs-learn/          # 3D 高斯泼溅
 │   └── diffusion-models-learn/  # 扩散模型
-└── textbook-learn/         # 学一本技术书 / PDF
-    └── d2l-learn/           # 《动手学深度学习》逐章 + 测验
+├── textbook-learn/         # 学一本技术书 / PDF
+│   └── d2l-learn/           # 《动手学深度学习》逐章 + 测验
+└── paper-learn/            # 精读一篇论文 / arXiv
+    └── attention-learn/     # Attention Is All You Need 逐图 + 交互 + 批判性阅读
 ```
 
 ## `github-project-learn/` — 学一个 GitHub 仓库或组织
@@ -68,6 +70,21 @@ seq2seq 架构图）/ 技术原理 / **代码结构与技术栈** / 部署。适
 **进度卡**实时记录你读完几章、测验答对几题，存在浏览器本地、关掉再开还在。所有公式 / 练习 / 配图均出自该书、逐节标注出处。
 
 ![d2l-learn 逐章精讲 + 测验预览](../docs/images/d2l-chapter.png)
+
+## `paper-learn/` — 精读一篇论文 / arXiv
+
+| 案例 | 来源 | 亮点 | 怎么看 |
+|------|------|------|--------|
+| [`attention-learn/`](paper-learn/attention-learn/index.html) | Attention Is All You Need（[arXiv:1706.03762](https://arxiv.org/abs/1706.03762)，Transformer 原论文） | **逐图拆方法 + 可交互注意力 demo + 「已证实 vs 只是假设」批判性阅读** | 双击 `index.html` |
+
+**attention-learn** —— `paper-learn` 的首个样例：把 Transformer 原论文按「该怎么读论文」的顺序走一遍——
+动机（为什么要抛弃循环）→ 复杂度对比表 → **逐图精读方法**（论文原图：架构图 / 缩放点积 / 多头，配离线渲染的
+关键公式与「为什么除以 √d_k」）→ **手算一次注意力的例题精讲** → **一个可交互的注意力 demo**（拖查询向量、开关
+缩放，实时看 softmax 权重怎么变；诚实标注这是机制的数学演示、非真实模型权重）→ 实验结果（真实 BLEU）→ 复现 /
+读代码 → **批判性阅读「声明核查」**（把论文主张分成 已证实 / 只是假设 / 有条件 三类，逐条给出处）。所有公式 / 图 /
+数字均出自原文、逐节标注；取不到的（如实时引用数）如实标注「未核实」，不编造。
+
+![attention-learn 交互注意力 demo 预览](../docs/images/paper-demo.png)
 
 > 提示：这些页面是**自包含 HTML + 本地 assets**，直接双击 `index.html` 即可，无需联网、无需构建。
 > Tip: each page is self-contained HTML + a local `assets/` folder — just double-click `index.html`.

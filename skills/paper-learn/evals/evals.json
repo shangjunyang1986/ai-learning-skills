@@ -1,0 +1,21 @@
+{
+  "skill_name": "paper-learn",
+  "evals": [
+    {
+      "id": 0,
+      "name": "attention-is-all-you-need",
+      "prompt": "帮我精读一下 Attention Is All You Need 这篇论文（arxiv.org/abs/1706.03762），做成一个能离线打开、带图和交互、方便理解的页面。",
+      "expected_output": "A self-contained offline index.html for the paper: a hero with title + full author list + venue + the paper's one-line contribution and real stat chips; a problem/motivation section; a background section with the paper's complexity comparison; a figure-by-figure method walk using the paper's REAL figures (downloaded into assets/) with key equations rendered offline (no KaTeX CDN) tagged with the paper's equation numbers and a 'why √d_k' style callout; a step-by-step worked example of scaled dot-product attention (with computed numbers flagged as illustrative); an honest interactive demo of the attention mechanism (caption states it teaches the math, not a trained model's output); a results table with real BLEU numbers and training cost; a reproduce/read-the-code section; and a critical-reading 'claim check' section sorting claims into demonstrated/hypothesized/conditional with sources; plus a searchable glossary. Every load-bearing claim/formula/number is sourced to the paper; any stat that can't be fetched (e.g. live citation count) is flagged, not fabricated.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "arxiv-link-supplied",
+      "prompt": "这是一篇 arXiv 论文链接，我想搞懂它的方法、它到底证明了什么、能不能落地。帮我做成一个精读页面。",
+      "expected_output": "Confirms the exact paper + version, then a self-contained offline reading page: motivation, figure-by-figure method walk built from the paper's real downloaded figures + offline-rendered key equations with section/equation citations, a worked example of the core mechanism, an honest interactive demo (or, if the paper has no tangible mechanism, a stronger figure/algorithm walk with a note explaining why no demo), a sourced results section, a reproduce section, and a critical-reading claim-check that explicitly separates demonstrated results from hypothesized/conditional claims with sources. Computed numbers are flagged as illustrative; unverifiable facts are flagged rather than fabricated.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}
