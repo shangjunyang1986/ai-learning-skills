@@ -2,8 +2,10 @@
 
 # ai-learning-skills
 
-> Use AI to turn anything — a GitHub project, a tech organization, an unfamiliar field,
-> a technical book — into an **interactive, offline, media-rich learning page**.
+> Use AI to turn a **GitHub project / paper / technical book / unfamiliar field** into an
+> **interactive, offline, shareable learning page** — fast.
+> Built for **getting up to speed and personal learning** — deliberately lightweight: one
+> self-contained HTML, double-click to open, usable on its own or combined.
 
 ![A study page generated for openai/whisper from a single sentence](docs/images/03-single-repo-whisper.png)
 
@@ -50,6 +52,19 @@ Give it a source; it runs **research → structure → generate** and produces a
 offline, shareable** learning page: left TOC, right content, with the source's own diagrams,
 screenshots, and video covers downloaded locally — plus a glossary, a code-structure
 walkthrough, and interactive learning pieces.
+
+**What it's for (and its boundaries):**
+
+- 🚀 **Built for learning fast / getting the lay of the land** — understand and get hands-on
+  with a project / field / paper / book, not write an authoritative manual.
+- 👤 **Personal learning first** — study material for yourself, not a team wiki, a docs site,
+  or a knowledge-base system.
+- 📄 **The output is a single static HTML, shareable** — self-contained, offline, double-click
+  to open, send it to anyone; no build, no server, no dependencies.
+- 🧩 **Use one on its own, or combine them** — each skill is self-contained and individually
+  installable/triggerable; want one entry point? `/learn` auto-detects and routes.
+- 🪶 **Deliberately lightweight** — one research-and-organize pass plus a static page; to
+  update, just re-run it. No heavy infrastructure.
 
 The whole family shares **one look, one set of interactions, and one "faithful, never
 fabricated" rule** — whatever you learn, the experience is consistent and every number is
