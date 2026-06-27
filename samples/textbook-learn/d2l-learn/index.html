@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>《动手学深度学习》(d2l.ai) 学习手册 · 逐章精讲 + 主动回忆</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#161922; --panel:#1b1f2a; --panel2:#212636;
+    --line:#2a3042; --txt:#e6e8ee; --muted:#9aa3b5; --dim:#717b90;
+    --accent:#7c5cff; --accent2:#22d3ee; --amber:#f5b94d; --green:#46c98b; --pink:#ff7eb6; --red:#ff6b6b;
+    --maxw:1500px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:15.5px;
+  }
+  a{color:var(--accent2); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:"SF Mono",Consolas,"Fira Code",monospace; background:#0c0e14; border:1px solid var(--line); padding:1px 6px; border-radius:5px; font-size:.86em; color:#ffd9a8}
+  pre{margin:0}
+  pre code{display:block; padding:16px 18px; overflow-x:auto; line-height:1.6; color:#d6deea; background:#0a0c12}
+  /* math */
+  .eq{display:block;background:#0c0e14;border:1px solid var(--line);border-left:3px solid var(--accent2);border-radius:0 9px 9px 0;padding:11px 16px;margin:13px 0;font-family:"SF Mono",Consolas,monospace;font-size:14px;color:#dfe7f3;overflow-x:auto}
+  .eq .tag{float:right;color:var(--dim);font-size:12px}
+  .m{font-family:"SF Mono",Consolas,monospace;color:#ffd9a8;background:#0c0e14;border:1px solid var(--line);padding:0 5px;border-radius:4px;font-size:.9em}
+
+  /* layout */
+  .wrap{display:flex; max-width:var(--maxw); margin:0 auto; min-height:100vh}
+  .side{
+    width:300px; flex:0 0 300px; position:sticky; top:0; height:100vh; overflow-y:auto;
+    background:var(--bg2); border-right:1px solid var(--line); padding:26px 18px 40px;
+  }
+  .side::-webkit-scrollbar{width:8px}
+  .side::-webkit-scrollbar-thumb{background:#2c3244; border-radius:8px}
+  .brand{display:flex; align-items:center; gap:11px; margin-bottom:6px}
+  .brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex:0 0 38px}
+  .brand h1{font-size:15px;margin:0;line-height:1.25}
+  .brand p{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
+  .navsec{margin-top:20px; font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--dim); padding:0 10px 6px}
+  nav a{
+    display:flex; gap:10px; align-items:baseline; padding:8px 11px; border-radius:9px;
+    color:var(--muted); font-size:14px; margin:2px 0; border:1px solid transparent;
+  }
+  nav a .n{color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; min-width:22px}
+  nav a:hover{background:var(--panel); color:var(--txt); text-decoration:none}
+  nav a.active{background:linear-gradient(90deg,rgba(124,92,255,.18),rgba(34,211,238,.06)); color:#fff; border-color:#3a3560}
+  nav a.active .n{color:var(--accent2)}
+  nav a .dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:#2c3244;flex:0 0 8px;align-self:center}
+  nav a.done .dot{background:var(--green)}
+  .sidefoot{margin-top:24px;padding:14px 11px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .sidefoot a{color:var(--muted)}
+
+  /* content */
+  main{flex:1; min-width:0; padding:46px 56px 120px; max-width:1040px}
+  section{padding-top:30px; margin-top:10px; scroll-margin-top:24px}
+  section > h2{font-size:27px; margin:0 0 4px; letter-spacing:-.01em; display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  section > h2 .kbd{font-size:13px;color:var(--accent2);background:rgba(34,211,238,.1);border:1px solid #244b55;border-radius:7px;padding:2px 9px;font-family:monospace}
+  .lead{color:var(--muted); font-size:16px; margin:6px 0 22px; max-width:80ch}
+  h3{font-size:18px;margin:30px 0 10px;color:#fff}
+  h4{font-size:15px;margin:20px 0 8px;color:#cdd4e2}
+  p{max-width:80ch}
+  hr.div{border:0;border-top:1px solid var(--line);margin:42px 0}
+
+  /* hero */
+  .hero{background:radial-gradient(120% 140% at 0% 0%,rgba(124,92,255,.22),transparent 50%),radial-gradient(120% 140% at 100% 0%,rgba(34,211,238,.14),transparent 45%),var(--panel);border:1px solid var(--line); border-radius:18px; padding:30px 32px; margin-bottom:8px}
+  .hero h2{border:0;font-size:30px;margin:0 0 8px}
+  .hero .lead{margin-bottom:18px}
+  .herorow{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+  .herorow .htext{flex:1;min-width:280px}
+  .herocover{flex:0 0 188px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff}
+  .herocover img{display:block;width:100%;height:auto}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:118px}
+  .stat b{display:block;font-size:21px;color:#fff;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  /* cards / grid */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1100px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .card h4{margin-top:0;display:flex;align-items:center;gap:8px}
+  .card p{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);background:var(--bg2)}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;margin:3px 5px 3px 0}
+  .pill.a{background:rgba(124,92,255,.14);color:#c3b4ff;border:1px solid #3a3560}
+  .pill.b{background:rgba(34,211,238,.12);color:#9fe9f5;border:1px solid #1f5562}
+  .pill.c{background:rgba(70,201,139,.12);color:#9fe9c4;border:1px solid #1f5a44}
+  .pill.d{background:rgba(245,185,77,.12);color:#f5d49a;border:1px solid #5a4a23}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}
+  tr:hover td{background:rgba(124,92,255,.04)}
+  td .s{color:var(--amber);font-variant-numeric:tabular-nums;font-weight:600}
+
+  /* figure */
+  figure{margin:20px 0;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;position:relative}
+  figure img{display:block;width:100%;height:auto;cursor:zoom-in;padding:8px}
+  figure::after{content:"🔍 点击放大";position:absolute;top:8px;right:8px;background:rgba(15,17,23,.78);color:#e6e8ee;font-size:11px;padding:3px 9px;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+  figure:hover::after{opacity:1}
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(6,7,11,.92);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;backdrop-filter:blur(3px)}
+  .lb.open{display:flex}
+  .lb img{max-width:94vw;max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6);cursor:default;animation:lbin .18s ease;background:#fff}
+  @keyframes lbin{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .lb .cap{color:#cdd4e2;font-size:13.5px;margin-top:14px;max-width:80vw;text-align:center}
+  .lb .x{position:absolute;top:18px;right:24px;color:#fff;font-size:30px;line-height:1;cursor:pointer;opacity:.8}
+  .lb .x:hover{opacity:1}
+  figure figcaption{background:var(--panel);color:var(--muted);font-size:12.5px;padding:9px 14px;border-top:1px solid var(--line)}
+  .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:900px){.imgrow{grid-template-columns:1fr}}
+
+  /* callout */
+  .note{border-left:3px solid var(--accent);background:var(--panel);border-radius:0 11px 11px 0;padding:13px 16px;margin:16px 0;font-size:14px}
+  .note.warn{border-color:var(--amber)}
+  .note.ok{border-color:var(--green)}
+  .note.src{border-color:var(--accent2);font-size:13px;color:var(--muted)}
+  .note b{color:#fff}
+
+  /* steps */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+  ol.steps li{position:relative;padding:0 0 4px 40px;margin-bottom:18px}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:#fff}
+
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;font-family:monospace;font-size:13px}
+  .flow .node{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:#cdd4e2}
+  .flow .arr{color:var(--accent);font-size:16px}
+
+  .copybtn{float:right;font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:3px 9px;cursor:pointer;margin:-2px 0 6px}
+  .copybtn:hover{color:#fff;border-color:var(--accent)}
+  .codewrap{position:relative;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:14px 0}
+  .codewrap .bar{background:var(--panel);padding:7px 13px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:50;width:0}
+  .todo{color:var(--amber)}
+  ul.clean{list-style:none;padding:0}
+  ul.clean li{padding:6px 0 6px 24px;position:relative;border-bottom:1px solid rgba(42,48,66,.5)}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;color:var(--accent)}
+
+  /* ===== chapter map (textbook-learn specific) ===== */
+  .chapmap{display:grid;grid-template-columns:1fr;gap:12px;margin:18px 0}
+  .cstage{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(180deg,var(--panel),var(--bg2))}
+  .cstage > .sh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .cstage .badge{font-size:12px;font-weight:700;padding:3px 11px;border-radius:20px}
+  .cstage.s1 .badge{background:rgba(124,92,255,.16);color:#c3b4ff;border:1px solid #3a3560}
+  .cstage.s2 .badge{background:rgba(34,211,238,.14);color:#9fe9f5;border:1px solid #1f5562}
+  .cstage.s3 .badge{background:rgba(70,201,139,.14);color:#9fe9c4;border:1px solid #1f5a44}
+  .cstage.s4 .badge{background:rgba(245,185,77,.14);color:#f5d49a;border:1px solid #5a4a23}
+  .cstage .sh .sg{color:var(--muted);font-size:13px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:12.5px;padding:4px 10px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:#cdd4e2}
+  .chip.hot{border-color:var(--accent);color:#fff}
+
+  /* ===== worked example (例题精讲) ===== */
+  .worked{border:1px solid #3a3560;border-radius:13px;background:linear-gradient(180deg,rgba(124,92,255,.07),var(--panel));margin:18px 0;overflow:hidden}
+  .worked .wh{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:rgba(124,92,255,.08)}
+  .worked .wh .ic{font-size:16px}
+  .worked .wh b{color:#fff;font-size:15px}
+  .worked .wb{padding:6px 18px 16px}
+  .worked .prompt{color:#dfe3ee;font-size:14.5px;margin:12px 0}
+  .reveal-btn{display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:var(--panel2);border:1px solid var(--accent);color:#cdb4ff;border-radius:9px;padding:8px 15px;font-size:13.5px;margin:6px 0 2px}
+  .reveal-btn:hover{background:rgba(124,92,255,.18);color:#fff}
+  .solution{display:none;margin-top:12px;animation:fade .25s ease}
+  .solution.open{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+  /* ===== active-recall quiz ===== */
+  .quiz{border:1px solid #1f5a44;border-radius:13px;background:linear-gradient(180deg,rgba(70,201,139,.06),var(--panel));margin:18px 0;padding:6px 18px 16px}
+  .quiz > .qh{display:flex;align-items:center;gap:10px;padding:12px 0 4px;color:#fff;font-weight:700;font-size:15px}
+  .quiz .qh .ic{font-size:16px}
+  .q{border-top:1px solid var(--line);padding:15px 0 5px}
+  .q:first-of-type{border-top:0}
+  .q .qq{font-weight:600;color:#eef1f6;margin:0 0 10px}
+  .q .qq .qn{color:var(--green);font-variant-numeric:tabular-nums;margin-right:7px}
+  .qopts{display:flex;flex-direction:column;gap:8px}
+  .qopt{display:flex;gap:10px;align-items:flex-start;text-align:left;cursor:pointer;background:var(--bg2);border:1px solid var(--line);color:#cdd4e2;border-radius:10px;padding:10px 13px;font-size:14px;font-family:inherit;transition:.12s}
+  .qopt:hover{border-color:var(--accent);color:#fff}
+  .qopt .lt{font-weight:700;color:var(--dim);flex:0 0 18px}
+  .qopt.correct{border-color:var(--green);background:rgba(70,201,139,.13);color:#dffaec}
+  .qopt.correct .lt{color:var(--green)}
+  .qopt.wrong{border-color:var(--red);background:rgba(255,107,107,.1);color:#ffd9d9}
+  .qopt.wrong .lt{color:var(--red)}
+  .qopt.locked{cursor:default;opacity:.85}
+  .qexplain{display:none;margin-top:10px;border-left:3px solid var(--green);background:var(--bg2);border-radius:0 9px 9px 0;padding:10px 14px;font-size:13.5px;color:var(--muted)}
+  .qexplain.open{display:block}
+  .qexplain b{color:#fff}
+
+  /* free-recall flip cards */
+  .recall{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  @media(max-width:760px){.recall{grid-template-columns:1fr}}
+  .rcard{cursor:pointer;border:1px solid var(--line);border-radius:12px;background:var(--bg2);padding:14px 16px;min-height:96px;display:flex;flex-direction:column;justify-content:center;transition:.15s}
+  .rcard:hover{border-color:var(--accent2)}
+  .rcard .q{border:0;padding:0;color:#eef1f6;font-weight:600;font-size:14.5px}
+  .rcard .ans{display:none;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);color:#9fe9c4;font-size:13.5px}
+  .rcard.flip .ans{display:block;animation:fade .2s ease}
+  .rcard .hint{color:var(--dim);font-size:11.5px;margin-top:8px}
+  .rcard.flip .hint{display:none}
+
+  /* ===== progress tracker widget ===== */
+  .tracker{position:fixed;right:18px;bottom:18px;z-index:60;width:236px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.45);overflow:hidden}
+  .tracker .th{padding:10px 14px;font-size:12.5px;color:#fff;font-weight:700;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,rgba(124,92,255,.2),rgba(34,211,238,.08));border-bottom:1px solid var(--line)}
+  .tracker .th .min{cursor:pointer;color:var(--muted);font-size:15px;line-height:1}
+  .tracker .tb{padding:12px 14px;font-size:12.5px;color:var(--muted)}
+  .tracker.minim .tb{display:none}
+  .bar2{height:8px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);overflow:hidden;margin:5px 0 3px}
+  .bar2 > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:width .3s}
+  .bar2.g > i{background:linear-gradient(90deg,#2e9e6b,var(--green))}
+  .trow{display:flex;justify-content:space-between;margin:9px 0 2px;color:#cdd4e2}
+  .trow b{color:#fff;font-variant-numeric:tabular-nums}
+  .treset{margin-top:10px;width:100%;cursor:pointer;background:var(--bg2);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:5px;font-size:11.5px;font-family:inherit}
+  .treset:hover{color:#fff;border-color:var(--red)}
+
+  /* chapter read toggle */
+  .readbar{display:flex;align-items:center;gap:11px;margin:20px 0 4px;padding:11px 15px;background:var(--bg2);border:1px solid var(--line);border-radius:11px}
+  .readbar label{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:14px;color:#cdd4e2;user-select:none}
+  .readbar input{width:18px;height:18px;accent-color:var(--green);cursor:pointer}
+  .readbar .sub{color:var(--dim);font-size:12.5px;margin-left:auto}
+
+  /* glossary */
+  .gsearch{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:12px 16px;font-size:15px;margin:8px 0 18px}
+  .gsearch:focus{outline:none;border-color:var(--accent)}
+  .gitem{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px;margin:9px 0}
+  .gitem .term{font-weight:700;color:#fff;font-size:15px}
+  .gitem .en{color:var(--accent2);font-size:12.5px;font-family:monospace;margin-left:8px}
+  .gitem .def{color:var(--muted);font-size:14px;margin-top:5px}
+  .gitem .gcat{float:right;font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+  .gnone{color:var(--dim);padding:16px 0}
+  .mob{display:none}
+  @media(max-width:980px){
+    .side{display:none}
+    .mob{display:flex;position:sticky;top:0;z-index:40;background:var(--bg2);border-bottom:1px solid var(--line);padding:12px 18px;gap:10px;align-items:center}
+    main{padding:24px 20px 90px}
+    .tracker{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">D2L</div>
+      <div><h1>《动手学深度学习》学习手册</h1><p>Dive into Deep Learning · 逐章精讲 + 主动回忆</p></div>
+    </div>
+
+    <div class="navsec">导览</div>
+    <nav id="nav">
+      <a href="#s0"><span class="n">0</span>30 秒速览</a>
+      <a href="#s1"><span class="n">1</span>这本书是什么 · 适合谁</a>
+      <a href="#s2"><span class="n">2</span>全书地图 · 学习路线</a>
+    </nav>
+    <div class="navsec">逐章精讲（含测验）</div>
+    <nav id="nav2">
+      <a href="#s3" data-chap="c3"><span class="n">3</span>线性回归<span class="dot"></span></a>
+      <a href="#s4" data-chap="c4"><span class="n">4</span>Softmax 分类<span class="dot"></span></a>
+      <a href="#s5" data-chap="c5"><span class="n">5</span>多层感知机<span class="dot"></span></a>
+      <a href="#s6" data-chap="c6"><span class="n">7</span>卷积神经网络<span class="dot"></span></a>
+    </nav>
+    <div class="navsec">动手 &amp; 参考</div>
+    <nav id="nav3">
+      <a href="#s7"><span class="n">8</span>怎么动手跑代码</a>
+      <a href="#s8"><span class="n">9</span>我的学习记录</a>
+      <a href="#s9"><span class="n">10</span>术语表</a>
+    </nav>
+
+    <div class="sidefoot">
+      官方资源<br>
+      <a href="https://d2l.ai" target="_blank">d2l.ai 官网</a> ·
+      <a href="https://github.com/d2l-ai/d2l-en" target="_blank">GitHub</a><br>
+      <a href="https://d2l.ai/d2l-en.pdf" target="_blank">PDF (PyTorch)</a> ·
+      <a href="https://d2l.ai/chapter_installation/index.html" target="_blank">安装</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mob"><strong>《动手学深度学习》学习手册</strong><span style="color:var(--muted);font-size:13px">— 屏幕较窄，目录与进度条已折叠，向下滚动阅读</span></div>
+
+    <!-- ===== 0 ===== -->
+    <section id="s0">
+      <div class="hero">
+        <div class="herorow">
+          <div class="htext">
+            <h2>《动手学深度学习》学习手册</h2>
+            <p class="lead">把这本可执行、跨框架、数学+代码+讨论一体的开源深度学习教科书，做成一条<strong>可走的学习路线</strong>：先给全书 23 章的地图，再挑 4 章<strong>逐章精讲</strong>——每章都配一道<strong>例题精讲</strong>和一组<strong>主动回忆测验</strong>，右下角实时记录你的进度与答题。</p>
+            <div class="stats">
+              <div class="stat"><b>23</b><span>顶层章节</span></div>
+              <div class="stat"><b>4</b><span>代码框架</span></div>
+              <div class="stat"><b>⭐29k</b><span>GitHub 星标</span></div>
+              <div class="stat"><b>500+</b><span>所大学采用</span></div>
+              <div class="stat"><b>免费</b><span>CC BY-SA 4.0</span></div>
+            </div>
+          </div>
+          <figure class="herocover" style="margin:0"><img src="assets/cover.png" alt="Dive into Deep Learning 封面"></figure>
+        </div>
+      </div>
+      <div class="note">怎么用这页：<b>0→2</b> 帮你判断「值不值得学、按什么顺序学」；<b>3→6</b> 是 4 章深入，<b>每章先读、再看例题、最后做测验</b>——答完测验再勾「读完」，右下角进度会涨。<a href="#s7">第 8 节</a>教你把代码真正跑起来。</div>
+      <div class="note src">数据来源：<a href="https://github.com/d2l-ai/d2l-en" target="_blank">github.com/d2l-ai/d2l-en</a> 的 GitHub API（⭐29,063，抓取于 <b>2026-06-28</b>）与 <a href="https://d2l.ai" target="_blank">d2l.ai</a> 官网。本页所有公式、练习题、配图均出自该书，逐节标注出处。</div>
+    </section>
+
+    <!-- ===== 1 ===== -->
+    <section id="s1">
+      <h2>1 · 这本书是什么 · 适合谁</h2>
+      <p class="lead">一句话：一本<strong>每节都是一个可运行 Jupyter Notebook</strong> 的深度学习教科书——把数学推导、可执行代码、社区讨论放进同一页，被 70 个国家 500+ 所大学采用。</p>
+
+      <div class="grid g2" style="margin:16px 0">
+        <div class="card"><h4>🧮 数学 + 代码 + 讨论一体</h4><p>每节既讲公式，也给出可直接运行的实现，文末还接社区讨论区。不是「看懂」而是「跑通」。</p></div>
+        <div class="card"><h4>🔀 四套框架并行</h4><p>同一本书提供 <b>PyTorch / MXNet / JAX / TensorFlow</b> 四种代码实现，挑你用的那套即可。</p></div>
+        <div class="card"><h4>🎓 教材级采用</h4><p>被 Stanford、MIT、Harvard、Cambridge 等 <b>500+ 所大学、70 国</b>用作教材（出处：仓库 README，未标注具体日期）。</p></div>
+        <div class="card"><h4>💸 完全免费</h4><p>正文 CC BY-SA 4.0、示例代码改良版 MIT；在线全文 + PDF 均免费，关联 Cambridge University Press。</p></div>
+      </div>
+
+      <h3>适合谁 · 需要什么前置</h3>
+      <p>书中自述：只需「适量的<strong>线性代数、微积分、概率与 Python 编程</strong>」；它「优先讲直觉与想法，而非数学严谨性」，并配了一个数学附录做复习。换句话说——<b>会写 Python、记得一点点矩阵和求导，就能开始。</b></p>
+      <div class="flow">
+        <span class="node">会 Python</span><span class="arr">+</span>
+        <span class="node">一点线代/微积分</span><span class="arr">+</span>
+        <span class="node">一点概率</span><span class="arr">→</span>
+        <span class="node" style="border-color:var(--green);color:#9fe9c4">可以开始</span>
+      </div>
+      <div class="note src">出处：<a href="https://d2l.ai/chapter_preface/index.html" target="_blank">前言 (Preface)</a> 与 <a href="https://github.com/d2l-ai/d2l-en" target="_blank">仓库 README</a>。作者：Aston Zhang、Zachary C. Lipton、Mu Li、Alexander J. Smola。</div>
+    </section>
+
+    <!-- ===== 2 ===== -->
+    <section id="s2">
+      <h2>2 · 全书地图 · 学习路线</h2>
+      <p class="lead">23 章不必从头啃到尾。按「<strong>打基础 → 学核心架构 → 进序列与注意力 → 落到应用与专题</strong>」四段来走，每段标出该先读哪几章。</p>
+
+      <figure style="background:#fff;max-width:560px"><img src="assets/book-org.svg" alt="全书结构图"><figcaption>官方「全书组织」图：箭头表示章节依赖关系——基础章是其它一切的前提（出处：d2l.ai 前言）</figcaption></figure>
+
+      <div class="chapmap">
+        <div class="cstage s1">
+          <div class="sh"><span class="badge">第 1 段 · 打基础</span><span class="sg">先把这几章吃透，后面才不卡（本手册深入前 4 章中的 3 章在这里）</span></div>
+          <div class="chips"><span class="chip">1 引言</span><span class="chip">2 预备知识</span><span class="chip hot">3 线性回归 ★</span><span class="chip hot">4 Softmax 分类 ★</span><span class="chip hot">5 多层感知机 ★</span><span class="chip">6 构建者指南</span></div>
+        </div>
+        <div class="cstage s2">
+          <div class="sh"><span class="badge">第 2 段 · 核心架构</span><span class="sg">深度学习「看图」的看家本领</span></div>
+          <div class="chips"><span class="chip hot">7 卷积神经网络 ★</span><span class="chip">8 现代 CNN</span><span class="chip">9 循环神经网络</span><span class="chip">10 现代 RNN</span></div>
+        </div>
+        <div class="cstage s3">
+          <div class="sh"><span class="badge">第 3 段 · 注意力与优化</span><span class="sg">通往 Transformer / 大模型的桥</span></div>
+          <div class="chips"><span class="chip">11 注意力与 Transformer</span><span class="chip">12 优化算法</span><span class="chip">13 计算性能</span></div>
+        </div>
+        <div class="cstage s4">
+          <div class="sh"><span class="badge">第 4 段 · 应用与进阶专题</span><span class="sg">按兴趣挑读，不必全看</span></div>
+          <div class="chips"><span class="chip">14 计算机视觉</span><span class="chip">15 NLP 预训练</span><span class="chip">16 NLP 应用</span><span class="chip">17 强化学习</span><span class="chip">18 高斯过程</span><span class="chip">19 超参数优化</span><span class="chip">20 GAN</span><span class="chip">21 推荐系统</span><span class="chip">22 数学附录</span><span class="chip">23 工具附录</span></div>
+        </div>
+      </div>
+
+      <div class="note ok"><b>从这里开始读：</b>1 → 2 → <b>3 线性回归</b>（最简单的「真·神经网络」）→ 4 Softmax（从回归跨到分类）→ 5 MLP（加上隐藏层与非线性）→ 7 卷积（专门看图）。本手册接下来就按这条线深入这 4 章（标 ★ 者）。</div>
+      <div class="imgrow">
+        <figure><img src="assets/supervised-learning.svg" alt="监督学习"><figcaption>监督学习的基本回路（第 1 章）：从带标签数据学习一个映射</figcaption></figure>
+        <figure><img src="assets/transformer.svg" alt="Transformer 架构"><figcaption>Transformer 架构（第 11 章）——前 6 章打好的底子，最终指向这里</figcaption></figure>
+      </div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 3 线性回归 ===== -->
+    <section id="s3">
+      <h2>3 · 线性回归 <span class="kbd">逐章精讲开始</span></h2>
+      <p class="lead">最简单、也最该先懂的模型：用<strong>特征的加权和 + 偏置</strong>预测一个连续值。它是理解后面一切的「单神经元」原型。</p>
+
+      <h3>核心要点（忠于原书）</h3>
+      <ul class="clean">
+        <li><b>模型是仿射函数：</b>预测 = 各特征的加权和再加偏置。</li>
+        <li><b>用平方损失衡量好坏，</b>训练就是在数据上最小化平均损失。</li>
+        <li><b>平方损失下存在罕见的解析解</b>（正规方程），但一般我们用<b>小批量随机梯度下降 (SGD)</b>。</li>
+        <li><b>平方损失不是随便选的</b>——它等价于「加性高斯噪声」假设下的极大似然估计。</li>
+      </ul>
+
+      <figure style="max-width:360px"><img src="assets/singleneuron.svg" alt="线性回归=单层神经网络"><figcaption>线性回归就是一个单层神经网络：每个输入连到唯一的输出（图 3.1.2）</figcaption></figure>
+
+      <h3>关键公式</h3>
+      <div class="eq">ŷ = w<sup>⊤</sup>x + b <span class="tag">(3.1.3) 单样本预测</span></div>
+      <div class="eq">L(w,b) = (1/n) Σ<sub>i</sub> ½ (w<sup>⊤</sup>x<sup>(i)</sup> + b − y<sup>(i)</sup>)<sup>2</sup> <span class="tag">(3.1.6) 平均平方损失</span></div>
+      <div class="eq">w* = (X<sup>⊤</sup>X)<sup>−1</sup> X<sup>⊤</sup>y <span class="tag">(3.1.9) 正规方程 / 解析解</span></div>
+      <div class="note src">出处：<a href="https://d2l.ai/chapter_linear-regression/linear-regression.html" target="_blank">3.1 Linear Regression</a>（公式编号同书）。</div>
+
+      <!-- 例题精讲 -->
+      <div class="worked">
+        <div class="wh"><span class="ic">📝</span><b>例题精讲 · 推导正规方程</b></div>
+        <div class="wb">
+          <p class="prompt">把损失写成 <span class="m">‖y − Xw‖²</span>（把偏置 b 并入 w，对应 X 补一列 1）。求使损失最小的 <span class="m">w</span>。</p>
+          <div class="reveal-btn" onclick="reveal(this)">▸ 展开解答</div>
+          <div class="solution">
+            <ol class="steps">
+              <li><b>写出目标：</b>最小化 <span class="m">‖y − Xw‖² = (y−Xw)<sup>⊤</sup>(y−Xw)</span>。</li>
+              <li><b>对 w 求梯度：</b><span class="m">∂<sub>w</sub>‖y − Xw‖² = 2X<sup>⊤</sup>(Xw − y)</span>。</li>
+              <li><b>令梯度为零：</b><span class="m">X<sup>⊤</sup>(Xw − y) = 0 ⟹ X<sup>⊤</sup>Xw = X<sup>⊤</sup>y</span>。</li>
+              <li><b>解出：</b><span class="m">w* = (X<sup>⊤</sup>X)<sup>−1</sup>X<sup>⊤</sup>y</span>。</li>
+            </ol>
+            <div class="note warn"><b>关键前提：</b>只有当 <span class="m">X<sup>⊤</sup>X</span> 可逆（设计矩阵满秩）时成立。若不满秩，需正则化/加噪等手段——这正是原书练习 4 让你思考的。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 测验 -->
+      <div class="quiz">
+        <div class="qh"><span class="ic">🧠</span>主动回忆 · 线性回归</div>
+        <div class="q" data-correct="1">
+          <p class="qq"><span class="qn">Q1</span>为什么说平方损失「有统计学道理」，而不是随便选的？</p>
+          <div class="qopts">
+            <button class="qopt" onclick="pick(this,0)"><span class="lt">A</span><span>因为它总能给出稀疏（很多 0）的权重</span></button>
+            <button class="qopt" onclick="pick(this,1)"><span class="lt">B</span><span>因为它等价于「加性高斯噪声」假设下的极大似然估计</span></button>
+            <button class="qopt" onclick="pick(this,2)"><span class="lt">C</span><span>因为它对异常值（离群点）最鲁棒</span></button>
+          </div>
+          <div class="qexplain"><b>B。</b>原书 3.1 证明：在 y = w⊤x + b + ε、ε~高斯 的假设下，最小化平方损失 = 最大化似然。鲁棒于异常值的反而是绝对值损失（练习 1c）。</div>
+        </div>
+        <div class="q" data-correct="0">
+          <p class="qq"><span class="qn">Q2</span>正规方程给出的解析解是？</p>
+          <div class="qopts">
+            <button class="qopt" onclick="pick(this,0)"><span class="lt">A</span><span><span class="m">w* = (X<sup>⊤</sup>X)<sup>−1</sup>X<sup>⊤</sup>y</span></span></button>
+            <button class="qopt" onclick="pick(this,1)"><span class="lt">B</span><span><span class="m">w* = X<sup>⊤</sup>y</span></span></button>
+            <button class="qopt" onclick="pick(this,2)"><span class="lt">C</span><span><span class="m">w* = (XX<sup>⊤</sup>)<sup>−1</sup>y</span></span></button>
+          </div>
+          <div class="qexplain"><b>A。</b>由 X⊤Xw = X⊤y 解出，前提是 X⊤X 满秩可逆。</div>
+        </div>
+      </div>
+      <div class="recall">
+        <div class="rcard" onclick="flip(this)"><div class="q">线性回归什么时候有解析解？</div><div class="ans">当 X⊤X 满秩（可逆）时；否则只能靠正则化或迭代优化。</div><div class="hint">点击翻面看答案</div></div>
+        <div class="rcard" onclick="flip(this)"><div class="q">一般情况下我们用什么方法训练它？</div><div class="ans">小批量随机梯度下降（minibatch SGD），更新式 3.1.10。</div><div class="hint">点击翻面看答案</div></div>
+      </div>
+
+      <div class="readbar"><label><input type="checkbox" data-read="c3" onchange="toggleRead(this)">读完本章，标记为已掌握</label><span class="sub">第 3 章 · Linear Regression</span></div>
+    </section>
+
+    <!-- ===== 4 Softmax ===== -->
+    <section id="s4">
+      <h2>4 · Softmax 分类</h2>
+      <p class="lead">从「预测一个数」跨到「预测哪一类」：用 <strong>softmax</strong> 把原始分数变成概率分布，用<strong>交叉熵</strong>当损失。</p>
+
+      <h3>核心要点</h3>
+      <ul class="clean">
+        <li><b>分类问题问的是「哪一个」</b>，标签用 <b>one-hot</b> 编码，每个类别一个输出。</li>
+        <li><b>softmax</b> 把 logits 变成非负、和为 1 的概率，同时保持 argmax 不变。</li>
+        <li><b>交叉熵 = 正确类别的负对数似然</b>，是分类的自然损失。</li>
+        <li><b>softmax + 交叉熵的梯度形式极简</b>：预测概率 − 真实标签。</li>
+      </ul>
+
+      <figure style="max-width:420px"><img src="assets/softmaxreg.svg" alt="softmax 回归=单层网络"><figcaption>Softmax 回归也是单层网络，只是有 q 个输出、每个全连接到所有输入（图 4.1.1）</figcaption></figure>
+
+      <h3>关键公式</h3>
+      <div class="eq">ŷ<sub>i</sub> = exp(o<sub>i</sub>) / Σ<sub>j</sub> exp(o<sub>j</sub>) <span class="tag">(4.1.3) softmax</span></div>
+      <div class="eq">l(y, ŷ) = − Σ<sub>j</sub> y<sub>j</sub> log ŷ<sub>j</sub> <span class="tag">(4.1.8) 交叉熵</span></div>
+      <div class="eq">∂ l / ∂ o<sub>j</sub> = softmax(o)<sub>j</sub> − y<sub>j</sub> <span class="tag">(4.1.10) 干净的梯度</span></div>
+      <div class="note src">出处：<a href="https://d2l.ai/chapter_linear-classification/softmax-regression.html" target="_blank">4.1 Softmax Regression</a>。</div>
+
+      <div class="worked">
+        <div class="wh"><span class="ic">📝</span><b>例题精讲 · 手算一遍 softmax + 交叉熵</b></div>
+        <div class="wb">
+          <p class="prompt">设 logits <span class="m">o = (2, 1, 0)</span>，真实类别是第 0 类（one-hot <span class="m">(1,0,0)</span>）。求 softmax 概率、交叉熵损失、以及对 o 的梯度。</p>
+          <div class="reveal-btn" onclick="reveal(this)">▸ 展开解答</div>
+          <div class="solution">
+            <ol class="steps">
+              <li><b>取指数：</b><span class="m">exp(2),exp(1),exp(0) ≈ (7.389, 2.718, 1.000)</span>，和 ≈ <span class="m">11.107</span>。</li>
+              <li><b>softmax：</b><span class="m">(7.389, 2.718, 1.000)/11.107 ≈ (0.665, 0.245, 0.090)</span>。</li>
+              <li><b>交叉熵：</b>只有正确类有贡献，<span class="m">l = −log(0.665) ≈ 0.408</span>。</li>
+              <li><b>梯度 = softmax − y：</b><span class="m">(0.665−1, 0.245−0, 0.090−0) = (−0.335, 0.245, 0.090)</span>。</li>
+            </ol>
+            <div class="note"><b>读法：</b>梯度告诉你——把正确类的 logit 往上推（负梯度方向），把另两类往下压，幅度正比于它们「冒头」的概率。<span style="color:var(--dim)">（这组具体数字是按书中公式 4.1.3/4.1.8/4.1.10 的演算示例，书里并未印出这几个数。）</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="qh"><span class="ic">🧠</span>主动回忆 · Softmax 分类</div>
+        <div class="q" data-correct="2">
+          <p class="qq"><span class="qn">Q1</span>softmax+交叉熵 对某个 logit <span class="m">o<sub>j</sub></span> 的梯度等于？</p>
+          <div class="qopts">
+            <button class="qopt" onclick="pick(this,0)"><span class="lt">A</span><span><span class="m">y<sub>j</sub> − ŷ<sub>j</sub></span></span></button>
+            <button class="qopt" onclick="pick(this,1)"><span class="lt">B</span><span><span class="m">o<sub>j</sub> − y<sub>j</sub></span></span></button>
+            <button class="qopt" onclick="pick(this,2)"><span class="lt">C</span><span><span class="m">softmax(o)<sub>j</sub> − y<sub>j</sub></span>（预测概率 − 真实标签）</span></button>
+          </div>
+          <div class="qexplain"><b>C。</b>正是公式 4.1.10——这种「预测 − 真实」的干净形式，是 softmax 配交叉熵被广泛采用的原因之一。</div>
+        </div>
+        <div class="q" data-correct="1">
+          <p class="qq"><span class="qn">Q2</span>为什么要套一层 softmax，而不直接拿 logits 当输出？</p>
+          <div class="qopts">
+            <button class="qopt" onclick="pick(this,0)"><span class="lt">A</span><span>softmax 会改变哪个类别得分最高（argmax）</span></button>
+            <button class="qopt" onclick="pick(this,1)"><span class="lt">B</span><span>它把分数变成非负、和为 1 的概率，同时不改变 argmax</span></button>
+            <button class="qopt" onclick="pick(this,2)"><span class="lt">C</span><span>它能让模型变成非线性</span></button>
+          </div>
+          <div class="qexplain"><b>B。</b>softmax 保持 argmax 不变，只是把任意实数分数规范成合法概率分布，方便用交叉熵和做概率解释。它本身不改变模型是「线性」这一事实。</div>
+        </div>
+      </div>
+      <div class="recall">
+        <div class="rcard" onclick="flip(this)"><div class="q">交叉熵损失 l(y, ŷ) 的式子？</div><div class="ans">l = − Σⱼ yⱼ log ŷⱼ —— 因 y 是 one-hot，等于正确类预测概率的负对数。</div><div class="hint">点击翻面看答案</div></div>
+        <div class="rcard" onclick="flip(this)"><div class="q">分类的标签怎么编码？输出层有几个单元？</div><div class="ans">one-hot 编码；每个类别一个输出单元（q 类就 q 个输出），全连接到输入。</div><div class="hint">点击翻面看答案</div></div>
+      </div>
+
+      <div class="readbar"><label><input type="checkbox" data-read="c4" onchange="toggleRead(this)">读完本章，标记为已掌握</label><span class="sub">第 4 章 · Softmax Regression</span></div>
+    </section>
+
+    <!-- ===== 5 MLP ===== -->
+    <section id="s5">
+      <h2>5 · 多层感知机 (MLP)</h2>
+      <p class="lead">给网络加上<strong>隐藏层</strong>和<strong>非线性激活</strong>——这是从「线性模型」迈向「深度」的第一步，也是关键一步。</p>
+
+      <h3>核心要点</h3>
+      <ul class="clean">
+        <li><b>线性模型假设太强</b>（单调/线性），现实问题常常不成立。</li>
+        <li><b>隐藏层</b>在输入与输出间加入中间表示。</li>
+        <li><b>没有非线性，多个仿射层会「坍缩」</b>成单个仿射层——白加。</li>
+        <li><b>ReLU / sigmoid / tanh 等激活</b>才让「深度」真正有意义；单隐藏层 MLP 即<b>万能逼近器</b>。</li>
+      </ul>
+
+      <figure style="max-width:440px"><img src="assets/mlp.svg" alt="带一个隐藏层的 MLP"><figcaption>含 5 个隐藏单元的单隐藏层 MLP（图 5.1.1）</figcaption></figure>
+
+      <h3>关键公式</h3>
+      <div class="eq">无激活：O = (XW<sup>(1)</sup>+b<sup>(1)</sup>)W<sup>(2)</sup>+b<sup>(2)</sup> = XW + b <span class="tag">(5.1.2) 坍缩</span></div>
+      <div class="eq">加激活：H = σ(XW<sup>(1)</sup>+b<sup>(1)</sup>),  O = HW<sup>(2)</sup>+b<sup>(2)</sup> <span class="tag">(5.1.3) 真·MLP</span></div>
+      <div class="eq">ReLU(x) = max(x, 0)    sigmoid(x) = 1/(1+e<sup>−x</sup>) <span class="tag">(5.1.4 / 5.1.6)</span></div>
+      <div class="note src">出处：<a href="https://d2l.ai/chapter_multilayer-perceptrons/mlp.html" target="_blank">5.1 Multilayer Perceptrons</a>。</div>
+
+      <div class="worked">
+        <div class="wh"><span class="ic">📝</span><b>例题精讲 · 为什么「纯线性堆叠」等于白堆</b></div>
+        <div class="wb">
+          <p class="prompt">两层都不加激活：<span class="m">H = XW<sup>(1)</sup>+b<sup>(1)</sup></span>，<span class="m">O = HW<sup>(2)</sup>+b<sup>(2)</sup></span>。证明它和单个线性层表达力相同。</p>
+          <div class="reveal-btn" onclick="reveal(this)">▸ 展开解答</div>
+          <div class="solution">
+            <ol class="steps">
+              <li><b>代入：</b><span class="m">O = (XW<sup>(1)</sup>+b<sup>(1)</sup>)W<sup>(2)</sup> + b<sup>(2)</sup></span>。</li>
+              <li><b>展开：</b><span class="m">O = X(W<sup>(1)</sup>W<sup>(2)</sup>) + (b<sup>(1)</sup>W<sup>(2)</sup>+b<sup>(2)</sup>)</span>。</li>
+              <li><b>令</b> <span class="m">W = W<sup>(1)</sup>W<sup>(2)</sup></span>、<span class="m">b = b<sup>(1)</sup>W<sup>(2)</sup>+b<sup>(2)</sup></span>，则 <span class="m">O = XW + b</span>。</li>
+              <li><b>结论：</b>两层线性网络 = 单个线性层，「白忙一场」。<b>插入非线性 σ（式 5.1.3）才打破坍缩。</b></li>
+            </ol>
+            <div class="note ok">一句话记住：<b>仿射的仿射还是仿射。</b>深度要靠非线性才换来表达力。（原书练习 1）</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="qh"><span class="ic">🧠</span>主动回忆 · MLP</div>
+        <div class="q" data-correct="1">
+          <p class="qq"><span class="qn">Q1</span>给一个「纯线性」深网（层与层之间无激活）不断加层，会怎样？</p>
+          <div class="qopts">
+            <button class="qopt" onclick="pick(this,0)"><span class="lt">A</span><span>表达力随层数指数增长</span></button>
+            <button class="qopt" onclick="pick(this,1)"><span class="lt">B</span><span>表达力不增加，始终等价于一个单层线性模型</span></button>
+            <button class="qopt" onclick="pick(this,2)"><span class="lt">C</span><span>一定会过拟合但表达力更强</span></button>
+          </div>
+          <div class="qexplain"><b>B。</b>仿射复合仍是仿射（例题已证）。原书练习 1 还要你举出「加层反而降低表达力」的例子。</div>
+        </div>
+        <div class="q" data-correct="0">
+          <p class="qq"><span class="qn">Q2</span>下面哪个恒等式成立？（原书练习 5a）</p>
+          <div class="qopts">
+            <button class="qopt" onclick="pick(this,0)"><span class="lt">A</span><span><span class="m">tanh(x) + 1 = 2·sigmoid(2x)</span></span></button>
+            <button class="qopt" onclick="pick(this,1)"><span class="lt">B</span><span><span class="m">tanh(x) = sigmoid(x) − 1</span></span></button>
+            <button class="qopt" onclick="pick(this,2)"><span class="lt">C</span><span><span class="m">ReLU(x) = sigmoid(x)·x</span></span></button>
+          </div>
+          <div class="qexplain"><b>A。</b>这说明 sigmoid 与 tanh 只差一个仿射的前后处理，二者参数化的函数类其实相同（练习 5b）。</div>
+        </div>
+      </div>
+      <div class="recall">
+        <div class="rcard" onclick="flip(this)"><div class="q">ReLU(x) 的定义？它解决了什么？</div><div class="ans">ReLU(x)=max(x,0)。计算简单、正区间梯度恒为 1，缓解了 sigmoid 的梯度消失。</div><div class="hint">点击翻面看答案</div></div>
+        <div class="rcard" onclick="flip(this)"><div class="q">「万能逼近」是什么意思？</div><div class="ans">单隐藏层、足够多单元的 MLP 能逼近任意（合理的）连续函数——但「能逼近」不等于「容易训练/泛化好」。</div><div class="hint">点击翻面看答案</div></div>
+      </div>
+
+      <div class="readbar"><label><input type="checkbox" data-read="c5" onchange="toggleRead(this)">读完本章，标记为已掌握</label><span class="sub">第 5 章 · Multilayer Perceptrons</span></div>
+    </section>
+
+    <!-- ===== 6 (书第7章) 卷积 ===== -->
+    <section id="s6">
+      <h2>7 · 卷积神经网络 <span class="kbd">书第 7 章</span></h2>
+      <p class="lead">专门「看图」的架构。它不是凭空发明的——把<strong>平移不变性</strong>和<strong>局部性</strong>两条原则加到全连接层上，<strong>自然就推出了卷积</strong>。</p>
+
+      <h3>核心要点</h3>
+      <ul class="clean">
+        <li><b>全连接层撑不起图像：</b>百万像素接千单元隐藏层 ≈ 10<sup>9</sup> 个参数。</li>
+        <li><b>平移不变性：</b>图像平移，表示也应随之平移——权重不该依赖绝对位置 ⟹ <b>权重共享</b>。</li>
+        <li><b>局部性：</b>一个隐藏单元只看输入的一小块邻域 ⟹ <b>有界感受野</b>。</li>
+        <li>两条原则一加，参数量直降十个数量级——结果<b>正好就是卷积层</b>；真实图像还要加<b>通道</b>。</li>
+      </ul>
+
+      <figure style="max-width:430px"><img src="assets/correlation.svg" alt="二维互相关"><figcaption>二维互相关：阴影部分是算第一个输出元素时用到的输入与核（图 7.2.1）。注意：深度学习里说的「卷积」其实是互相关。</figcaption></figure>
+
+      <h3>关键公式</h3>
+      <div class="eq">[H]<sub>i,j</sub> = u + Σ<sub>a=−Δ..Δ</sub> Σ<sub>b=−Δ..Δ</sub> [V]<sub>a,b</sub> [X]<sub>i+a, j+b</sub> <span class="tag">(7.1.3) 加上两原则后</span></div>
+      <div class="eq">输出尺寸 = (n<sub>h</sub> − k<sub>h</sub> + 1) × (n<sub>w</sub> − k<sub>w</sub> + 1) <span class="tag">(7.2) 无填充无步幅时</span></div>
+      <div class="note src">出处：<a href="https://d2l.ai/chapter_convolutional-neural-networks/why-conv.html" target="_blank">7.1 从全连接到卷积</a> 与 <a href="https://d2l.ai/chapter_convolutional-neural-networks/conv-layer.html" target="_blank">7.2 图像卷积</a>。</div>
+
+      <div class="worked">
+        <div class="wh"><span class="ic">📝</span><b>例题精讲 · 手算一次二维互相关</b></div>
+        <div class="wb">
+          <p class="prompt">输入 <span class="m">[[0,1,2],[3,4,5],[6,7,8]]</span>，核 <span class="m">[[0,1],[2,3]]</span>。求输出（步幅 1、无填充）。</p>
+          <div class="reveal-btn" onclick="reveal(this)">▸ 展开解答</div>
+          <div class="solution">
+            <ol class="steps">
+              <li><b>输出尺寸：</b><span class="m">(3−2+1)×(3−2+1) = 2×2</span>。</li>
+              <li><b>左上：</b><span class="m">0·0+1·1+3·2+4·3 = 19</span>。</li>
+              <li><b>右上：</b><span class="m">1·0+2·1+4·2+5·3 = 25</span>。</li>
+              <li><b>左下：</b><span class="m">3·0+4·1+6·2+7·3 = 37</span>。</li>
+              <li><b>右下：</b><span class="m">4·0+5·1+7·2+8·3 = 43</span>，得 <span class="m">[[19,25],[37,43]]</span>。</li>
+            </ol>
+            <div class="note ok">核在输入上滑动，每个位置做「逐元素相乘再求和」。这就是图 7.2.1 在算的事（原书式 7.2.1）。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="qh"><span class="ic">🧠</span>主动回忆 · 卷积</div>
+        <div class="q" data-correct="2">
+          <p class="qq"><span class="qn">Q1</span>卷积层是从全连接层施加哪两条原则「推导」出来的？</p>
+          <div class="qopts">
+            <button class="qopt" onclick="pick(this,0)"><span class="lt">A</span><span>稀疏性 + 正则化</span></button>
+            <button class="qopt" onclick="pick(this,1)"><span class="lt">B</span><span>单调性 + 凸性</span></button>
+            <button class="qopt" onclick="pick(this,2)"><span class="lt">C</span><span>平移不变性 + 局部性</span></button>
+          </div>
+          <div class="qexplain"><b>C。</b>平移不变性 ⟹ 权重共享（V 不依赖位置）；局部性 ⟹ 只看 ±Δ 邻域。两者一起，全连接层就退化成卷积层。</div>
+        </div>
+        <div class="q" data-correct="0">
+          <p class="qq"><span class="qn">Q2</span>上面例题里输出的左上角元素是多少？</p>
+          <div class="qopts">
+            <button class="qopt" onclick="pick(this,0)"><span class="lt">A</span><span>19</span></button>
+            <button class="qopt" onclick="pick(this,1)"><span class="lt">B</span><span>25</span></button>
+            <button class="qopt" onclick="pick(this,2)"><span class="lt">C</span><span>0</span></button>
+          </div>
+          <div class="qexplain"><b>A。</b>0·0+1·1+3·2+4·3 = 19。</div>
+        </div>
+      </div>
+      <div class="recall">
+        <div class="rcard" onclick="flip(this)"><div class="q">无填充、步幅 1 时，卷积输出尺寸公式？</div><div class="ans">(n_h − k_h + 1) × (n_w − k_w + 1)。</div><div class="hint">点击翻面看答案</div></div>
+        <div class="rcard" onclick="flip(this)"><div class="q">深度学习的「卷积」和数学上的卷积差在哪？</div><div class="ans">实现的其实是互相关（核不翻转，用 +a,+b）。因核是学出来的，翻不翻转不影响结果，所以习惯上仍叫卷积。</div><div class="hint">点击翻面看答案</div></div>
+      </div>
+
+      <figure style="max-width:620px;margin-top:22px"><img src="assets/lenet.svg" alt="LeNet 架构"><figcaption>顺带一看：LeNet（书第 7.6 节）——最早的卷积网络之一，卷积+池化堆叠后接全连接。把本章的卷积积木搭起来就是它。</figcaption></figure>
+
+      <div class="readbar"><label><input type="checkbox" data-read="c6" onchange="toggleRead(this)">读完本章，标记为已掌握</label><span class="sub">第 7 章 · Convolutional Neural Networks</span></div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 7 动手 ===== -->
+    <section id="s7">
+      <h2>8 · 怎么动手跑代码 <span class="kbd">官方步骤</span></h2>
+      <p class="lead">这本书的精髓是「每节都能跑」。下面是官方安装路径（以 PyTorch 为例），跑通后每一节的 Notebook 都能改了就看效果。</p>
+
+      <h3>① 建环境 + 装框架 + 装 d2l 包</h3>
+      <div class="codewrap"><div class="bar"><span>conda + pip（官方安装页）</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 建并激活环境
+conda create --name d2l python=3.9 -y
+conda activate d2l
+
+# 装 PyTorch（也可换 mxnet / jax / tensorflow）
+pip install torch==2.0.0 torchvision==0.15.1
+
+# 装配套 d2l 工具包
+pip install d2l==1.0.3</code></pre></div>
+
+      <h3>② 下载并打开 Notebook</h3>
+      <div class="codewrap"><div class="bar"><span>下载全书 Notebook</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>curl https://d2l.ai/d2l-en-1.0.3.zip -o d2l-en.zip
+unzip d2l-en.zip && cd pytorch    # 另有 mxnet / jax / tensorflow 子目录
+jupyter notebook                  # 浏览器打开 http://localhost:8888</code></pre></div>
+
+      <ul class="clean">
+        <li>不想装环境？官方支持 <b>Google Colab / Amazon SageMaker / SageMaker Studio Lab</b> 一键在云端跑。</li>
+        <li>想离线读：下载 <a href="https://d2l.ai/d2l-en.pdf" target="_blank">PDF（PyTorch 版）</a>。</li>
+        <li>安装详情：<a href="https://d2l.ai/chapter_installation/index.html" target="_blank">d2l.ai/chapter_installation</a>。</li>
+      </ul>
+      <div class="note warn"><b>诚实提醒：</b>仓库最后一次 push 是 <b>2024-08-18</b>（抓取于 2026-06-28），上面的版本号（torch 2.0.0、d2l 1.0.3）是当时官方安装页的固定值；真装时如遇版本冲突，以 <a href="https://d2l.ai/chapter_installation/index.html" target="_blank">最新安装页</a>为准。</div>
+    </section>
+
+    <!-- ===== 8 学习记录 ===== -->
+    <section id="s8">
+      <h2>9 · 我的学习记录 <span class="kbd todo">边学边填</span></h2>
+      <p class="lead">这页本身就是你的学习追踪器：右下角的<strong>进度卡</strong>会记下你读完几章、测验答对几题（存在浏览器本地）。下面留几个回填位，跑完代码后补上。</p>
+
+      <div class="grid g2">
+        <div class="card"><h4>✅ 自动追踪（右下角进度卡）</h4><p>每章末勾「读完」→ 章节进度 +1；每答一道测验 → 正确率更新。关掉页面再打开仍在（localStorage）。</p></div>
+        <div class="card"><h4>📓 建议的练手顺序</h4><p>读完一章 → 打开对应 Notebook → 改一个超参（学习率/隐藏单元数/核大小）→ 看曲线变化 → 回这页做测验巩固。</p></div>
+      </div>
+
+      <h3 class="todo">▢ 回填占位（动手后补这里）</h3>
+      <ul class="clean">
+        <li class="todo">环境装好截图（conda + d2l 版本）</li>
+        <li class="todo">线性回归 Notebook：改学习率后的损失曲线对比</li>
+        <li class="todo">Softmax / Fashion-MNIST：测试精度截图</li>
+        <li class="todo">MLP：换激活函数（ReLU↔sigmoid）后的效果差异</li>
+        <li class="todo">卷积：在 LeNet 上跑通的准确率与耗时</li>
+        <li class="todo">每章「练习题」里挑 1 道写下你的解答</li>
+      </ul>
+      <div class="note">把「读 → 改 → 看 → 测验」做成一个循环，比单纯读完整本更能留下东西——这正是这本书「动手学」的本意。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 9 术语表 ===== -->
+    <section id="s9">
+      <h2>10 · 术语表</h2>
+      <p class="lead">本书高频术语速查，输入关键词实时过滤（中/英/释义都可搜）。</p>
+      <input class="gsearch" id="gsearch" placeholder="🔍 搜索术语，如 softmax、损失、卷积、激活…" oninput="gfilter()">
+      <div id="glist"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- progress tracker -->
+<div class="tracker" id="tracker">
+  <div class="th"><span>📈 学习进度</span><span class="min" onclick="document.getElementById('tracker').classList.toggle('minim')" title="折叠/展开">–</span></div>
+  <div class="tb">
+    <div class="trow"><span>章节读完</span><b><span id="chDone">0</span> / 4</b></div>
+    <div class="bar2 g"><i id="chBar"></i></div>
+    <div class="trow"><span>测验正确率</span><b><span id="qRight">0</span> / <span id="qTot">0</span></b></div>
+    <div class="bar2"><i id="qBar"></i></div>
+    <button class="treset" onclick="resetProgress()">清空进度</button>
+  </div>
+</div>
+
+<div class="lb" id="lb" onclick="closeLb()"><span class="x">&times;</span><img id="lbimg" src="" onclick="event.stopPropagation()"><div class="cap" id="lbcap"></div></div>
+
+<script>
+/* ===== glossary ===== */
+const GLOSSARY=[
+  {t:"线性回归",en:"Linear Regression",c:"基础",d:"用特征加权和+偏置预测连续值的模型，可视作单层神经网络。"},
+  {t:"平方损失",en:"Squared Loss",c:"基础",d:"½(ŷ−y)²。等价于加性高斯噪声下的极大似然，故有统计学依据。"},
+  {t:"正规方程",en:"Normal Equation",c:"基础",d:"线性回归的解析解 w*=(XᵀX)⁻¹Xᵀy，仅当 XᵀX 满秩时成立。"},
+  {t:"随机梯度下降",en:"SGD",c:"优化",d:"用小批量样本估计梯度并更新参数；线性回归及绝大多数深网的通用训练法。"},
+  {t:"小批量",en:"Minibatch",c:"优化",d:"每次更新所用的一小撮样本，平衡噪声与计算效率。"},
+  {t:"Softmax",en:"Softmax",c:"分类",d:"把 logits 变成非负、和为 1 的概率分布，且保持 argmax 不变。"},
+  {t:"交叉熵",en:"Cross-Entropy",c:"分类",d:"l=−Σ yⱼ log ŷⱼ，分类的自然损失，等于正确类的负对数似然。"},
+  {t:"logits",en:"Logits",c:"分类",d:"softmax 之前的原始分数（未归一化）。"},
+  {t:"独热编码",en:"One-hot",c:"分类",d:"用只有一个 1、其余为 0 的向量表示类别标签。"},
+  {t:"多层感知机",en:"MLP",c:"架构",d:"含一个或多个隐藏层、层间带非线性激活的前馈网络。"},
+  {t:"激活函数",en:"Activation",c:"架构",d:"逐元素非线性（ReLU/sigmoid/tanh），打破多仿射层的坍缩。"},
+  {t:"ReLU",en:"ReLU",c:"架构",d:"max(x,0)。计算简单、正区间梯度为 1，缓解梯度消失。"},
+  {t:"坍缩",en:"Collapse",c:"架构",d:"无激活时多个仿射层等价于单个仿射层——「仿射的仿射还是仿射」。"},
+  {t:"万能逼近",en:"Universal Approximation",c:"架构",d:"单隐藏层、足够宽的 MLP 可逼近任意连续函数；但不保证好训练/好泛化。"},
+  {t:"卷积/互相关",en:"Convolution",c:"卷积",d:"核在输入上滑动做逐元素相乘求和；深度学习里实际是互相关（核不翻转）。"},
+  {t:"平移不变性",en:"Translation Invariance",c:"卷积",d:"输入平移则表示随之平移 ⟹ 权重不依赖绝对位置（权重共享）。"},
+  {t:"局部性",en:"Locality",c:"卷积",d:"隐藏单元只依赖输入的一小块邻域 ⟹ 有界感受野。"},
+  {t:"通道",en:"Channel",c:"卷积",d:"特征图的「深度」维（如 RGB 三输入通道、多输出特征图）。"},
+  {t:"感受野",en:"Receptive Field",c:"卷积",d:"影响某个输出元素的输入区域；越深的层感受野越大。"},
+  {t:"Jupyter Notebook",en:"Notebook",c:"工具",d:"d2l 每一节都是一个可运行的 Notebook，代码+公式+文字同页。"},
+];
+function gcard(g){return `<div class="gitem"><span class="gcat">${g.c}</span><span class="term">${g.t}</span><span class="en">${g.en}</span><div class="def">${g.d}</div></div>`}
+function renderG(list){const e=document.getElementById('glist');e.innerHTML=list.length?list.map(gcard).join(''):'<div class="gnone">没有匹配的术语</div>'}
+function gfilter(){const q=document.getElementById('gsearch').value.trim().toLowerCase();renderG(!q?GLOSSARY:GLOSSARY.filter(g=>(g.t+g.en+g.d+g.c).toLowerCase().includes(q)))}
+renderG(GLOSSARY);
+
+/* ===== lightbox ===== */
+function openLb(img){document.getElementById('lbimg').src=img.src;const f=img.closest('figure');const cap=f&&f.querySelector('figcaption');document.getElementById('lbcap').textContent=cap?cap.textContent:'';document.getElementById('lb').classList.add('open')}
+function closeLb(){document.getElementById('lb').classList.remove('open')}
+document.querySelectorAll('figure img').forEach(i=>i.addEventListener('click',()=>openLb(i)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb()});
+
+/* ===== copy ===== */
+function cp(btn){const code=btn.closest('.codewrap').querySelector('code').innerText;navigator.clipboard.writeText(code).then(()=>{const o=btn.textContent;btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent=o,1400)})}
+
+/* ===== worked example reveal ===== */
+function reveal(btn){const s=btn.nextElementSibling;const open=s.classList.toggle('open');btn.textContent=(open?'▾ 收起解答':'▸ 展开解答')}
+
+/* ===== free-recall flip ===== */
+function flip(card){card.classList.toggle('flip')}
+
+/* ===== quiz ===== */
+let qState={};  // qid -> {answered, correct}
+function pick(btn,idx){
+  const q=btn.closest('.q');const qid=qIndexOf(q);
+  if(qState[qid]&&qState[qid].answered) return;          // lock after first answer
+  const correct=parseInt(q.dataset.correct,10);
+  q.querySelectorAll('.qopt').forEach((o,i)=>{o.classList.add('locked');if(i===correct)o.classList.add('correct')});
+  const ok=(idx===correct);
+  if(!ok) btn.classList.add('wrong');
+  q.querySelector('.qexplain').classList.add('open');
+  qState[qid]={answered:true,correct:ok};
+  saveProgress();updateTracker();
+}
+function qIndexOf(q){return Array.from(document.querySelectorAll('.q')).indexOf(q)}
+
+/* ===== chapter read tracking ===== */
+let readState={};
+function toggleRead(cb){readState[cb.dataset.read]=cb.checked;saveProgress();updateTracker()}
+
+/* ===== persistence ===== */
+const KEY='d2l-learn-progress-v1';
+function saveProgress(){try{localStorage.setItem(KEY,JSON.stringify({q:qState,r:readState}))}catch(e){}}
+function loadProgress(){
+  let data=null;try{data=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  if(!data)return;
+  qState=data.q||{};readState=data.r||{};
+  // restore read checkboxes + answered quizzes
+  document.querySelectorAll('input[data-read]').forEach(cb=>{if(readState[cb.dataset.read]){cb.checked=true}});
+  document.querySelectorAll('.q').forEach(q=>{const qid=qIndexOf(q);const st=qState[qid];if(st&&st.answered){
+    const correct=parseInt(q.dataset.correct,10);
+    q.querySelectorAll('.qopt').forEach((o,i)=>{o.classList.add('locked');if(i===correct)o.classList.add('correct')});
+    q.querySelector('.qexplain').classList.add('open');
+  }});
+}
+function resetProgress(){qState={};readState={};try{localStorage.removeItem(KEY)}catch(e){}location.reload()}
+
+/* ===== tracker + nav dots ===== */
+function updateTracker(){
+  const chaps=['c3','c4','c5','c6'];
+  const done=chaps.filter(c=>readState[c]).length;
+  document.getElementById('chDone').textContent=done;
+  document.getElementById('chBar').style.width=(done/chaps.length*100)+'%';
+  const ans=Object.values(qState).filter(s=>s.answered);
+  const right=ans.filter(s=>s.correct).length;
+  document.getElementById('qRight').textContent=right;
+  document.getElementById('qTot').textContent=ans.length;
+  document.getElementById('qBar').style.width=(ans.length?right/ans.length*100:0)+'%';
+  // sidebar dots
+  document.querySelectorAll('nav a[data-chap]').forEach(a=>{a.classList.toggle('done',!!readState[a.dataset.chap])});
+}
+
+/* ===== scroll progress + spy ===== */
+const secs=[...document.querySelectorAll('section')];const links=[...document.querySelectorAll('nav a')];
+function onScroll(){
+  const sc=document.documentElement.scrollTop||document.body.scrollTop;
+  const h=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+  document.getElementById('progress').style.width=(h>0?sc/h*100:0)+'%';
+  let cur=secs[0]?secs[0].id:'';
+  for(const s of secs){if(s.getBoundingClientRect().top<=120)cur=s.id}
+  links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+loadProgress();updateTracker();onScroll();
+</script>
+</body>
+</html>

@@ -59,7 +59,7 @@ from a real fetch.
 |-------|----------------------|--------|
 | **[github-project-learn](skills/github-project-learn)** | A GitHub repo or a whole organization | ✅ Done |
 | **[domain-learn](skills/domain-learn)** | An open topic researched across the web (e.g. "3DGS", "diffusion models") — a beginner→advanced→hands-on roadmap with interactive demos | ✅ Done |
-| **textbook-learn** | A specific technical book / PDF — chapter by chapter, with active-recall quizzes and worked examples | 🔜 Planned |
+| **[textbook-learn](skills/textbook-learn)** | A specific technical book / PDF — turned into a chapter course with worked examples, active-recall quizzes, and a progress tracker | ✅ Done |
 
 Each skill is **self-contained and individually installable** — you don't need the whole repo to use one.
 
@@ -133,8 +133,8 @@ truth** — improve the design system here, then re-sync into each skill. See
 
 - [x] `github-project-learn` — repos & organizations
 - [x] `domain-learn` — web-researched topic roadmaps with interactive demos (built on rigorous, cited research) — examples: [3DGS](samples/domain-learn/3dgs-learn/index.html), [diffusion models](samples/domain-learn/diffusion-models-learn/index.html)
-- [ ] `textbook-learn` — book/PDF courses with active recall
-- [ ] Extract the shared design core once the second skill confirms what's truly common
+- [x] `textbook-learn` — book/PDF courses with worked examples + active-recall quizzes + a progress tracker (example: [Dive into Deep Learning](samples/textbook-learn/d2l-learn/index.html))
+- [ ] All three skills are in place — next: extract the shared core (the page shell is already shared; revisit the research/pedagogy layer)
 
 ## License
 

@@ -1,0 +1,21 @@
+{
+  "skill_name": "textbook-learn",
+  "evals": [
+    {
+      "id": 0,
+      "name": "dive-into-deep-learning",
+      "prompt": "帮我学《动手学深度学习》(d2l.ai) 这本书，做成一个方便学习、可以离线打开的页面，最好每章后面带点测验帮我巩固。",
+      "expected_output": "A self-contained offline index.html for the book: a hero with the real book cover + sourced stat chips; a what/who section with prerequisites; a chapter map of the full TOC grouped into stages with a reading path; 3-6 deep-dive chapter sections, each with faithful core takeaways, the book's real figures (downloaded into assets/), key equations rendered offline (no KaTeX CDN) tagged with the book's equation numbers, a step-by-step worked example the user reveals, and a self-grading active-recall quiz (MCQs + flip cards) built from the chapter's real exercises; a how-to-run section; a searchable glossary; and a localStorage progress tracker for chapters read + quiz accuracy. Every load-bearing claim/formula/answer is sourced to the book. Math is offline; media is local.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "user-supplied-pdf",
+      "prompt": "这是一本技术书的 PDF（我已放在当前目录）。我想系统过一遍其中讲基础的那几章，帮我做成带例题精讲和主动回忆测验的学习网页。",
+      "expected_output": "Scopes with the user on which chapters to deep-dive, then a self-contained offline index.html built from the actual PDF content: a chapter map of the book's real TOC, deep-dive sections for the chosen foundational chapters (faithful takeaways, real figures extracted/downloaded, key definitions/equations rendered offline with page/section citations, a revealed worked example, and a self-grading quiz + flip cards seeded from the book's real exercises), plus a progress tracker. Any computed numbers not printed in the book are flagged as illustrative; anything unverifiable is flagged rather than fabricated.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

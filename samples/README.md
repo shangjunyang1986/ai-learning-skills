@@ -12,9 +12,11 @@ samples/
 │   ├── whisper-learn/       # 单仓库
 │   ├── qwenlm-learn/        # 整个组织
 │   └── om-ai-lab-learn/     # 组织 + 旗舰深入
-└── domain-learn/           # 学一个开放领域
-    ├── 3dgs-learn/          # 3D 高斯泼溅
-    └── diffusion-models-learn/  # 扩散模型
+├── domain-learn/           # 学一个开放领域
+│   ├── 3dgs-learn/          # 3D 高斯泼溅
+│   └── diffusion-models-learn/  # 扩散模型
+└── textbook-learn/         # 学一本技术书 / PDF
+    └── d2l-learn/           # 《动手学深度学习》逐章 + 测验
 ```
 
 ## `github-project-learn/` — 学一个 GitHub 仓库或组织
@@ -52,6 +54,20 @@ seq2seq 架构图）/ 技术原理 / **代码结构与技术栈** / 部署。适
 **外加一个可交互的「加噪 / 去噪」demo**：拖「时间步 t」实时加噪（数学精确），点「▶去噪生成」回放反向过程。
 
 ![3dgs-learn 预览](../docs/images/3dgs-hero.png)
+
+## `textbook-learn/` — 学一本技术书 / PDF
+
+| 案例 | 来源 | 亮点 | 怎么看 |
+|------|------|------|--------|
+| [`d2l-learn/`](textbook-learn/d2l-learn/index.html) | 《动手学深度学习》[d2l.ai](https://d2l.ai)（23 章开源教科书） | **逐章例题精讲 + 自评测验 + 进度追踪** | 双击 `index.html` |
+
+**d2l-learn** —— `textbook-learn` 的首个样例：把《动手学深度学习》做成一条可走的课程——速览（真实
+封面 + GitHub API 星标）、全书 23 章地图与「从这里开始读」路线，再**逐章深入 4 章**（线性回归 / Softmax
+分类 / 多层感知机 / 卷积）。每章都配**关键公式（离线渲染，不用 KaTeX）+ 书里的真实配图 + 一道点开逐步
+展开的「例题精讲」+ 一组会自动判对错的「主动回忆测验」**（题目源自书末练习），再加可搜索术语表。右下角
+**进度卡**实时记录你读完几章、测验答对几题，存在浏览器本地、关掉再开还在。所有公式 / 练习 / 配图均出自该书、逐节标注出处。
+
+![d2l-learn 逐章精讲 + 测验预览](../docs/images/d2l-chapter.png)
 
 > 提示：这些页面是**自包含 HTML + 本地 assets**，直接双击 `index.html` 即可，无需联网、无需构建。
 > Tip: each page is self-contained HTML + a local `assets/` folder — just double-click `index.html`.

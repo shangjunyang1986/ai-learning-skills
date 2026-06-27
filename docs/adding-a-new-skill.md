@@ -14,12 +14,14 @@ skill keeps the same output shell and principles, and differs in three places:
 See `shared/learning-page-design.md` for the page shell and component library.
 
 ## What each skill customizes
-| Dimension | github-project-learn | domain-learn (planned) | textbook-learn (planned) |
+| Dimension | github-project-learn | domain-learn | textbook-learn |
 |-----------|----------------------|------------------------|--------------------------|
 | Source | repo / org (GitHub API) | open web (papers, blogs, repos, videos) | one book / PDF |
-| Research | README + API + diagrams | multi-source + **citation & verification** (lean on a deep-research pattern) | chapter parsing |
-| Pedagogy | understand & onboard | **roadmap: beginner → advanced → hands-on** | **course: chapters + active recall** |
-| Interactivity | TOC, zoom, glossary search | **+ runnable demos / parameter sliders** | **+ quizzes, worked examples, progress** |
+| Research | README + API + diagrams | multi-source + **citation & verification** (lean on a deep-research pattern) | **parse the book's TOC + chapters + exercises, sourced to a page** |
+| Pedagogy | understand & onboard | **roadmap: beginner → advanced → hands-on** | **course: chapter map + deep-dive chapters + active recall** |
+| Interactivity | TOC, zoom, glossary search | **+ runnable demos / parameter sliders** | **+ self-grading quizzes, worked-example reveals, localStorage progress tracker** |
+
+All three are now built — see `skills/<name>/` and a real sample under `samples/<name>/`.
 
 ## Conventions
 - **Folder**: `skills/<name>/` with `SKILL.md` + `references/` + `scripts/` + `assets/`.
