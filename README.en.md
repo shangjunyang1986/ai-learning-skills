@@ -58,7 +58,7 @@ from a real fetch.
 | Skill | Source it learns from | Status |
 |-------|----------------------|--------|
 | **[github-project-learn](skills/github-project-learn)** | A GitHub repo or a whole organization | ✅ Done |
-| **domain-learn** | An open topic researched across the web (e.g. "3DGS", "diffusion models") — a beginner→advanced→hands-on roadmap with interactive demos | 🔜 Planned |
+| **[domain-learn](skills/domain-learn)** | An open topic researched across the web (e.g. "3DGS", "diffusion models") — a beginner→advanced→hands-on roadmap with interactive demos | ✅ Done |
 | **textbook-learn** | A specific technical book / PDF — chapter by chapter, with active-recall quizzes and worked examples | 🔜 Planned |
 
 Each skill is **self-contained and individually installable** — you don't need the whole repo to use one.
@@ -132,7 +132,7 @@ truth** — improve the design system here, then re-sync into each skill. See
 ## Roadmap
 
 - [x] `github-project-learn` — repos & organizations
-- [ ] `domain-learn` — web-researched topic roadmaps with interactive demos (built on rigorous, cited research)
+- [x] `domain-learn` — web-researched topic roadmaps with interactive demos (built on rigorous, cited research) — example: [3DGS](samples/3dgs-learn/index.html)
 - [ ] `textbook-learn` — book/PDF courses with active recall
 - [ ] Extract the shared design core once the second skill confirms what's truly common
 

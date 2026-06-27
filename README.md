@@ -49,7 +49,7 @@
 | Skill | 学习的来源 | 状态 |
 |-------|-----------|------|
 | **[github-project-learn](skills/github-project-learn)** | 一个 GitHub 仓库或整个组织 | ✅ 已完成 |
-| **domain-learn** | 一个开放领域（如 “3DGS”“扩散模型”），跨网络调研成「入门→进阶→实践」路线，含可交互 demo | 🔜 规划中 |
+| **[domain-learn](skills/domain-learn)** | 一个开放领域（如 “3DGS”“扩散模型”），跨网络调研成「入门→进阶→实践」路线，含可交互 demo | ✅ 已完成 |
 | **textbook-learn** | 一本技术书 / PDF，逐章拆解，配主动回忆测验与例题精讲 | 🔜 规划中 |
 
 每个 skill **独立自包含、可单独安装**——用其中一个，不需要整个仓库。
@@ -122,7 +122,7 @@ skill。详见 [docs/adding-a-new-skill.md](docs/adding-a-new-skill.md)。
 ## 路线图
 
 - [x] `github-project-learn` —— 仓库与组织
-- [ ] `domain-learn` —— 网络调研的领域学习路线（建立在严谨、可溯源的调研之上）+ 可交互 demo
+- [x] `domain-learn` —— 网络调研的领域学习路线（建立在严谨、可溯源的调研之上）+ 可交互 demo（样例：[3DGS](samples/3dgs-learn/index.html)）
 - [ ] `textbook-learn` —— 书 / PDF 的课程化学习，含主动回忆
 - [ ] 等第二个 skill 验证了「真正共享的部分」后，再正式抽出共享内核
 

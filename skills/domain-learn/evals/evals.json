@@ -1,0 +1,21 @@
+{
+  "skill_name": "domain-learn",
+  "evals": [
+    {
+      "id": 0,
+      "name": "rag-retrieval-augmented-generation",
+      "prompt": "我想系统学习一下 RAG（检索增强生成），从入门到能动手做。帮我整理成一个方便学习、可以离线打开的页面。",
+      "expected_output": "A self-contained offline index.html for the topic RAG: a 入门→进阶→实践→前沿 learning roadmap, a sourced explanation of how RAG works (retrieve → augment → generate) written from real sources, a comparison/results section, an ecosystem table of real tools with GitHub-API stars, learning videos, a searchable glossary, and (if it fits) an interactive demo. Every load-bearing claim/link carries a source. Media downloaded into assets/.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "diffusion-models",
+      "prompt": "帮我研究下扩散模型（diffusion models）这个领域，做个从入门到实践的学习教程，最好有点能交互的东西帮助理解。",
+      "expected_output": "A self-contained offline index.html for diffusion models: learning roadmap, sourced core-principle section (forward noising / reverse denoising), an interactive demo that teaches the denoising/sampling intuition (canvas + a step or noise-level slider), results/ecosystem with real-star tools, videos, glossary. Sources cited; media downloaded locally.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}
