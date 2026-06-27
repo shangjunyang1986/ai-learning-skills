@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>3D 高斯泼溅 (3DGS) 学习手册</title>
+<style>
+  :root{
+    --bg:#0e1014; --bg2:#15181f; --panel:#1a1e27; --panel2:#202635;
+    --line:#283041; --txt:#e7e9ef; --muted:#99a2b4; --dim:#6f7a90;
+    --accent:#6c8cff; --accent2:#33e0c8; --amber:#f5b94d; --green:#46c98b; --pink:#ff7eb6;
+    --maxw:1500px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;line-height:1.7;font-size:15.5px}
+  a{color:var(--accent2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:"SF Mono",Consolas,"Fira Code",monospace;background:#0b0d12;border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:.86em;color:#ffd9a8}
+  pre{margin:0}
+  pre code{display:block;padding:16px 18px;overflow-x:auto;line-height:1.6;color:#d6deea;background:#090b10;border:0}
+  .wrap{display:flex;max-width:var(--maxw);margin:0 auto;min-height:100vh}
+  .side{width:292px;flex:0 0 292px;position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg2);border-right:1px solid var(--line);padding:26px 18px 40px}
+  .side::-webkit-scrollbar{width:8px}.side::-webkit-scrollbar-thumb{background:#2c3244;border-radius:8px}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .brand .logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#10141c;flex:0 0 40px;letter-spacing:-1px}
+  .brand h1{font-size:15.5px;margin:0;line-height:1.25}
+  .brand p{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
+  .navsec{margin-top:20px;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);padding:0 10px 6px}
+  nav a{display:flex;gap:10px;align-items:baseline;padding:8px 11px;border-radius:9px;color:var(--muted);font-size:14px;margin:2px 0;border:1px solid transparent}
+  nav a .n{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums;min-width:20px}
+  nav a:hover{background:var(--panel);color:var(--txt);text-decoration:none}
+  nav a.active{background:linear-gradient(90deg,rgba(108,140,255,.18),rgba(51,224,200,.05));color:#fff;border-color:#34406a}
+  nav a.active .n{color:var(--accent2)}
+  .sidefoot{margin-top:24px;padding:14px 11px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .sidefoot a{color:var(--muted)}
+  main{flex:1;min-width:0;padding:46px 56px 120px;max-width:1060px}
+  section{padding-top:30px;margin-top:10px;scroll-margin-top:24px}
+  section>h2{font-size:27px;margin:0 0 4px;letter-spacing:-.01em;display:flex;align-items:center;gap:12px}
+  section>h2 .kbd{font-size:13px;color:var(--accent2);background:rgba(51,224,200,.1);border:1px solid #1d5650;border-radius:7px;padding:2px 9px;font-family:monospace}
+  .lead{color:var(--muted);font-size:16px;margin:6px 0 22px;max-width:80ch}
+  h3{font-size:18px;margin:30px 0 10px;color:#fff}
+  h4{font-size:15px;margin:18px 0 8px;color:#cdd4e2}
+  p{max-width:82ch}
+  hr.div{border:0;border-top:1px solid var(--line);margin:42px 0}
+  .hero{background:radial-gradient(120% 140% at 0% 0%,rgba(108,140,255,.22),transparent 50%),radial-gradient(120% 140% at 100% 0%,rgba(51,224,200,.14),transparent 45%),var(--panel);border:1px solid var(--line);border-radius:18px;padding:30px 32px;margin-bottom:8px}
+  .hero h2{border:0;font-size:30px;margin:0 0 8px}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:120px}
+  .stat b{display:block;font-size:19px;color:#fff}
+  .stat span{font-size:12px;color:var(--muted)}
+  .grid{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1100px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .card h4{margin-top:0;display:flex;align-items:center;gap:8px}
+  .card p{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);background:var(--bg2)}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;margin:3px 5px 3px 0}
+  .pill.a{background:rgba(108,140,255,.14);color:#bcd;border:1px solid #34406a}
+  .pill.b{background:rgba(51,224,200,.12);color:#9fece0;border:1px solid #1d5650}
+  .pill.c{background:rgba(70,201,139,.12);color:#9fe9c4;border:1px solid #1f5a44}
+  .pill.d{background:rgba(245,185,77,.12);color:#f5d49a;border:1px solid #5a4a23}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}
+  tr:hover td{background:rgba(108,140,255,.04)}
+  td .s{color:var(--amber);font-variant-numeric:tabular-nums;font-weight:600}
+  figure{margin:20px 0;background:#0d0f15;border:1px solid var(--line);border-radius:13px;overflow:hidden;position:relative}
+  figure img{display:block;width:100%;height:auto;cursor:zoom-in}
+  figure figcaption{background:var(--panel);color:var(--muted);font-size:12.5px;padding:9px 14px;border-top:1px solid var(--line)}
+  figure::after{content:"🔍 点击放大";position:absolute;top:8px;right:8px;background:rgba(14,16,20,.8);color:#e7e9ef;font-size:11px;padding:3px 9px;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+  figure:hover::after{opacity:1}
+  .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:900px){.imgrow{grid-template-columns:1fr}}
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(6,7,11,.93);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;backdrop-filter:blur(3px)}
+  .lb.open{display:flex}
+  .lb img{max-width:94vw;max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .lb .cap{color:#cdd4e2;font-size:13.5px;margin-top:14px;max-width:80vw;text-align:center}
+  .lb .x{position:absolute;top:18px;right:24px;color:#fff;font-size:30px;cursor:pointer;opacity:.8}
+  .note{border-left:3px solid var(--accent);background:var(--panel);border-radius:0 11px 11px 0;padding:13px 16px;margin:16px 0;font-size:14px}
+  .note.warn{border-color:var(--amber)}.note.ok{border-color:var(--green)}
+  .note b{color:#fff}
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+  ol.steps li{position:relative;padding:0 0 4px 42px;margin-bottom:18px}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#10141c;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:#fff}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;font-family:monospace;font-size:13px}
+  .flow .node{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:#cdd4e2}
+  .flow .arr{color:var(--accent);font-size:16px}
+  .codewrap{position:relative;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:14px 0}
+  .codewrap .bar{background:var(--panel);padding:7px 13px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .copybtn{font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:3px 9px;cursor:pointer}
+  .copybtn:hover{color:#fff;border-color:var(--accent)}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:50;width:0}
+  ul.clean{list-style:none;padding:0}
+  ul.clean li{padding:6px 0 6px 24px;position:relative;border-bottom:1px solid rgba(40,48,65,.5)}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;color:var(--accent)}
+  .roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+  @media(max-width:1000px){.roadmap{grid-template-columns:1fr 1fr}}
+  .rstage{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 16px;border-top:3px solid var(--accent)}
+  .rstage:nth-child(2){border-top-color:var(--accent2)}.rstage:nth-child(3){border-top-color:var(--green)}.rstage:nth-child(4){border-top-color:var(--amber)}
+  .rstage h4{margin:0 0 8px;color:#fff}
+  .rstage ul{margin:0;padding-left:18px;font-size:13px;color:var(--muted)}
+  .rstage ul li{margin:5px 0}
+  /* video cards */
+  .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0}
+  @media(max-width:1100px){.vgrid{grid-template-columns:1fr 1fr}}@media(max-width:680px){.vgrid{grid-template-columns:1fr}}
+  .vcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;color:inherit;transition:transform .15s,border-color .15s}
+  .vcard:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
+  .vthumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:linear-gradient(135deg,#1c2740,#15323a)}
+  .vthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .vthumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px}
+  .vthumb .play{position:absolute;inset:0;margin:auto;width:50px;height:50px;border-radius:50%;background:rgba(14,16,20,.66);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.85)}
+  .vthumb .play::after{content:"";border-left:15px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
+  .vbadge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+  .vbadge.yt{background:#ff0000}.vbadge.bili{background:#fb7299}
+  .vtag{position:absolute;top:8px;right:8px;font-size:10.5px;padding:2px 8px;border-radius:20px;background:rgba(14,16,20,.78);color:#cdd4e2}
+  .vbody{padding:11px 13px}
+  .vtitle{font-size:13.5px;font-weight:600;color:#fff;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+  .vmeta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+  /* glossary */
+  .gsearch{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:12px 16px;font-size:15px;margin:8px 0 18px}
+  .gsearch:focus{outline:none;border-color:var(--accent)}
+  .gitem{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px;margin:9px 0}
+  .gitem .term{font-weight:700;color:#fff;font-size:15px}
+  .gitem .en{color:var(--accent2);font-size:12.5px;font-family:monospace;margin-left:8px}
+  .gitem .def{color:var(--muted);font-size:14px;margin-top:5px}
+  .gitem .gcat{float:right;font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+  .gnone{color:var(--dim);padding:16px 0}
+  /* interactive demo */
+  .demo{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:18px 0;display:grid;grid-template-columns:1fr 280px;gap:18px}
+  @media(max-width:860px){.demo{grid-template-columns:1fr}}
+  .demo canvas{width:100%;height:auto;border-radius:10px;background:#05070b;display:block;border:1px solid var(--line)}
+  .demo .stage{font-size:12px;color:var(--dim);margin:6px 2px 0;display:flex;justify-content:space-between}
+  .ctrl{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .ctrl label{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 5px;font-weight:600}
+  .ctrl label:first-child{margin-top:0}
+  .ctrl input[type=range]{width:100%;accent-color:var(--accent2)}
+  .ctrl .val{color:#fff;font-variant-numeric:tabular-nums}
+  .ctrl button{width:100%;margin-top:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#10141c;border:0;border-radius:9px;padding:9px;font-weight:700;cursor:pointer;font-size:13.5px}
+  .ctrl .chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--muted);cursor:pointer}
+  .ctrl .read{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .ctrl .read b{color:var(--accent2);font-variant-numeric:tabular-nums}
+  .mob{display:none}
+  @media(max-width:980px){.side{display:none}.mob{display:flex;position:sticky;top:0;z-index:40;background:var(--bg2);border-bottom:1px solid var(--line);padding:12px 18px;gap:10px;align-items:center}main{padding:24px 20px 90px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">3DGS</div>
+      <div><h1>3D 高斯泼溅 学习手册</h1><p>从入门到实践 · domain-learn 样例</p></div>
+    </div>
+    <div class="navsec">认识它</div>
+    <nav>
+      <a href="#s0"><span class="n">0</span>30 秒速览</a>
+      <a href="#s1"><span class="n">1</span>这是什么 &amp; 为什么火</a>
+      <a href="#s2"><span class="n">2</span>学习路线图</a>
+    </nav>
+    <div class="navsec">搞懂原理</div>
+    <nav>
+      <a href="#s3"><span class="n">3</span>核心原理（5 步）</a>
+      <a href="#s4"><span class="n">4</span>🎮 动手玩：2D 泼溅</a>
+      <a href="#s5"><span class="n">5</span>关键结果</a>
+    </nav>
+    <div class="navsec">动手 &amp; 前沿</div>
+    <nav>
+      <a href="#s6"><span class="n">6</span>开源生态与工具</a>
+      <a href="#s7"><span class="n">7</span>动手实践流程</a>
+      <a href="#s8"><span class="n">8</span>前沿方向</a>
+    </nav>
+    <div class="navsec">参考</div>
+    <nav>
+      <a href="#s9"><span class="n">9</span>学习视频</a>
+      <a href="#s10"><span class="n">10</span>术语表</a>
+    </nav>
+    <div class="sidefoot">
+      权威出处<br>
+      <a href="https://arxiv.org/abs/2308.04079" target="_blank">论文 arXiv:2308.04079</a><br>
+      <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/" target="_blank">官方项目页 (Inria)</a><br>
+      <a href="https://github.com/graphdeco-inria/gaussian-splatting" target="_blank">官方代码仓库</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mob"><strong>3D 高斯泼溅 学习手册</strong><span style="color:var(--muted);font-size:13px">— 屏幕较窄，目录已折叠</span></div>
+
+    <!-- 0 -->
+    <section id="s0">
+      <div class="hero">
+        <h2>3D 高斯泼溅 (3D Gaussian Splatting)</h2>
+        <p class="lead">2023 年 SIGGRAPH 横空出世、把「三维场景重建 + 实时渲染」彻底带火的方法。用一句话概括：<b>把一个场景表示成几百万个带颜色和透明度的「3D 高斯椭球」，靠光栅化把它们泼到屏幕上——又快又真。</b></p>
+        <figure style="margin:6px 0 0;background:#0d0f15"><img src="assets/gs-teaser.png" alt="3DGS teaser"><figcaption>官方 teaser：从一组照片重建出可实时自由视角漫游的高质量场景（来源：graphdeco-inria/gaussian-splatting）</figcaption></figure>
+        <div class="stats">
+          <div class="stat"><b>SIGGRAPH 2023</b><span>Kerbl et al. · Inria</span></div>
+          <div class="stat"><b>≥30 FPS @1080p</b><span>首个实时高质量辐射场</span></div>
+          <div class="stat"><b>~1000×</b><span>渲染快于 Mip-NeRF360</span></div>
+          <div class="stat"><b>显式表示</b><span>无神经网络，纯高斯</span></div>
+          <div class="stat"><b>⭐22.5k</b><span>官方实现仓库</span></div>
+        </div>
+      </div>
+      <div class="note">怎么用这份手册：<b>0→2</b> 先建立直觉、规划学习路线；<b>3→5</b> 搞懂原理（含一个<a href="#s4">能上手玩的 2D 泼溅 demo</a>）；<b>6→8</b> 动手与追前沿。所有数据/链接均来自论文、官方页与 GitHub API 真实抓取。</div>
+    </section>
+
+    <!-- 1 -->
+    <section id="s1">
+      <h2>1 · 这是什么 &amp; 为什么火</h2>
+      <p class="lead">它解决的问题叫<strong>新视角合成（Novel View Synthesis）</strong>：给一堆某场景的照片，重建出一个三维表示，让你能从<strong>没拍过的新角度</strong>把它渲染出来。</p>
+      <p>在 3DGS 之前，这个领域的王者是 <b>NeRF</b>（神经辐射场）——质量很高，但用一个神经网络逐条光线采样去渲染，<b>又慢又难实时</b>。3DGS 换了个思路：不再用神经网络隐式表示，而是把场景<strong>显式地</strong>表示成一大堆「3D 高斯椭球」，再用 GPU 光栅化飞快地渲染。结果是<strong>第一次同时拿到「高质量 + 实时 + 训练不慢」</strong>，于是迅速火遍学术界和工业界。</p>
+      <h3>和 NeRF 的关键区别</h3>
+      <table>
+        <thead><tr><th></th><th>NeRF（神经辐射场）</th><th>3DGS（高斯泼溅）</th></tr></thead>
+        <tbody>
+          <tr><td><b>场景表示</b></td><td>隐式：一个神经网络(MLP)</td><td>显式：一堆 3D 高斯椭球（无网络）</td></tr>
+          <tr><td><b>渲染方式</b></td><td>逐光线体积采样查询 MLP</td><td>投影 + 排序 + alpha 混合的光栅化</td></tr>
+          <tr><td><b>渲染速度</b></td><td>慢（Mip-NeRF360 约 0.06–0.14 FPS）</td><td><span class="s">实时（约 134 FPS）</span></td></tr>
+          <tr><td><b>训练时间</b></td><td>很长（Mip-NeRF360 约 48 小时）</td><td>分钟级（约 27–42 分钟达高质量）</td></tr>
+          <tr><td><b>可编辑性</b></td><td>较难（藏在网络权重里）</td><td>较易（每个高斯是显式图元，可增删改）</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:13px;color:var(--dim)">数据出处：论文 Table 1 / 摘要（<a href="https://arxiv.org/abs/2308.04079" target="_blank">arXiv:2308.04079</a>），详见 <a href="#s5">第 5 节</a>。</p>
+    </section>
+
+    <!-- 2 -->
+    <section id="s2">
+      <h2>2 · 学习路线图</h2>
+      <p class="lead">别一上来就啃论文。按「入门 → 进阶 → 实践 → 前沿」四段走，每段配好了对应资源（详细链接在 <a href="#s9">视频</a> 与各节里）。</p>
+      <div class="roadmap">
+        <div class="rstage"><h4>① 入门 · 建直觉</h4><ul>
+          <li>读 <a href="https://huggingface.co/blog/gaussian-splatting" target="_blank">HuggingFace 入门博客</a>（最佳第一篇）</li>
+          <li>看 Two Minute Papers 概览视频</li>
+          <li>浏览<a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/" target="_blank">官方项目页</a>的演示</li>
+          <li>玩本页 <a href="#s4">2D 泼溅 demo</a></li>
+        </ul></div>
+        <div class="rstage"><h4>② 进阶 · 懂数学</h4><ul>
+          <li>精读<a href="https://arxiv.org/abs/2308.04079" target="_blank">原论文</a></li>
+          <li><a href="https://learnopencv.com/3d-gaussian-splatting/" target="_blank">LearnOpenCV 论文精讲</a></li>
+          <li>深挖博客：球谐/协方差/投影推导</li>
+          <li>看原作者 TUM 讲座</li>
+        </ul></div>
+        <div class="rstage"><h4>③ 实践 · 跑起来</h4><ul>
+          <li>用<a href="https://github.com/graphdeco-inria/gaussian-splatting" target="_blank">官方代码</a>或 OpenSplat 训练</li>
+          <li>走 COLMAP → 训练 → 查看 全流程（<a href="#s7">第 7 节</a>）</li>
+          <li>跟 B 站「保姆教程」系列</li>
+        </ul></div>
+        <div class="rstage"><h4>④ 前沿 · 追新</h4><ul>
+          <li>读<a href="https://arxiv.org/abs/2401.03890" target="_blank">综述</a>建立全景</li>
+          <li>4D / SLAM / 提网格 / 抗锯齿（<a href="#s8">第 8 节</a>）</li>
+          <li>盯 <a href="https://github.com/MrNeRF/awesome-3D-gaussian-splatting" target="_blank">Awesome-3DGS</a> 追最新</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <hr class="div">
+
+    <!-- 3 -->
+    <section id="s3">
+      <h2>3 · 核心原理（5 步）<span class="kbd">原理</span></h2>
+      <p class="lead">3DGS 本质是「一堆可微分的高斯图元 + 一个可微分光栅化器 + 梯度下降优化」。拆成 5 步看就通了。</p>
+      <div class="flow">
+        <span class="node">照片</span><span class="arr">→</span>
+        <span class="node">① COLMAP 初始化</span><span class="arr">→</span>
+        <span class="node">③ 可微光栅化渲染</span><span class="arr">→</span>
+        <span class="node">④ 与真值比对·梯度下降</span><span class="arr">↺</span>
+        <span class="node">⑤ 自适应增删高斯</span>
+      </div>
+      <ol class="steps">
+        <li><b>场景 = 一堆 3D 各向异性高斯。</b>每个高斯椭球存四样东西：<b>位置</b>（均值 μ，椭球在哪）、<b>协方差 Σ</b>（形状朝向，写成 <code>Σ = R S Sᵀ Rᵀ</code> 即「缩放 + 旋转(四元数)」以保证是合法协方差，"各向异性"=三个轴能不等长，好贴合表面）、<b>不透明度 α</b>、<b>颜色（球谐 SH）</b>（用球谐系数表示<b>随视角变化</b>的颜色，能表现高光/反射）。</li>
+        <li><b>用 SfM / COLMAP 初始化。</b>先用运动恢复结构（COLMAP）从照片估出<b>相机位姿</b>和一团<b>稀疏点云</b>；每个点种下一个初始高斯，给优化一个靠谱的几何起点（而非乱猜）。</li>
+        <li><b>可微分的瓦片光栅化（渲染器）。</b>渲染一帧：把每个 3D 高斯的均值与协方差<b>投影成 2D 椭圆「斑点(splat)」</b>；把画面切成<b>瓦片(tile)</b>，每块内的高斯用 GPU 基数排序<b>按深度排序</b>（每帧排一次，不是每像素）；瓦片内从前到后做 <b>alpha 混合</b>得到像素颜色。整个过程<b>可微</b>，梯度能回流到每个高斯。</li>
+        <li><b>梯度下降优化。</b>渲染图和真实照片比，用 <code>L1 + D-SSIM</code> 损失；梯度更新每个高斯的位置/协方差/不透明度/颜色。优化与下一步的"增删"<b>交替进行</b>。</li>
+        <li><b>自适应密度控制（克隆 / 分裂 / 剪枝）。</b>周期性调整高斯集合：欠重建处（小高斯、梯度大）<b>克隆</b>补细节；过重建处（大高斯、梯度大）<b>分裂</b>成更小的；几乎透明的高斯<b>剪枝</b>删掉（并周期性重置不透明度清"浮点体"）。于是模型从稀疏种子长成<b>约 1–5 百万</b>个自适应高斯。</li>
+      </ol>
+      <div class="imgrow">
+        <figure style="background:#0d0f15"><img src="assets/gs-better.png" alt="3DGS quality"><figcaption>3DGS 重建细节（来源：官方仓库 assets）</figcaption></figure>
+        <figure style="background:#0d0f15"><img src="assets/gs-aa.gif" alt="anti-aliasing on/off"><figcaption>抗锯齿开/关对比（官方 GIF）——可见高斯渲染的细节表现</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- 4 interactive -->
+    <section id="s4">
+      <h2>4 · 🎮 动手玩：2D 高斯泼溅 <span class="kbd">可交互</span></h2>
+      <p class="lead">真正的 3DGS 是 3D 的，但核心直觉在 2D 上就能体会：<strong>一张图，可以用许多个带颜色、半透明、各向异性的「高斯斑点」叠加（alpha 混合）出来——斑点越多越清晰，这就是「泼溅」与「致密化」的本质。</strong>拖动滑块亲手感受：</p>
+      <div class="demo">
+        <div>
+          <canvas id="splatCanvas" width="520" height="340"></canvas>
+          <div class="stage"><span id="canvasNote">左：用 N 个高斯泼溅重建出的图　·　目标是右上角那张「真值」</span></div>
+          <canvas id="targetCanvas" width="130" height="85" style="margin-top:8px;width:130px;float:right"></canvas>
+        </div>
+        <div class="ctrl">
+          <label>高斯数量 N：<span class="val" id="nVal">300</span></label>
+          <input type="range" id="nRange" min="5" max="1500" value="300" step="5">
+          <label>高斯大小：<span class="val" id="sVal">1.0×</span></label>
+          <input type="range" id="sRange" min="40" max="260" value="100" step="5">
+          <label class="chk"><input type="checkbox" id="outlineChk"> 显示单个高斯的椭圆轮廓</label>
+          <button id="regenBtn">🎲 重新随机播撒</button>
+          <div class="read">
+            重建相似度：<b id="simVal">—</b><br>
+            <span style="font-size:12px;color:var(--dim)">N 越大越像真值；高斯越小越锐但需要更多个——这正是论文里「自适应密度控制」要自动平衡的事。</span>
+          </div>
+        </div>
+      </div>
+      <div class="note ok">观察：① 只有几十个高斯时图像很糊（欠重建）；② 加到几百上千个，细节逐渐浮现；③ 把高斯调小，需要更多个才能铺满——<b>质量、数量、单元大小三者的权衡，就是 3DGS 训练在自动求解的核心问题。</b>（这是一个教学用的 2D 简化版，真实 3DGS 还有：3D、视角相关颜色、可微优化反向传播。）</div>
+    </section>
+
+    <!-- 5 -->
+    <section id="s5">
+      <h2>5 · 关键结果</h2>
+      <p class="lead">论文在 Mip-NeRF360 等数据集上的对比（出处：<a href="https://arxiv.org/abs/2308.04079" target="_blank">论文 Table 1</a>）。一句话：<strong>质量追平甚至超过 Mip-NeRF360，渲染却快约 1000 倍。</strong></p>
+      <table>
+        <thead><tr><th>方法</th><th>渲染 FPS</th><th>训练时间</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th></tr></thead>
+        <tbody>
+          <tr><td><b>3DGS (Ours-30K)</b></td><td><span class="s">~134</span></td><td>27–42 分钟</td><td>27.21</td><td><b>0.815</b></td><td><b>0.214</b></td></tr>
+          <tr><td>Mip-NeRF360</td><td>0.06–0.14</td><td>~48 小时</td><td><b>27.69</b></td><td>0.792</td><td>0.237</td></tr>
+          <tr><td>Instant-NGP (Big)</td><td>11.7–17.1</td><td>~6 分钟</td><td>25.59</td><td>0.699</td><td>0.331</td></tr>
+          <tr><td>Plenoxels</td><td>6.8–13.0</td><td>~26 分钟</td><td>23.08</td><td>0.626</td><td>0.463</td></tr>
+        </tbody>
+      </table>
+      <div class="note">读法：PSNR 上 3DGS（27.21）略低于 Mip-NeRF360（27.69），但 <b>SSIM / LPIPS（更贴近人眼的指标）反超</b>，且渲染快约三个数量级、训练从 48 小时降到半小时级。<br><span style="font-size:12.5px;color:var(--dim)">注：官方仓库后续优化又带来约 ×1.6（默认）/ ×2.7（sparse Adam）的训练提速。</span></div>
+    </section>
+
+    <hr class="div">
+
+    <!-- 6 -->
+    <section id="s6">
+      <h2>6 · 开源生态与工具</h2>
+      <p class="lead">围绕 3DGS 已长出一整套工具链。星标/更新均为 GitHub API 真实抓取于 <b>2026-06-27</b>。按用途分四类，先看你要干嘛。</p>
+
+      <h3>① 训练 / 参考实现</h3>
+      <table>
+        <thead><tr><th>仓库</th><th>用来干嘛</th><th>语言</th><th>星标</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/graphdeco-inria/gaussian-splatting" target="_blank"><b>graphdeco-inria/gaussian-splatting</b></a></td><td>官方参考实现，理解原始方法从这开始（研究/非商业许可）</td><td>Python</td><td><span class="s">22.5k</span></td></tr>
+          <tr><td><a href="https://github.com/nerfstudio-project/nerfstudio" target="_blank">nerfstudio</a></td><td>端到端框架，内含 <code>splatfacto</code> 的清爽训练路径</td><td>Python</td><td><span class="s">11.7k</span></td></tr>
+          <tr><td><a href="https://github.com/nerfstudio-project/gsplat" target="_blank">gsplat</a></td><td>现代模块化 CUDA 光栅化库，自己搭训练器的后端（最活跃）</td><td>CUDA/Py</td><td><span class="s">5.3k</span></td></tr>
+          <tr><td><a href="https://github.com/pierotofy/OpenSplat" target="_blank">OpenSplat</a></td><td>跨平台、CPU/GPU 都能跑、依赖轻的生产级训练器</td><td>C++</td><td><span class="s">2.1k</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3>② Web / 实时查看器</h3>
+      <table>
+        <thead><tr><th>仓库</th><th>用来干嘛</th><th>语言</th><th>星标</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/playcanvas/supersplat" target="_blank"><b>playcanvas/supersplat</b></a></td><td>浏览器里的可视化<b>编辑器</b>（裁剪/清理/导出/发布），最适合非程序员</td><td>TS</td><td><span class="s">9.3k</span></td></tr>
+          <tr><td><a href="https://github.com/playcanvas/engine" target="_blank">playcanvas/engine</a></td><td>原生支持 3DGS 的 Web 引擎（WebGL/WebGPU/WebXR）</td><td>JS</td><td><span class="s">16.1k</span></td></tr>
+          <tr><td><a href="https://github.com/antimatter15/splat" target="_blank">antimatter15/splat</a></td><td>极简 WebGL 查看器，读它的代码学"泼溅怎么渲染"</td><td>JS</td><td><span class="s">3.0k</span></td></tr>
+          <tr><td><a href="https://github.com/mkkellogg/GaussianSplats3D" target="_blank">GaussianSplats3D</a></td><td>three.js 集成，把 splat 嵌进现有 three.js 场景</td><td>JS</td><td><span class="s">2.8k</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3>③ 引擎 / DCC 集成　④ 预处理</h3>
+      <div class="grid g2">
+        <div class="card"><h4>引擎集成</h4><p><b>Unity：</b><a href="https://github.com/aras-p/UnityGaussianSplatting" target="_blank">aras-p/UnityGaussianSplatting</a>（⭐3.3k，事实标准）。<b>Unreal：</b><a href="https://github.com/mlslabs/MLSLabsGaussianSplattingRenderer-UE" target="_blank">MLSLabs UE 插件</a>（含 4DGS）。<b>Blender：</b><a href="https://github.com/ReshotAI/gaussian-splatting-blender-addon" target="_blank">ReshotAI 插件</a>。</p></div>
+        <div class="card"><h4>预处理（先跑这个！）</h4><p><a href="https://github.com/colmap/colmap" target="_blank"><b>COLMAP</b></a>（⭐12k）——把你的照片/视频帧算成<b>相机位姿 + 稀疏点云</b>，几乎所有训练器都吃它的输出。</p></div>
+      </div>
+
+      <h3>不想装环境？在浏览器里直接看</h3>
+      <ul class="clean">
+        <li><a href="https://antimatter15.com/splat/" target="_blank">antimatter15.com/splat</a> —— 拖动即可环绕观察 garden/bicycle 场景</li>
+        <li><a href="https://superspl.at/" target="_blank">superspl.at</a> —— PlayCanvas SuperSplat 编辑器 + 查看器，可加载样例场景实时编辑</li>
+        <li><a href="https://github.com/MrNeRF/awesome-3D-gaussian-splatting" target="_blank">Awesome-3DGS</a>（⭐8.7k）—— 持续更新的论文/代码/工具总目录，追新看它</li>
+      </ul>
+    </section>
+
+    <!-- 7 -->
+    <section id="s7">
+      <h2>7 · 动手实践流程</h2>
+      <p class="lead">从你自己的照片/视频，到一个能在浏览器里转的 splat，标准管线长这样：</p>
+      <div class="flow">
+        <span class="node">拍照片/视频帧</span><span class="arr">→</span>
+        <span class="node">COLMAP 求位姿</span><span class="arr">→</span>
+        <span class="node">gsplat / nerfstudio / OpenSplat 训练</span><span class="arr">→</span>
+        <span class="node">SuperSplat 清理编辑</span><span class="arr">→</span>
+        <span class="node">Web 查看器展示</span>
+      </div>
+      <h3>最快上手：官方实现</h3>
+      <div class="codewrap"><div class="bar"><span>克隆官方仓库（含子模块）</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 需要 CUDA、合适的 PyTorch；建议先看仓库 README 的环境要求
+git clone https://github.com/graphdeco-inria/gaussian-splatting --recursive
+
+# 训练（DATA 是 COLMAP 处理好的数据集目录）
+python train.py -s &lt;DATA&gt;
+
+# 实时查看（仓库提供 SIBR 查看器）
+# 也可把导出的 .ply 拖进 https://superspl.at/ 在浏览器里看</code></pre></div>
+      <ul class="clean">
+        <li>新手友好替代：<a href="https://github.com/pierotofy/OpenSplat" target="_blank">OpenSplat</a>（跨平台、能用 CPU 兜底）或 <a href="https://github.com/nerfstudio-project/nerfstudio" target="_blank">nerfstudio</a> 的 <code>splatfacto</code></li>
+        <li>实操教程：<a href="https://learnopencv.com/3d-gaussian-splatting/" target="_blank">LearnOpenCV（含 NeRFStudio 训练）</a>；中文见 <a href="#s9">第 9 节</a> 的 B 站「保姆教程」</li>
+        <li>许可证注意：Inria 官方实现与部分研究分支是<b>研究/非商业</b>；要做产品看 gsplat(Apache-2.0)、OpenSplat(AGPL)、PlayCanvas 系。</li>
+      </ul>
+      <div class="note warn">这页是<b>学习样例</b>，未在本机真正训练（需要 GPU + COLMAP，较重）。真要跑时，先按官方 README 配 CUDA/PyTorch 环境，再用一个小数据集（如官方 T&amp;T+DB）跑通 7K 迭代验证。</div>
+    </section>
+
+    <!-- 8 -->
+    <section id="s8">
+      <h2>8 · 前沿方向</h2>
+      <p class="lead">原论文之后，3DGS 迅速长出一片生态。几个有代表性、可溯源的方向：</p>
+      <div class="grid g2">
+        <div class="card"><h4>🎞️ 动态 / 4D</h4><p><a href="https://arxiv.org/abs/2310.08528" target="_blank">4D Gaussian Splatting</a>（CVPR 2024）——把高斯扩展到时间维做动态场景，报告 RTX 3090 上 800×800 约 70 FPS。</p></div>
+        <div class="card"><h4>🗺️ SLAM</h4><p><a href="https://openaccess.thecvf.com/content/CVPR2024/html/Keetha_SplaTAM_Splat_Track__Map_3D_Gaussians_for_Dense_RGB-D_CVPR_2024_paper.html" target="_blank">SplaTAM</a> / <a href="https://openaccess.thecvf.com/content/CVPR2024/html/Matsuki_Gaussian_Splatting_SLAM_CVPR_2024_paper.html" target="_blank">Gaussian Splatting SLAM</a>（CVPR 2024）——用显式高斯做稠密 RGB-D 实时定位与建图。</p></div>
+        <div class="card"><h4>📐 提网格</h4><p><a href="https://arxiv.org/abs/2311.12775" target="_blank">SuGaR</a>（CVPR 2024）——约束高斯贴合表面，再几分钟内抽出可编辑的三角网格。</p></div>
+        <div class="card"><h4>🔍 抗锯齿</h4><p><a href="https://github.com/autonomousvision/mip-splatting" target="_blank">Mip-Splatting</a>（CVPR 2024 最佳学生论文）——加 3D 平滑 + 2D Mip 滤波，消除缩放时的锯齿/伪影。</p></div>
+      </div>
+      <p style="margin-top:14px">想系统追踪：读<a href="https://arxiv.org/abs/2401.03890" target="_blank">综述</a>，再盯 <a href="https://github.com/MrNeRF/awesome-3D-gaussian-splatting" target="_blank">Awesome-3DGS</a>。</p>
+    </section>
+
+    <hr class="div">
+
+    <!-- 9 -->
+    <section id="s9">
+      <h2>9 · 学习视频</h2>
+      <p class="lead">YouTube（英文，封面已下载到本地）+ Bilibili（中文，链接）。封面来自官方缩略图。</p>
+      <h3>英文（YouTube）</h3>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.youtube.com/watch?v=TLK3TDDcJFU" target="_blank">
+          <div class="vthumb"><img src="assets/vid-2mp.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">入门概览</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">NVIDIA's Rendering, But 10X Faster! (3D Gaussian Splatting)</div><div class="vmeta"><span>Two Minute Papers</span><span>2 分钟速览</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=sQcrZHvrEnU" target="_blank">
+          <div class="vthumb"><img src="assets/vid-explained.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">概念讲解</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">3D Gaussian Splatting - Explained!</div><div class="vmeta"><span>概念讲解</span><span>入门→进阶</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=DjOqkVIlEGY" target="_blank">
+          <div class="vthumb"><img src="assets/vid-tum-talk.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">原作者讲座</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">The 3D Gaussian Splatting Adventure（George Drettakis · TUM AI 讲座）</div><div class="vmeta"><span>原作者</span><span>进阶</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=UXtuigy_wYc" target="_blank">
+          <div class="vthumb"><img src="assets/vid-windows.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">实操</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">Getting Started With 3D Gaussian Splatting for Windows（入门实操）</div><div class="vmeta"><span>动手训练</span><span>实践</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=9p_i9nKZA4Q" target="_blank">
+          <div class="vthumb"><img src="assets/vid-start2025.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">工具选型</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">Where to start with 3D Gaussian Splatting</div><div class="vmeta"><span>工具landscape</span><span>入门</span></div></div>
+        </a>
+      </div>
+      <h3>中文（Bilibili）</h3>
+      <p style="font-size:13px;color:var(--dim);margin-top:-6px">说明：本环境无法直连 B 站抓封面，下面是搜索得到的真实链接（点开即看）。「保姆教程」3DGS_01/02/03 是较成体系的入门→实操中文路径。</p>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.bilibili.com/video/BV1Gu3uztECe/" target="_blank">
+          <div class="vthumb"><span class="ph">🎓</span><span class="vbadge bili">B站</span><span class="vtag">保姆教程 01</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">3DGS_01 本地训练环境搭建 · 高斯泼溅保姆教程</div><div class="vmeta"><span>环境搭建</span><span>实践</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.bilibili.com/video/BV1GT3uzfEdd/" target="_blank">
+          <div class="vthumb"><span class="ph">🎬</span><span class="vbadge bili">B站</span><span class="vtag">保姆教程 02</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">3DGS_02 数据准备和本地训练全流程</div><div class="vmeta"><span>训练全流程</span><span>实践</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.bilibili.com/video/BV1qGoqYUEWV/" target="_blank">
+          <div class="vthumb"><span class="ph">⚡</span><span class="vbadge bili">B站</span><span class="vtag">快速入门</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">3D 高斯泼溅 Windows 安装教程（快速入门版）</div><div class="vmeta"><span>安装入门</span><span>入门</span></div></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 10 glossary -->
+    <section id="s10">
+      <h2>10 · 术语表 <span class="kbd">可搜索</span></h2>
+      <p class="lead">3DGS 黑话不少，这里按本页用到的词收录，输入关键词即时过滤（中英文都行）。</p>
+      <input class="gsearch" id="gsearch" type="text" placeholder="🔎 搜索术语，如 NeRF / 协方差 / 球谐 / COLMAP ..." autocomplete="off">
+      <div id="glist"></div>
+      <p class="gnone" id="gnone" style="display:none">没有匹配的术语。</p>
+    </section>
+
+    <div style="margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:13px">
+      本手册由公开资料整理（论文 / 官方页 / GitHub API），用于学习；技术细节以 <a href="https://arxiv.org/abs/2308.04079" target="_blank">原论文</a> 为准。这是 <code>ai-learning-skills</code> 家族中 <b>domain-learn</b> 方向的样例：把一个开放领域调研整理成可离线学习页，并配可交互 demo。
+    </div>
+  </main>
+</div>
+
+<div class="lb" id="lb"><span class="x" id="lbx">&times;</span><img id="lbimg" src="" alt=""><div class="cap" id="lbcap"></div></div>
+
+<script>
+  // progress + scroll-spy
+  const prog=document.getElementById('progress');
+  const links=[...document.querySelectorAll('nav a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  function onScroll(){const h=document.documentElement;prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';let idx=0;for(let i=0;i<secs.length;i++){if(secs[i]&&secs[i].getBoundingClientRect().top<=120)idx=i;}links.forEach((a,i)=>a.classList.toggle('active',i===idx));}
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  // copy
+  function cp(btn){const code=btn.closest('.codewrap').querySelector('code').innerText;navigator.clipboard.writeText(code).then(()=>{const t=btn.textContent;btn.textContent='已复制 ✓';setTimeout(()=>btn.textContent=t,1400)});}
+  window.cp=cp;
+  // lightbox
+  const lb=document.getElementById('lb'),lbimg=document.getElementById('lbimg'),lbcap=document.getElementById('lbcap');
+  document.querySelectorAll('figure img').forEach(img=>img.addEventListener('click',e=>{e.stopPropagation();lbimg.src=img.src;const fc=img.closest('figure').querySelector('figcaption');lbcap.textContent=fc?fc.textContent:'';lb.classList.add('open');}));
+  function closeLb(){lb.classList.remove('open');}
+  lb.addEventListener('click',closeLb);document.getElementById('lbx').addEventListener('click',closeLb);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
+
+  // ---------- 2D Gaussian Splatting playground ----------
+  (function(){
+    const disp=document.getElementById('splatCanvas'), dctx=disp.getContext('2d');
+    const tgt=document.getElementById('targetCanvas'), tctx=tgt.getContext('2d');
+    const W=disp.width,H=disp.height;
+    // build a procedural "ground truth" scene on an offscreen canvas at full res
+    const off=document.createElement('canvas');off.width=W;off.height=H;const octx=off.getContext('2d');
+    function buildTarget(){
+      const g=octx.createLinearGradient(0,0,W,H);
+      g.addColorStop(0,'#1b3a6b');g.addColorStop(0.5,'#6b3f86');g.addColorStop(1,'#c2553f');
+      octx.fillStyle=g;octx.fillRect(0,0,W,H);
+      // sun
+      const sun=octx.createRadialGradient(W*0.74,H*0.3,5,W*0.74,H*0.3,90);
+      sun.addColorStop(0,'#ffe9a8');sun.addColorStop(1,'rgba(255,233,168,0)');
+      octx.fillStyle=sun;octx.fillRect(0,0,W,H);
+      // blobs
+      const blobs=[['#2bd6a8',0.22,0.72,70],['#ff7eb6',0.45,0.6,55],['#7cc4ff',0.6,0.8,60],['#ffd34d',0.32,0.42,38]];
+      blobs.forEach(b=>{const rg=octx.createRadialGradient(W*b[1],H*b[2],2,W*b[1],H*b[2],b[3]);rg.addColorStop(0,b[0]);rg.addColorStop(1,'rgba(0,0,0,0)');octx.fillStyle=rg;octx.fillRect(0,0,W,H);});
+      // hill
+      octx.fillStyle='rgba(20,28,20,0.55)';octx.beginPath();octx.moveTo(0,H);octx.quadraticCurveTo(W*0.5,H*0.62,W,H*0.9);octx.lineTo(W,H);octx.closePath();octx.fill();
+      // draw downscaled preview into the little target canvas
+      tctx.drawImage(off,0,0,tgt.width,tgt.height);
+    }
+    const tdata=()=>octx.getImageData(0,0,W,H).data;
+    let TD=null;
+    // simple seeded RNG
+    let seed=12345; function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
+    let points=[];
+    function regen(){seed=(Math.floor((performance.now?performance.now():0))%100000)+7;points=[];}
+    function sampleColor(x,y){const xi=Math.max(0,Math.min(W-1,x|0)),yi=Math.max(0,Math.min(H-1,y|0));const i=(yi*W+xi)*4;return [TD[i],TD[i+1],TD[i+2]];}
+    function render(){
+      const N=+document.getElementById('nRange').value;
+      const sizeScale=(+document.getElementById('sRange').value)/100;
+      const outline=document.getElementById('outlineChk').checked;
+      // (re)build point set deterministically from seed up to N
+      seed=98765+ (regenSeed||0);
+      const base=Math.sqrt((W*H)/N)*0.95*sizeScale;
+      dctx.clearRect(0,0,W,H);dctx.fillStyle='#05070b';dctx.fillRect(0,0,W,H);
+      dctx.globalCompositeOperation='source-over';
+      for(let k=0;k<N;k++){
+        const x=rnd()*W, y=rnd()*H;
+        const c=sampleColor(x,y);
+        const aspect=0.55+rnd()*1.1, rot=rnd()*Math.PI;
+        const rx=base*aspect, ry=base/aspect;
+        dctx.save();dctx.translate(x,y);dctx.rotate(rot);dctx.scale(rx,ry);
+        const g=dctx.createRadialGradient(0,0,0,0,0,1);
+        g.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+',0.85)');
+        g.addColorStop(1,'rgba('+c[0]+','+c[1]+','+c[2]+',0)');
+        dctx.globalAlpha=0.75;dctx.fillStyle=g;dctx.beginPath();dctx.arc(0,0,1,0,6.2832);dctx.fill();
+        dctx.restore();
+        if(outline){dctx.save();dctx.translate(x,y);dctx.rotate(rot);dctx.scale(rx,ry);dctx.globalAlpha=0.5;dctx.strokeStyle='rgba(255,255,255,0.5)';dctx.lineWidth=1/Math.max(rx,ry);dctx.beginPath();dctx.arc(0,0,1,0,6.2832);dctx.stroke();dctx.restore();}
+      }
+      // similarity
+      const dd=dctx.getImageData(0,0,W,H).data;let diff=0;const step=4*37;
+      for(let i=0;i<dd.length;i+=step){diff+=Math.abs(dd[i]-TD[i])+Math.abs(dd[i+1]-TD[i+1])+Math.abs(dd[i+2]-TD[i+2]);}
+      const samples=Math.ceil(dd.length/step);const sim=Math.max(0,100-(diff/samples/3)/2.55*1.6);
+      document.getElementById('simVal').textContent=sim.toFixed(1)+'%';
+      document.getElementById('nVal').textContent=N;
+      document.getElementById('sVal').textContent=sizeScale.toFixed(2)+'×';
+    }
+    let regenSeed=0;
+    document.getElementById('nRange').addEventListener('input',render);
+    document.getElementById('sRange').addEventListener('input',render);
+    document.getElementById('outlineChk').addEventListener('change',render);
+    document.getElementById('regenBtn').addEventListener('click',()=>{regenSeed=(regenSeed+1373)%100000;render();});
+    buildTarget();TD=tdata();render();
+  })();
+
+  // ---------- glossary ----------
+  const GLOSSARY=[
+    {t:"3DGS",en:"3D Gaussian Splatting",c:"核心",d:"用一大堆 3D 高斯椭球显式表示场景、靠光栅化实时渲染的新视角合成方法（SIGGRAPH 2023）。"},
+    {t:"新视角合成",en:"Novel View Synthesis",c:"任务",d:"给定若干张照片，重建场景并从没拍过的新相机角度渲染出图像。3DGS 要解决的核心任务。"},
+    {t:"辐射场",en:"Radiance Field",c:"概念",d:"描述空间中每点向各方向发出的颜色与密度的函数。NeRF 用网络表示它，3DGS 用高斯集合表示它。"},
+    {t:"NeRF",en:"Neural Radiance Fields",c:"对比",d:"3DGS 之前的主流：用神经网络隐式表示辐射场，逐光线采样渲染，质量高但慢。"},
+    {t:"高斯泼溅",en:"Splatting",c:"核心",d:"把一个 3D 高斯投影成 2D 椭圆斑点「泼」到图像平面再混合的渲染方式，相对体积渲染极快。"},
+    {t:"各向异性",en:"Anisotropic",c:"原理",d:"高斯椭球三个轴长度可以不同，能拉伸贴合表面/边缘，比各向同性(圆球)表达力强。"},
+    {t:"协方差矩阵",en:"Covariance Σ",c:"原理",d:"决定高斯椭球的形状与朝向。为保证优化中合法，参数化为 Σ=RSSᵀRᵀ（旋转+缩放）。"},
+    {t:"球谐函数",en:"Spherical Harmonics (SH)",c:"原理",d:"一组球面上的基函数，用来表示高斯<b>随视角变化</b>的颜色，从而表现高光、反射等效果。"},
+    {t:"Alpha 混合",en:"Alpha Blending",c:"原理",d:"按深度从前到后把半透明高斯的颜色加权叠加成最终像素，3DGS 渲染的合成步骤。"},
+    {t:"光栅化",en:"Rasterization",c:"原理",d:"把几何图元直接画到像素网格的渲染范式（GPU 强项）。3DGS 用可微的瓦片光栅化器。"},
+    {t:"瓦片",en:"Tile",c:"原理",d:"把图像切成的小方块。3DGS 按瓦片对高斯排序与混合，提升 GPU 并行效率。"},
+    {t:"SfM",en:"Structure-from-Motion",c:"流程",d:"运动恢复结构：从多张照片同时估出相机位姿和稀疏三维点云。3DGS 的初始化来源。"},
+    {t:"COLMAP",en:"",c:"流程",d:"最常用的开源 SfM/MVS 工具，几乎所有 3DGS 训练器都吃它输出的位姿+点云。先跑它。"},
+    {t:"自适应密度控制",en:"Adaptive Density Control",c:"原理",d:"训练中周期性<b>克隆/分裂/剪枝</b>高斯：欠重建处加点、过大处分裂、近透明处删除。也叫致密化(densification)。"},
+    {t:"浮点体",en:"Floaters",c:"原理",d:"漂浮在空中的错误高斯/伪影。通过周期性重置不透明度并剪枝来清除。"},
+    {t:"PSNR",en:"Peak Signal-to-Noise Ratio",c:"指标",d:"峰值信噪比，衡量重建图与真值的逐像素差异，越高越好。"},
+    {t:"SSIM",en:"Structural Similarity",c:"指标",d:"结构相似度，更贴近人眼对结构的感知，越高越好。3DGS 在此超过 Mip-NeRF360。"},
+    {t:"LPIPS",en:"Learned Perceptual Image Patch Similarity",c:"指标",d:"基于深度特征的感知相似度，越低越好，常被认为最贴近人眼判断。"},
+    {t:"Mip-NeRF360",en:"",c:"对比",d:"3DGS 之前的高质量 NeRF 代表，质量强但训练约 48 小时、渲染极慢，是论文主要对比对象。"},
+    {t:"Instant-NGP",en:"",c:"对比",d:"用哈希编码大幅加速 NeRF 训练的代表作；3DGS 在质量与渲染速度上进一步超越它。"},
+    {t:".ply / .splat",en:"",c:"格式",d:"存储训练好的高斯集合的常见文件格式，可拖进 Web 查看器(如 SuperSplat)直接观看。"},
+    {t:"4DGS",en:"4D Gaussian Splatting",c:"前沿",d:"把 3DGS 扩展到时间维，表示并实时渲染<b>动态</b>场景（CVPR 2024）。"},
+    {t:"SuGaR",en:"Surface-Aligned GS",c:"前沿",d:"约束高斯贴合表面，从而能从 3DGS 快速抽出可编辑的三角网格(mesh)。"},
+    {t:"Mip-Splatting",en:"",c:"前沿",d:"给 3DGS 加抗锯齿(3D 平滑 + 2D Mip 滤波)，消除缩放时的伪影，CVPR 2024 最佳学生论文。"}
+  ];
+  const glist=document.getElementById('glist'),gnone=document.getElementById('gnone'),gsearch=document.getElementById('gsearch');
+  function renderG(q){q=(q||'').trim().toLowerCase();let n=0,html='';GLOSSARY.forEach(g=>{const hay=(g.t+' '+g.en+' '+g.d+' '+g.c).toLowerCase();if(q&&!hay.includes(q))return;n++;html+=`<div class="gitem"><span class="gcat">${g.c}</span><span class="term">${g.t}</span>${g.en?`<span class="en">${g.en}</span>`:''}<div class="def">${g.d}</div></div>`;});glist.innerHTML=html;gnone.style.display=n?'none':'block';}
+  renderG('');gsearch.addEventListener('input',e=>renderG(e.target.value));
+</script>
+</body>
+</html>
