@@ -78,6 +78,8 @@ How complete is org mode? Here's the QwenLM page **scrolled top to bottom** — 
 
 Built into every page: sticky TOC with scroll-spy, click-to-zoom on images, copy buttons on code, and a searchable glossary.
 
+Want to see real output right now? [`samples/`](samples/) has complete, offline-openable examples (just double-click `index.html`).
+
 ## What the output looks like
 
 A folder with no build step, no server, fully offline:
