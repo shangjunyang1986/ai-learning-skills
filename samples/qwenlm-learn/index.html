@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Qwen (通义千问) 学习手册 · 重点：Qwen-Agent</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#161922; --panel:#1b1f2a; --panel2:#212636;
+    --line:#2a3042; --txt:#e6e8ee; --muted:#9aa3b5; --dim:#717b90;
+    --accent:#7c5cff; --accent2:#22d3ee; --amber:#f5b94d; --green:#46c98b; --pink:#ff7eb6;
+    --maxw:1500px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:15.5px;
+  }
+  a{color:var(--accent2); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:"SF Mono",Consolas,"Fira Code",monospace; background:#0c0e14; border:1px solid var(--line); padding:1px 6px; border-radius:5px; font-size:.86em; color:#ffd9a8}
+  pre{margin:0}
+  pre code{display:block; padding:16px 18px; overflow-x:auto; line-height:1.6; color:#d6deea; background:#0a0c12}
+
+  /* layout */
+  .wrap{display:flex; max-width:var(--maxw); margin:0 auto; min-height:100vh}
+  /* sidebar */
+  .side{
+    width:288px; flex:0 0 288px; position:sticky; top:0; height:100vh; overflow-y:auto;
+    background:var(--bg2); border-right:1px solid var(--line); padding:26px 18px 40px;
+  }
+  .side::-webkit-scrollbar{width:8px}
+  .side::-webkit-scrollbar-thumb{background:#2c3244; border-radius:8px}
+  .brand{display:flex; align-items:center; gap:11px; margin-bottom:6px}
+  .brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex:0 0 38px}
+  .brand h1{font-size:16px;margin:0;line-height:1.25}
+  .brand p{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
+  .navsec{margin-top:22px; font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--dim); padding:0 10px 6px}
+  nav a{
+    display:flex; gap:10px; align-items:baseline; padding:8px 11px; border-radius:9px;
+    color:var(--muted); font-size:14px; margin:2px 0; border:1px solid transparent;
+  }
+  nav a .n{color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; min-width:22px}
+  nav a:hover{background:var(--panel); color:var(--txt); text-decoration:none}
+  nav a.active{background:linear-gradient(90deg,rgba(124,92,255,.18),rgba(34,211,238,.06)); color:#fff; border-color:#3a3560}
+  nav a.active .n{color:var(--accent2)}
+  .sidefoot{margin-top:26px;padding:14px 11px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .sidefoot a{color:var(--muted)}
+
+  /* content */
+  main{flex:1; min-width:0; padding:46px 56px 120px; max-width:1040px}
+  section{padding-top:30px; margin-top:10px; scroll-margin-top:24px}
+  section > h2{
+    font-size:27px; margin:0 0 4px; letter-spacing:-.01em; display:flex; align-items:center; gap:12px;
+  }
+  section > h2 .kbd{font-size:13px;color:var(--accent2);background:rgba(34,211,238,.1);border:1px solid #244b55;border-radius:7px;padding:2px 9px;font-family:monospace}
+  .lead{color:var(--muted); font-size:16px; margin:6px 0 22px; max-width:80ch}
+  h3{font-size:18px;margin:30px 0 10px;color:#fff}
+  h4{font-size:15px;margin:20px 0 8px;color:#cdd4e2}
+  p{max-width:80ch}
+  hr.div{border:0;border-top:1px solid var(--line);margin:42px 0}
+
+  /* hero */
+  .hero{
+    background:radial-gradient(120% 140% at 0% 0%,rgba(124,92,255,.22),transparent 50%),radial-gradient(120% 140% at 100% 0%,rgba(34,211,238,.14),transparent 45%),var(--panel);
+    border:1px solid var(--line); border-radius:18px; padding:30px 32px; margin-bottom:8px;
+  }
+  .hero h2{border:0;font-size:30px;margin:0 0 8px}
+  .hero .lead{margin-bottom:18px}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:120px}
+  .stat b{display:block;font-size:21px;color:#fff;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  /* cards / grid */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1100px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .card h4{margin-top:0;display:flex;align-items:center;gap:8px}
+  .card p{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);background:var(--bg2)}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;margin:3px 5px 3px 0}
+  .pill.a{background:rgba(124,92,255,.14);color:#c3b4ff;border:1px solid #3a3560}
+  .pill.b{background:rgba(34,211,238,.12);color:#9fe9f5;border:1px solid #1f5562}
+  .pill.c{background:rgba(70,201,139,.12);color:#9fe9c4;border:1px solid #1f5a44}
+  .pill.d{background:rgba(245,185,77,.12);color:#f5d49a;border:1px solid #5a4a23}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}
+  tr:hover td{background:rgba(124,92,255,.04)}
+  td .s{color:var(--amber);font-variant-numeric:tabular-nums;font-weight:600}
+
+  /* figure */
+  figure{margin:20px 0;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;position:relative}
+  figure img{display:block;width:100%;height:auto;cursor:zoom-in}
+  figure::after{content:"🔍 点击放大";position:absolute;top:8px;right:8px;background:rgba(15,17,23,.78);color:#e6e8ee;font-size:11px;padding:3px 9px;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+  figure:hover::after{opacity:1}
+  /* lightbox */
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(6,7,11,.92);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;backdrop-filter:blur(3px)}
+  .lb.open{display:flex}
+  .lb img{max-width:94vw;max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6);cursor:default;animation:lbin .18s ease}
+  @keyframes lbin{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .lb .cap{color:#cdd4e2;font-size:13.5px;margin-top:14px;max-width:80vw;text-align:center}
+  .lb .x{position:absolute;top:18px;right:24px;color:#fff;font-size:30px;line-height:1;cursor:pointer;opacity:.8}
+  .lb .x:hover{opacity:1}
+  .lb .hint{position:absolute;bottom:18px;color:var(--dim);font-size:12px}
+  figure figcaption{background:var(--panel);color:var(--muted);font-size:12.5px;padding:9px 14px;border-top:1px solid var(--line)}
+  .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:900px){.imgrow{grid-template-columns:1fr}}
+
+  /* callout */
+  .note{border-left:3px solid var(--accent);background:var(--panel);border-radius:0 11px 11px 0;padding:13px 16px;margin:16px 0;font-size:14px}
+  .note.warn{border-color:var(--amber)}
+  .note.ok{border-color:var(--green)}
+  .note b{color:#fff}
+
+  /* steps */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+  ol.steps li{position:relative;padding:0 0 4px 40px;margin-bottom:18px}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:#fff}
+
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;font-family:monospace;font-size:13px}
+  .flow .node{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:#cdd4e2}
+  .flow .arr{color:var(--accent);font-size:16px}
+  .flow .loop{background:#0a0c12;color:#f5d49a;border:1px solid #5a4a23}
+
+  .copybtn{float:right;font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:3px 9px;cursor:pointer;margin:-2px 0 6px}
+  .copybtn:hover{color:#fff;border-color:var(--accent)}
+  .codewrap{position:relative;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:14px 0}
+  .codewrap .bar{background:var(--panel);padding:7px 13px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:50;width:0}
+  .todo{color:var(--amber)}
+  ul.clean{list-style:none;padding:0}
+  ul.clean li{padding:6px 0 6px 24px;position:relative;border-bottom:1px solid rgba(42,48,66,.5)}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;color:var(--accent)}
+  /* language bar */
+  .langbar{display:flex;height:16px;border-radius:8px;overflow:hidden;border:1px solid var(--line);margin:10px 0}
+  .langbar span{height:100%}
+  .langleg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin:6px 0 4px}
+  .langleg b{color:#fff;font-variant-numeric:tabular-nums}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  /* video cards */
+  .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0}
+  @media(max-width:1100px){.vgrid{grid-template-columns:1fr 1fr}}
+  @media(max-width:680px){.vgrid{grid-template-columns:1fr}}
+  .vcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;color:inherit;transition:transform .15s,border-color .15s}
+  .vcard:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
+  .vthumb{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0d0f16}
+  .vthumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+  .vcard:hover .vthumb img{transform:scale(1.05)}
+  .vthumb .play{position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;background:rgba(15,17,23,.66);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.85)}
+  .vthumb .play::after{content:"";border-left:16px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:4px}
+  .vbadge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+  .vbadge.bili{background:#fb7299}
+  .vbadge.yt{background:#ff0000}
+  .vtag{position:absolute;top:8px;right:8px;font-size:10.5px;padding:2px 8px;border-radius:20px;background:rgba(15,17,23,.78);color:#cdd4e2}
+  .vbody{padding:11px 13px}
+  .vtitle{font-size:13.5px;font-weight:600;color:#fff;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+  .vmeta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+  /* glossary */
+  .gsearch{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:12px 16px;font-size:15px;margin:8px 0 18px}
+  .gsearch:focus{outline:none;border-color:var(--accent)}
+  .gitem{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px;margin:9px 0}
+  .gitem .term{font-weight:700;color:#fff;font-size:15px}
+  .gitem .en{color:var(--accent2);font-size:12.5px;font-family:monospace;margin-left:8px}
+  .gitem .def{color:var(--muted);font-size:14px;margin-top:5px}
+  .gitem .gcat{float:right;font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+  .gnone{color:var(--dim);padding:16px 0}
+  .freshness{font-size:12px;font-variant-numeric:tabular-nums}
+  .fresh-hot{color:var(--green)} .fresh-mid{color:var(--amber)} .fresh-old{color:var(--pink)}
+  /* per-repo profile */
+  .profile{display:grid;grid-template-columns:300px 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:16px 0}
+  @media(max-width:820px){.profile{grid-template-columns:1fr}}
+  .profile .pimg{background:#0d0f16;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--line)}
+  @media(max-width:820px){.profile .pimg{border-right:0;border-bottom:1px solid var(--line)}}
+  .profile .pimg img{width:100%;height:100%;max-height:230px;object-fit:cover;display:block;cursor:zoom-in}
+  .profile .pbody{padding:16px 20px}
+  .profile h4{margin:0 0 2px;font-size:17px;color:#fff;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .profile .meta{font-size:12.5px;color:var(--dim);margin:4px 0 10px;display:flex;gap:14px;flex-wrap:wrap}
+  .profile .meta .s{color:var(--amber);font-weight:600}
+  .profile .row{font-size:13.5px;color:var(--muted);margin:7px 0}
+  .profile .row b{color:#cdd4e2}
+  .mob{display:none}
+  @media(max-width:980px){
+    .side{display:none}
+    .mob{display:flex;position:sticky;top:0;z-index:40;background:var(--bg2);border-bottom:1px solid var(--line);padding:12px 18px;gap:10px;align-items:center}
+    main{padding:24px 20px 90px}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">Qw</div>
+      <div><h1>Qwen 通义千问 学习手册</h1><p>阿里云开源 AI 模型全家桶 · 重点拆解 Qwen-Agent</p></div>
+    </div>
+
+    <div class="navsec">组织全景</div>
+    <nav id="nav">
+      <a href="#s0"><span class="n">0</span>30 秒速览</a>
+      <a href="#s1"><span class="n">1</span>Qwen 是什么</a>
+      <a href="#s2"><span class="n">2</span>项目全景地图 · 选型</a>
+      <a href="#s2b"><span class="n">2b</span>重点仓库详解（8 个）</a>
+    </nav>
+    <div class="navsec">Qwen-Agent 深入</div>
+    <nav id="nav2">
+      <a href="#s3"><span class="n">3</span>这是什么</a>
+      <a href="#s4"><span class="n">4</span>面向领域 &amp; 亮点</a>
+      <a href="#s5"><span class="n">5</span>架构组成</a>
+      <a href="#s6"><span class="n">6</span>技术原理</a>
+      <a href="#s6b"><span class="n">6b</span>代码结构与技术栈</a>
+      <a href="#s7"><span class="n">7</span>怎么部署使用</a>
+      <a href="#s8"><span class="n">8</span>我的实操记录</a>
+    </nav>
+    <div class="navsec">扩展 &amp; 参考</div>
+    <nav id="nav3">
+      <a href="#s9"><span class="n">9</span>相关 GitHub 项目</a>
+      <a href="#s11"><span class="n">10</span>学习视频</a>
+      <a href="#s10"><span class="n">11</span>术语表</a>
+    </nav>
+
+    <div class="sidefoot">
+      官方资源<br>
+      <a href="https://github.com/QwenLM" target="_blank">GitHub 组织</a> ·
+      <a href="https://qwen.ai" target="_blank">官网 qwen.ai</a><br>
+      <a href="https://chat.qwen.ai" target="_blank">Qwen Chat</a> ·
+      <a href="https://huggingface.co/Qwen" target="_blank">Hugging Face</a> ·
+      <a href="https://qwenlm.github.io/" target="_blank">Blog</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mob"><strong>Qwen 学习手册</strong><span style="color:var(--muted);font-size:13px">— 屏幕较窄，目录已折叠，向下滚动阅读</span></div>
+
+    <!-- ===== 0 ===== -->
+    <section id="s0">
+      <div class="hero">
+        <h2>Qwen（通义千问）学习手册</h2>
+        <p class="lead">阿里云开源 AI 模型「全家桶」的全景导览：47 个公开仓库横跨<b>语言 / 代码 / 视觉 / 语音 / 图像 / 智能体</b>。本手册先帮你看懂「他们都做了什么、各仓库啥关系、该先学哪个」，再挑出最适合上手做应用的 <b>Qwen-Agent</b> 框架逐层拆解到「在本机跑起来」。</p>
+        <figure style="margin:0 0 6px;background:#0d0f16"><img src="assets/qwen-logo.png" alt="Qwen logo" /></figure>
+        <div class="stats">
+          <div class="stat"><b>47</b><span>组织公开仓库</span></div>
+          <div class="stat"><b>⭐27.3k</b><span>旗舰 Qwen3（模型）</span></div>
+          <div class="stat"><b>⭐25.6k</b><span>qwen-code（终端编程）</span></div>
+          <div class="stat"><b>⭐16.6k</b><span>Qwen-Agent（本手册重点）</span></div>
+          <div class="stat"><b>Apache-2.0</b><span>多数仓库许可证</span></div>
+        </div>
+      </div>
+      <div class="note">阅读建议：<b>0→2b</b> 帮你判断「Qwen 各项目啥关系、先学哪个」；<b>3→8</b> 是对 Qwen-Agent 的深入。星标 / 更新日期均为 <b>GitHub API 实抓于 2026-06-27</b> 的真实数据。</div>
+    </section>
+
+    <!-- ===== 1 ===== -->
+    <section id="s1">
+      <h2>1 · Qwen 是什么</h2>
+      <p class="lead">一句话：<strong>阿里云的通用 AI 模型团队（GitHub 组织名 Qwen / QwenLM）</strong>，把自家「通义千问」系列模型及其周边工具<strong>大规模开源</strong>，覆盖从基础大模型到上层应用的整条栈。</p>
+      <p>组织官方简介就是 “Alibaba Cloud's general-purpose AI models”。它的打法是<strong>「开源模型 + 开源用法」</strong>：既放出模型权重（在 Hugging Face / ModelScope），也在 GitHub 放出<strong>用这些模型的代码</strong>——推理示例、智能体框架、终端编程工具、各模态的工具包。产出横跨：</p>
+      <div class="grid g2" style="margin:16px 0">
+        <div class="card"><h4>🧠 语言 / 推理大模型</h4><p>Qwen3、Qwen3.6、QwQ（推理）、Qwen2.5-Math（数学）—— 组织的地基。</p></div>
+        <div class="card"><h4>👁️ 多模态模型</h4><p>Qwen3-VL（看图）、Qwen3-Omni（全模态）、Qwen-Image（生图/改图）。</p></div>
+        <div class="card"><h4>🎙️ 语音模型</h4><p>Qwen3-TTS（语音合成）、Qwen3-ASR（语音识别）、Qwen-Audio。</p></div>
+        <div class="card"><h4>🤖 智能体 / 工具</h4><p>Qwen-Agent（框架，本手册重点）、qwen-code（终端编程 Agent）、Qwen3-Coder（代码模型）。</p></div>
+      </div>
+      <p>简单说：<b>「模型」仓库给你能力，「应用 / 框架」仓库教你怎么把能力用起来。</b>本手册的重点 Qwen-Agent 属于后者——它是 <a href="https://chat.qwen.ai" target="_blank">Qwen Chat</a> 的后端框架。</p>
+      <div class="note">官方触点：
+        <a href="https://github.com/QwenLM" target="_blank">GitHub（QwenLM）</a> ·
+        <a href="https://qwen.ai" target="_blank">官网 qwen.ai</a> ·
+        <a href="https://chat.qwen.ai" target="_blank">Qwen Chat</a> ·
+        <a href="https://huggingface.co/Qwen" target="_blank">Hugging Face</a> ·
+        <a href="https://modelscope.cn/organization/qwen" target="_blank">ModelScope</a> ·
+        <a href="https://qwenlm.github.io/" target="_blank">Blog</a>
+      </div>
+    </section>
+
+    <!-- ===== 2 ===== -->
+    <section id="s2">
+      <h2>2 · 项目全景地图 · 选型</h2>
+      <p class="lead">47 个仓库不必逐个看。按「模态 / 用途」归类，并给出「你想干 X，先学哪个」的选型建议。下表为按星标排序的 Top（数据实抓于 2026-06-27）。</p>
+
+      <table>
+        <thead><tr><th>仓库</th><th>干什么</th><th>方向</th><th>Star</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/QwenLM/Qwen3" target="_blank"><b>Qwen3</b></a></td><td>旗舰语言大模型系列（权重 + 推理/部署说明）</td><td><span class="pill b">语言模型</span></td><td><span class="s">27.3k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/qwen-code" target="_blank"><b>qwen-code</b></a></td><td>住在终端里的开源 AI 编程 Agent（CLI）</td><td><span class="pill a">智能体/应用</span></td><td><span class="s">25.6k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen" target="_blank"><b>Qwen</b></a></td><td>初代 Qwen（1.0/1.5）官方仓库 · 现为历史/汇总入口</td><td><span class="pill b">语言模型</span></td><td><span class="s">21.3k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen3-VL" target="_blank"><b>Qwen3-VL</b></a></td><td>视觉语言多模态模型（看图、读文档、视觉推理）</td><td><span class="pill c">多模态</span></td><td><span class="s">19.5k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen3-Coder" target="_blank"><b>Qwen3-Coder</b></a></td><td>代码版 Qwen3（驱动 qwen-code 的底层模型）</td><td><span class="pill d">代码模型</span></td><td><span class="s">16.7k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen-Agent" target="_blank"><b>Qwen-Agent</b></a></td><td>构建 LLM 智能体的框架：函数调用 / MCP / 代码解释器 / RAG（本手册重点）</td><td><span class="pill a">智能体/框架</span></td><td><span class="s">16.6k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen3-TTS" target="_blank"><b>Qwen3-TTS</b></a></td><td>语音合成模型（流式、可设计音色、声音克隆）</td><td><span class="pill" style="background:rgba(255,126,182,.12);color:#ffb3d4;border:1px solid #5a2a40">语音</span></td><td><span class="s">12.2k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen-Image" target="_blank"><b>Qwen-Image</b></a></td><td>图像生成 + 精准编辑基础模型（擅长文字渲染）</td><td><span class="pill c">多模态</span></td><td><span class="s">8.1k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen-VL" target="_blank">Qwen-VL</a></td><td>初代视觉语言模型（Qwen3-VL 的前身）</td><td><span class="pill c">多模态</span></td><td><span class="s">6.7k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen3-Omni" target="_blank">Qwen3-Omni</a></td><td>原生端到端「全模态」模型（文/图/音/视频）</td><td><span class="pill c">多模态</span></td><td><span class="s">3.9k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen3-ASR" target="_blank">Qwen3-ASR</a></td><td>语音识别模型系列</td><td><span class="pill" style="background:rgba(255,126,182,.12);color:#ffb3d4;border:1px solid #5a2a40">语音</span></td><td><span class="s">3.0k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen3-Embedding" target="_blank">Qwen3-Embedding</a></td><td>文本向量 / 检索模型（RAG 的地基）</td><td><span class="pill d">检索</span></td><td><span class="s">2.0k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/Qwen2.5-Math" target="_blank">Qwen2.5-Math</a></td><td>数学专精模型（工具集成推理 TIR）</td><td><span class="pill b">语言模型</span></td><td><span class="s">1.1k</span></td></tr>
+          <tr><td><a href="https://github.com/QwenLM/QwQ" target="_blank">QwQ</a></td><td>推理模型系列（长思维链）</td><td><span class="pill b">语言模型</span></td><td><span class="s">519</span></td></tr>
+          <tr><td colspan="4" style="color:var(--dim)">其余（长尾）：Qwen3.6（3.6k，最新 LLM）、Qwen2.5-Omni（4.0k）、Qwen2-Audio（2.1k）、Qwen-Image-Layered（2.0k）、Qwen3-VL-Embedding（1.3k）、Qwen-VLA（655，视觉-语言-动作）、qwen.cpp（627，C++ 推理）、Qwen-AgentWorld（582）、FlashQLA（557，注意力算子）、ParScale（480）、Qwen3Guard（472，护栏）、AutoIF / ProcessBench（数据与评测）、open-computer-use（164，电脑操作 Agent）…</td></tr>
+        </tbody>
+      </table>
+
+      <h3>选型地图：你想干什么，先学哪个？</h3>
+      <div class="grid g2">
+        <div class="card"><h4>💬 用 / 部署一个聊天大模型</h4><p><b>先学 Qwen3</b>（拿权重 + vLLM/Ollama 部署）。要更新看 <b>Qwen3.6</b>；要强推理看 <b>QwQ</b>；数学看 Qwen2.5-Math。</p></div>
+        <div class="card"><h4>🤖 自己搭多模态 / 工具型 Agent</h4><p><b>先学 Qwen-Agent</b>（本手册重点，框架本体）。底层模型用 Qwen3 / Qwen3-VL，需要代码能力配 Qwen3-Coder。</p></div>
+        <div class="card"><h4>⌨️ 想要现成的 AI 编程助手</h4><p><b>直接用 qwen-code</b>（终端 CLI，开箱即用）。它由 <b>Qwen3-Coder</b> 模型驱动，不想读框架可先玩它。</p></div>
+        <div class="card"><h4>👁️🎙️🎨 做视觉 / 语音 / 生图</h4><p>看图读文档 <b>Qwen3-VL</b>；全模态 <b>Qwen3-Omni</b>；语音合成 <b>Qwen3-TTS</b>、识别 <b>Qwen3-ASR</b>；生图改图 <b>Qwen-Image</b>。</p></div>
+      </div>
+      <div class="note ok"><b>一句话路线：</b>想<b>用模型</b> → 从 <b>Qwen3</b> 起步；想<b>搭应用 / Agent</b> → 从 <b>Qwen-Agent</b> 起步（下面整本手册的重点）；想<b>立刻有个能干活的工具</b> → 用 <b>qwen-code</b>。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 2b · per-repo profiles ===== -->
+    <section id="s2b">
+      <h2>2b · 重点仓库详解 <span class="kbd">8 个</span></h2>
+      <p class="lead">下面对<strong>按星标排名前 8</strong> 的仓库逐个给出「详细画像」：是什么、关键特性、与兄弟仓库的区别、何时该用、星标 + 最后更新、代表图、链接。长尾仓库见上面的全景地图表格。</p>
+
+      <!-- 1 Qwen3 -->
+      <div class="profile">
+        <div class="pimg"><img src="assets/repo-qwen3.png" alt="Qwen3"></div>
+        <div class="pbody">
+          <h4>① Qwen3 <span class="pill b">语言模型 · 旗舰</span></h4>
+          <div class="meta"><span class="s">⭐ 27,333</span><span class="freshness fresh-mid">最后更新 2026-01-09</span><span>Python</span><span>模型权重开源</span></div>
+          <p class="row"><b>是什么：</b>Qwen 团队的旗舰大语言模型系列（含 Dense 与 MoE 混合专家版本）。这个仓库本身主要是<b>模型卡 + 推理/部署/微调说明</b>，权重托管在 Hugging Face / ModelScope。它是整个 Qwen 生态的「地基模型」。</p>
+          <p class="row"><b>关键特性：</b>覆盖从小到大的多种尺寸；支持「思考 / 非思考」双模式；原生擅长工具调用，与 Qwen-Agent 配套。</p>
+          <p class="row"><b>与兄弟的区别：</b>它是<b>模型</b>不是框架——给你「能力」；Qwen-Agent 给你「怎么编排能力」。比 Qwen3-VL 少了视觉，比 Qwen3-Coder 通用、非代码专精。</p>
+          <p class="row"><b>何时用：</b>你要一个可自部署的通用中文/多语聊天与推理模型时，从这里拿权重和部署命令。<a href="https://github.com/QwenLM/Qwen3" target="_blank">仓库 →</a></p>
+        </div>
+      </div>
+
+      <!-- 2 qwen-code -->
+      <div class="profile">
+        <div class="pimg"><img src="assets/repo-qwencode.png" alt="qwen-code 终端界面"></div>
+        <div class="pbody">
+          <h4>② qwen-code <span class="pill a">智能体 / 应用</span></h4>
+          <div class="meta"><span class="s">⭐ 25,577</span><span class="freshness fresh-hot">最后更新 2026-06-27</span><span>TypeScript</span><span>Apache-2.0</span></div>
+          <p class="row"><b>是什么：</b>一个「住在终端里」的开源 AI 编程 Agent（命令行工具）。你在 shell 里和它对话，它能读写代码库、跑命令、调用工具，完成编码任务。是组织里更新最勤的仓库之一。</p>
+          <p class="row"><b>关键特性：</b>CLI 交互（如截图里的 <code>/auth</code>、<code>/insight</code> 等斜杠命令）；可接 Alibaba ModelStudio 或第三方/自定义 provider；支持 MCP 工具。</p>
+          <p class="row"><b>与兄弟的区别：</b>它是<b>开箱即用的成品工具</b>（TypeScript/Node 生态），不是给你写代码的 Python 框架（那是 Qwen-Agent）。它消费的「大脑」通常是 Qwen3-Coder 模型。</p>
+          <p class="row"><b>何时用：</b>你想立刻有个能在终端帮你写代码的助手，而不想自己搭框架时。<a href="https://github.com/QwenLM/qwen-code" target="_blank">仓库 →</a></p>
+        </div>
+      </div>
+
+      <!-- 3 Qwen -->
+      <div class="profile">
+        <div class="pimg"><img src="assets/repo-qwen.jpg" alt="Qwen"></div>
+        <div class="pbody">
+          <h4>③ Qwen <span class="pill b">语言模型 · 初代</span></h4>
+          <div class="meta"><span class="s">⭐ 21,349</span><span class="freshness fresh-mid">最后更新 2026-03-05</span><span>Python</span><span>Apache-2.0</span></div>
+          <p class="row"><b>是什么：</b>最初的「通义千问」官方仓库（Qwen 1.0 / 1.5 时代），包含早期 chat 与预训练模型、量化、部署与微调脚本。如今更多作为<b>历史与资源汇总入口</b>（很多新模型的部署教程仍链回这里）。</p>
+          <p class="row"><b>关键特性：</b>沉淀了 vLLM / Ollama / llama.cpp / 量化等大量部署文档；微信群、生态链接的集散地。</p>
+          <p class="row"><b>与兄弟的区别：</b>它是<b>「老家」</b>——内容已被 Qwen3 等新仓库取代，但仍是理解 Qwen 演进与通用部署套路的好起点。星标高是历史积累。</p>
+          <p class="row"><b>何时用：</b>想了解 Qwen 系列的来龙去脉、或找通用部署/量化教程时。<a href="https://github.com/QwenLM/Qwen" target="_blank">仓库 →</a></p>
+        </div>
+      </div>
+
+      <!-- 4 Qwen3-VL -->
+      <div class="profile">
+        <div class="pimg"><img src="assets/repo-qwen3vl.jpg" alt="Qwen3-VL 评测"></div>
+        <div class="pbody">
+          <h4>④ Qwen3-VL <span class="pill c">多模态 · 视觉语言</span></h4>
+          <div class="meta"><span class="s">⭐ 19,483</span><span class="freshness fresh-mid">最后更新 2026-01-30</span><span>Jupyter Notebook</span><span>Apache-2.0</span></div>
+          <p class="row"><b>是什么：</b>Qwen 的视觉语言（VLM）模型系列：能看图、读文档/截图、做视觉推理与定位，并把「看到的」和「想到的」结合起来。仓库以 Notebook 示例为主，便于直接跑通看效果。</p>
+          <p class="row"><b>关键特性：</b>多种尺寸（含 Instruct / Thinking 思考版）；强 OCR 与文档理解；可与工具结合（如 think-with-images 放大图像再回答）。</p>
+          <p class="row"><b>与兄弟的区别：</b>比纯文本的 Qwen3 多了「眼睛」；比全模态 Qwen3-Omni 更聚焦图像/视频→文本，不做语音输出。是 Qwen-Agent 里视觉类 Worker 的常用后端。</p>
+          <p class="row"><b>何时用：</b>任务涉及图片、扫描件、UI 截图、图表理解时。<a href="https://github.com/QwenLM/Qwen3-VL" target="_blank">仓库 →</a></p>
+        </div>
+      </div>
+
+      <!-- 5 Qwen3-Coder -->
+      <div class="profile">
+        <div class="pimg"><img src="assets/repo-qwen3coder.png" alt="Qwen3-Coder"></div>
+        <div class="pbody">
+          <h4>⑤ Qwen3-Coder <span class="pill d">代码模型</span></h4>
+          <div class="meta"><span class="s">⭐ 16,653</span><span class="freshness fresh-mid">最后更新 2026-03-24</span><span>Python</span><span>模型权重开源</span></div>
+          <p class="row"><b>是什么：</b>Qwen3 的代码专精版本——为编程、工具调用、长上下文仓库级任务优化的大模型，是 qwen-code 终端工具背后的「大脑」。</p>
+          <p class="row"><b>关键特性：</b>面向 agentic coding（自主多步写代码 + 调工具）；建议配 vLLM 内置 tool-parser 使用；强长上下文。</p>
+          <p class="row"><b>与兄弟的区别：</b>它是<b>模型</b>（给能力），qwen-code 是<b>用它的工具</b>（给体验）；相对通用 Qwen3，它在代码与工具调用上更强、在闲聊上不是重点。</p>
+          <p class="row"><b>何时用：</b>你要把代码能力接进自己的系统（vLLM 部署 + Qwen-Agent / qwen-code 调用）时。<a href="https://github.com/QwenLM/Qwen3-Coder" target="_blank">仓库 →</a></p>
+        </div>
+      </div>
+
+      <!-- 6 Qwen-Agent (flagship) -->
+      <div class="profile" style="border-color:#3a3560">
+        <div class="pimg"><img src="assets/qa-logo.png" alt="Qwen-Agent"></div>
+        <div class="pbody">
+          <h4>⑥ Qwen-Agent <span class="pill a">智能体框架 · 本手册重点 ★</span></h4>
+          <div class="meta"><span class="s">⭐ 16,620</span><span class="freshness fresh-mid">最后更新 2026-03-04</span><span>Python</span><span>Apache-2.0</span></div>
+          <p class="row"><b>是什么：</b>一个基于 Qwen 的「指令遵循 + 工具使用 + 规划 + 记忆」能力来开发 LLM 应用的<b>框架</b>。提供 LLM / Tool / Agent 三层原子组件，自带浏览器助手、代码解释器、自定义 Assistant 等示例应用。<b>它就是 Qwen Chat 的后端。</b></p>
+          <p class="row"><b>关键特性：</b>函数调用、MCP、Docker 沙箱代码解释器、RAG（含百万 token 长文档问答）、Gradio GUI 一键起 Demo。</p>
+          <p class="row"><b>与兄弟的区别：</b>它是<b>编排层</b>——把上面那些「模型」组装成能用工具、能读文档的应用；不自带模型权重，模型来自 Qwen3 / Qwen3-VL 等。比 qwen-code 更底层、更可定制（Python 库 vs 成品 CLI）。</p>
+          <p class="row"><b>何时用：</b>你要自己搭一个会用工具、能读文件、可定制流程的 Agent 时。<b>下面第 3–8 节就是它的深入拆解。</b> <a href="https://github.com/QwenLM/Qwen-Agent" target="_blank">仓库 →</a></p>
+        </div>
+      </div>
+
+      <!-- 7 Qwen3-TTS -->
+      <div class="profile">
+        <div class="pimg"><img src="assets/repo-qwen3tts.png" alt="Qwen3-TTS"></div>
+        <div class="pbody">
+          <h4>⑦ Qwen3-TTS <span class="pill" style="background:rgba(255,126,182,.12);color:#ffb3d4;border:1px solid #5a2a40">语音合成</span></h4>
+          <div class="meta"><span class="s">⭐ 12,181</span><span class="freshness fresh-mid">最后更新 2026-03-17</span><span>Python</span><span>Apache-2.0</span></div>
+          <p class="row"><b>是什么：</b>开源的文本转语音（TTS）模型系列，主打稳定、富表现力的语音生成，支持流式输出、自由音色设计与逼真的声音克隆。</p>
+          <p class="row"><b>关键特性：</b>流式合成（低延迟）；free-form voice design（用文字描述音色）；voice cloning（少样本克隆音色）。</p>
+          <p class="row"><b>与兄弟的区别：</b>它管「让模型开口说话」，与负责「听懂」的 Qwen3-ASR 互为一对；与 Qwen3-Omni 相比是<b>单一语音任务</b>的专精模型，更轻、更易单独部署。</p>
+          <p class="row"><b>何时用：</b>要给应用加配音、语音播报或定制音色时。<a href="https://github.com/QwenLM/Qwen3-TTS" target="_blank">仓库 →</a></p>
+        </div>
+      </div>
+
+      <!-- 8 Qwen-Image -->
+      <div class="profile">
+        <div class="pimg"><img src="assets/repo-qwenimage.jpg" alt="Qwen-Image 编辑示例"></div>
+        <div class="pbody">
+          <h4>⑧ Qwen-Image <span class="pill c">多模态 · 生图/改图</span></h4>
+          <div class="meta"><span class="s">⭐ 8,051</span><span class="freshness fresh-mid">最后更新 2026-02-10</span><span>Python</span><span>Apache-2.0</span></div>
+          <p class="row"><b>是什么：</b>图像生成与精准编辑的基础模型，特别擅长<b>复杂文字渲染</b>（在图里准确写字）和按指令做局部编辑。</p>
+          <p class="row"><b>关键特性：</b>文生图 + 图像编辑（edit 系列）；强中英文字渲染；有 Layered（分层可编辑）等衍生仓库。</p>
+          <p class="row"><b>与兄弟的区别：</b>Qwen3-VL 是「看懂图」（图→文），Qwen-Image 是「画出图 / 改图」（文→图）；两者方向相反、可互补。</p>
+          <p class="row"><b>何时用：</b>要生成海报/插图、或对现有图做指令式编辑（尤其含文字）时。<a href="https://github.com/QwenLM/Qwen-Image" target="_blank">仓库 →</a></p>
+        </div>
+      </div>
+
+      <div class="note">为什么是这 8 个：它们是<b>按星标排名前 8</b> 的仓库，恰好覆盖了语言 / 代码 / 视觉 / 语音 / 图像 / 智能体六大方向，是理解整个 Qwen 全家桶的最短路径。更小众的模型与工具见<a href="#s2">第 2 节</a>的长尾表格。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 3 ===== -->
+    <section id="s3">
+      <h2>3 · Qwen-Agent 这是什么 <span class="kbd">深入开始</span></h2>
+      <p class="lead">一个<strong>用 Qwen 模型来开发 LLM 应用的 Python 框架</strong>——把「函数调用、工具使用、规划、记忆」这些 Agent 能力封装成可复用组件，让你专注于「定义 Agent 干什么」。</p>
+      <p>它基于 Qwen（推荐 ≥3.0）的指令遵循与工具能力，附带<b>浏览器助手 BrowserQwen、代码解释器、自定义 Assistant</b> 等示例应用。<b>Apache-2.0</b> 许可，<code>pip install qwen-agent</code> 即装，且<b>现在就是 <a href="https://chat.qwen.ai" target="_blank">Qwen Chat</a> 的后端</b>。</p>
+
+      <h3>三个开箱示例</h3>
+      <div class="grid g3">
+        <div class="card"><span class="tag">Demo 1</span><h4 style="margin-top:8px">自定义工具 + 助手</h4><p>注册一个画图工具，让 Assistant 读 PDF、写代码、调用工具，几十行代码起一个 Agent。</p></div>
+        <div class="card"><span class="tag">Demo 2</span><h4 style="margin-top:8px">代码解释器</h4><p>Agent 自主写 Python 并在 Docker 沙箱里执行（如下图：取数据→画饼图）。</p></div>
+        <div class="card"><span class="tag">Demo 3</span><h4 style="margin-top:8px">BrowserQwen 浏览器助手</h4><p>Chrome 扩展 + 后端，边浏览网页边问答、做多网页总结。</p></div>
+      </div>
+      <div class="imgrow">
+        <figure style="background:#0d0f16"><img src="assets/qa-screenshot-ci.png" alt="代码解释器演示"><figcaption>BrowserQwen · 代码解释器：模型自己写 matplotlib 代码并执行，画出人口分布饼图（注意 Thought / Action / Observation 结构）</figcaption></figure>
+        <figure style="background:#0d0f16"><img src="assets/qa-screenshot-pdf.png" alt="PDF 问答"><figcaption>对网页 / PDF 内容做问答与引用定位</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- ===== 4 ===== -->
+    <section id="s4">
+      <h2>4 · 面向领域 &amp; 亮点</h2>
+      <p class="lead">问题域：<strong>用 LLM 搭「会用工具、能读资料、可编排」的智能体应用</strong>，尤其是函数调用、RAG 与多步工具任务。</p>
+
+      <h3>新颖 / 真正有用的点</h3>
+      <ul class="clean">
+        <li><b>三层原子组件</b>：LLM（<code>BaseChatModel</code>，自带函数调用）+ Tool（<code>BaseTool</code>，可 <code>@register_tool</code> 注册）+ Agent（<code>Agent</code>，编排两者）。学会这三个类就会用整个框架。</li>
+        <li><b>原生函数调用 / 并行工具调用</b>：默认模板支持并行 function call，且框架自己解析 vLLM 的工具输出。</li>
+        <li><b>MCP 支持</b>：直接接入 Model Context Protocol 生态的各种 server（文件系统、SQLite、memory…）。</li>
+        <li><b>Docker 沙箱代码解释器</b>：让 Agent 安全地写代码并执行，返回结果（图/数值）。</li>
+        <li><b>长文档 RAG</b>：内置一套快速 RAG 与一套「昂贵但更强」的并行文档问答，号称在 <b>百万 token</b> 大海捞针中表现完美。</li>
+        <li><b>一行起 GUI</b>：<code>WebUI(bot).run()</code> 即用 Gradio 启动可对话的网页 Demo。</li>
+      </ul>
+
+      <h3>它的「身份」：Qwen Chat 的后端</h3>
+      <p>这点很关键——Qwen-Agent 不是一个玩具 demo 框架，而是<b>在生产里支撑官方 Qwen Chat</b> 的同一套代码。所以它既适合学习（示例丰富、API 简洁），也经得起实际负载。</p>
+      <div class="note ok">读法：把它理解为<b>「Qwen 版的 LangChain，但更聚焦函数调用 / 工具 / RAG，并和 Qwen 模型深度配套」</b>。轻、直接、官方维护，是学习「Agent 怎么落地」的好范本。</div>
+    </section>
+
+    <!-- ===== 5 ===== -->
+    <section id="s5">
+      <h2>5 · 架构组成</h2>
+      <p class="lead">三层原子抽象：底层 <b>LLM</b>（统一各家模型服务）→ 中层 <b>Tool</b>（可注册的能力）→ 上层 <b>Agent</b>（把 LLM + 工具 + 记忆编排起来）。</p>
+
+      <div class="flow">
+        <span class="node">用户消息</span><span class="arr">→</span>
+        <span class="node">Agent（如 Assistant）</span><span class="arr">→</span>
+        <span class="node">LLM 推理</span><span class="arr">→</span>
+        <span class="node loop">需要工具？ function call</span><span class="arr">→</span>
+        <span class="node">Tool.call()</span><span class="arr">↺</span>
+        <span class="node">观察结果回灌 LLM</span><span class="arr">→</span>
+        <span class="node">最终回复（流式）</span>
+      </div>
+
+      <div class="grid g3" style="margin-top:8px">
+        <div class="card"><h4>① LLM 层</h4><p><code>BaseChatModel</code> 统一封装：DashScope（<code>qwen_dashscope</code>）、OpenAI 兼容端点（vLLM / Ollama，<code>oai.py</code>）、VL / Omni / Audio 变体、本地 <code>transformers</code>。内置函数调用与 prompt 模板。</p></div>
+        <div class="card"><h4>② Tool 层</h4><p><code>BaseTool</code> + <code>@register_tool</code>。内置 <code>code_interpreter</code>、<code>retrieval</code>(RAG)、<code>web_search</code>、<code>doc_parser</code>、<code>image_gen</code>、<code>mcp_manager</code>（接 MCP）等；可自定义。</p></div>
+        <div class="card"><h4>③ Agent 层</h4><p><code>Agent</code> 基类定义 <code>run()</code> 流式协议；高层有 <code>Assistant</code>（最常用，带 RAG/读文件）、<code>FnCallAgent</code>、<code>ReActChat</code>、<code>GroupChat</code>（多智能体）、<code>Router</code>。</p></div>
+      </div>
+
+      <h3>内置 Agent 一览（决定「怎么编排」）</h3>
+      <div>
+        <span class="pill a">Assistant</span><span class="pill a">FnCallAgent</span><span class="pill b">ReActChat</span><span class="pill b">TIRAgent(数学)</span><span class="pill c">GroupChat 多智能体</span>
+        <span class="pill c">Router 路由</span><span class="pill d">ArticleAgent 写作</span><span class="pill d">DialogueRetrievalAgent</span>
+      </div>
+
+      <h3>两种用法：纯库 vs 带 GUI</h3>
+      <table>
+        <thead><tr><th>用法</th><th>依赖</th><th>适用</th></tr></thead>
+        <tbody>
+          <tr><td><b>最小（纯函数调用）</b></td><td><code>pip install qwen-agent</code></td><td>把 Agent 嵌进自己的程序——<b>推荐入门用这个</b></td></tr>
+          <tr><td><b>全功能</b></td><td><code>qwen-agent[gui,rag,code_interpreter,mcp]</code>（Gradio / 文档解析 / Docker / MCP）</td><td>要 GUI、RAG、代码沙箱、MCP 时按需加</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===== 6 ===== -->
+    <section id="s6">
+      <h2>6 · 技术原理</h2>
+      <p class="lead">把「Agent 怎么跑起来」拆成四件事：函数调用主循环、ReAct 式思考、长文档 RAG、MCP / 代码沙箱。</p>
+
+      <h3>① 函数调用主循环（FnCallAgent）</h3>
+      <p>核心循环很朴素：LLM 生成 → 若产生 function call 则执行对应 <code>Tool.call()</code> → 把「观察结果」回灌给 LLM → 再生成，直到没有工具调用、给出最终答案。框架的「魔法」在于一套 <b>function-call prompt 模板</b>（<code>llm/fncall_prompts/nous_fncall_prompt.py</code>），把工具描述编码进 prompt，并解析模型输出里的工具调用——所以即便后端只是个普通 OpenAI 兼容端点也能稳定触发工具。</p>
+      <div class="flow">
+        <span style="color:var(--dim)">循环体：</span>
+        <span class="node">LLM 生成</span><span class="arr">→</span>
+        <span class="node loop">含 function_call？</span>
+        <span style="color:var(--muted)">(是 → 执行工具 / 否 → 结束)</span>
+        <span class="arr">→</span><span class="node">Tool.call()</span><span class="arr">→</span>
+        <span class="node">observation</span><span class="arr">↺</span>
+      </div>
+
+      <h3>② ReAct：Thought / Action / Observation</h3>
+      <p>第 3 节那张代码解释器截图正是 ReAct 范式的实物：模型先写 <b>Thought（我需要用代码解释器画饼图）</b>，再给 <b>Action: code_interpreter</b> 与 <b>Action Input（matplotlib 代码）</b>，框架执行后把 <b>Observation</b>（运行结果 / 图）回灌——这就是 <code>ReActChat</code> / <code>FnCallAgent</code> 在干的事。</p>
+      <figure style="background:#0d0f16"><img src="assets/qa-screenshot-writing.png" alt="写作/多步任务"><figcaption>多步任务示例：Agent 规划 + 调工具 + 汇总成稿（Qwen-Agent 的 ArticleAgent / 多步编排）</figcaption></figure>
+
+      <h3>③ 长文档 RAG（百万 token 问答）</h3>
+      <p>面对超长文档，Qwen-Agent 提供两条路：一条<b>快速 RAG</b>（<code>retrieval</code> 工具 + BM25/向量），一条<b>更贵但更强的并行文档问答</b>（把文档切片并行处理再汇总）。官方称其在两个高难基准上优于原生长上下文模型，且在百万 token 单针「大海捞针」压力测试中表现完美。</p>
+      <figure style="max-width:460px"><img src="assets/qa-longctx.png" alt="长上下文结果"><figcaption>官方博客图：Qwen-Agent 的长上下文方案在长文档问答上的对比结果</figcaption></figure>
+
+      <h3>④ MCP 与代码解释器沙箱</h3>
+      <p><b>MCP</b>：通过 <code>mcp_manager</code> 接入 Model Context Protocol 的 server（用 <code>npx</code> / <code>uvx</code> 起 filesystem、sqlite、memory 等），工具生态即插即用。<b>代码解释器</b>：基于<b>本地 Docker 容器</b>实现隔离沙箱，Agent 自主写代码并在其中安全执行（仅挂载指定工作目录）。官方明确提醒：沙箱是基础隔离，生产环境仍需谨慎。</p>
+    </section>
+
+    <!-- ===== 6b · CODE STRUCTURE & TECH STACK ===== -->
+    <section id="s6b">
+      <h2>6b · 代码结构与技术栈 <span class="kbd">从这里开始读</span></h2>
+      <p class="lead">「这个代码库到底怎么搭的、我该从哪个文件开始读？」——不用 clone，全部来自 GitHub API（languages / git trees）与 <code>setup.py</code>，实抓于 2026-06-27。</p>
+
+      <h3>① 技术栈（按代码字节数）</h3>
+      <div class="langbar">
+        <span style="width:91.4%;background:#7c5cff" title="Python 91.4%"></span>
+        <span style="width:3.1%;background:#22d3ee" title="TypeScript 3.1%"></span>
+        <span style="width:2.4%;background:#46c98b" title="Shell 2.4%"></span>
+        <span style="width:1.1%;background:#f5b94d" title="CSS 1.1%"></span>
+        <span style="width:1.1%;background:#ff7eb6" title="JavaScript 1.1%"></span>
+        <span style="width:0.9%;background:#717b90" title="其他"></span>
+      </div>
+      <div class="langleg">
+        <span><span class="dot" style="background:#7c5cff"></span>Python <b>91.4%</b></span>
+        <span><span class="dot" style="background:#22d3ee"></span>TypeScript <b>3.1%</b></span>
+        <span><span class="dot" style="background:#46c98b"></span>Shell <b>2.4%</b></span>
+        <span><span class="dot" style="background:#f5b94d"></span>CSS <b>1.1%</b></span>
+        <span><span class="dot" style="background:#ff7eb6"></span>JavaScript <b>1.1%</b></span>
+        <span><span class="dot" style="background:#717b90"></span>MDX/HTML/Dockerfile <b>1.0%</b></span>
+      </div>
+      <p style="font-size:14px;color:var(--muted)">压倒性是 <b>Python</b>（框架本体）；TypeScript / CSS / JS 来自 <code>browser_qwen/</code> 这个 Chrome 扩展；MDX 来自文档站；Dockerfile 给代码解释器沙箱。</p>
+
+      <h3>② 关键依赖（来自 setup.py）</h3>
+      <table>
+        <thead><tr><th>依赖</th><th>属于</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>dashscope</code></td><td>核心</td><td>阿里云 DashScope 模型服务 SDK（默认模型后端）</td></tr>
+          <tr><td><code>openai</code></td><td>核心</td><td>调用 OpenAI 兼容端点（vLLM / Ollama 走这条）</td></tr>
+          <tr><td><code>pydantic&gt;=2.3</code></td><td>核心</td><td>消息 / 配置的数据校验与建模</td></tr>
+          <tr><td><code>tiktoken</code> · <code>json5</code> · <code>jsonschema</code></td><td>核心</td><td>分词计 token、宽松 JSON 解析、工具参数校验</td></tr>
+          <tr><td><code>gradio==5.23.1</code> · <code>modelscope_studio</code></td><td>[gui]</td><td>一行起网页 Demo（版本钉死，兼容性敏感）</td></tr>
+          <tr><td><code>pdfplumber</code>·<code>python-docx</code>·<code>rank_bm25</code>·<code>jieba</code></td><td>[rag]</td><td>解析 PDF/Word/PPT + BM25 中文检索（RAG）</td></tr>
+          <tr><td><code>fastapi</code> · <code>uvicorn</code> · <code>jupyter</code></td><td>[code_interpreter]</td><td>沙箱内的执行服务</td></tr>
+          <tr><td><code>sympy</code> · <code>numpy</code> · <code>scipy</code></td><td>[python_executor]</td><td>数学求解（配 Qwen2.5-Math 的 TIR）</td></tr>
+          <tr><td><code>mcp</code></td><td>[mcp]</td><td>Model Context Protocol 客户端</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:14px;color:var(--muted)">设计哲学很清楚：<b>核心极简</b>（只为函数调用），重依赖（GUI / RAG / 沙箱 / 数学）全放进 <code>extras_require</code> 按需安装。</p>
+
+      <h3>③ 目录树（顶层 + qwen_agent/，已标注）</h3>
+      <div class="codewrap"><div class="bar"><span>git/trees API · 417 个路径，未截断</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>Qwen-Agent/
+├─ qwen_agent/              # ★ 框架本体（Python 包）
+│  ├─ agent.py              #   抽象基类 Agent：定义 run() 流式协议
+│  ├─ agents/   (17 文件)   #   各种 Agent：assistant / fncall_agent / react_chat /
+│  │                        #     router / group_chat / tir_agent / article_agent ...
+│  ├─ llm/      (14 文件)   #   模型适配层：base(BaseChatModel) / oai / qwen_dashscope /
+│  │                        #     qwenvl_* / function_calling / fncall_prompts(模板)
+│  ├─ tools/    (16 文件)   #   工具：base(BaseTool) / code_interpreter / retrieval /
+│  │                        #     web_search / doc_parser / image_gen / mcp_manager ...
+│  ├─ memory/               #   memory.py：基于检索的记忆
+│  ├─ gui/                  #   WebUI（Gradio 封装）
+│  └─ utils/, settings.py, multi_agent_hub.py
+├─ examples/    (39 文件)   # ★ 最佳学习入口：assistant_qwen3.py / function_calling.py /
+│                           #     assistant_rag.py / group_chat_* / cookbook_*.ipynb ...
+├─ qwen_server/             # BrowserQwen 的后端服务（run_server.py 启）
+├─ browser_qwen/            # BrowserQwen 的 Chrome 扩展（TS/CSS/JS 即来自这里）
+├─ benchmark/, tests/       # 评测与测试
+├─ qwen-agent-docs/         # 文档站（MDX）
+├─ setup.py                 # 依赖与 extras 定义（见上表）
+└─ README.md / README_CN.md</code></pre></div>
+
+      <h3>④ 从这里开始读（推荐顺序）</h3>
+      <ol class="steps">
+        <li><b><code>examples/assistant_qwen3.py</code></b> — 最短的可运行示例，先看一个 Assistant 怎么配置、怎么 <code>bot.run()</code>。</li>
+        <li><b><code>qwen_agent/agent.py</code></b> — 抽象基类 <code>Agent</code>，理解 <code>run()</code> / <code>_run()</code> 的<b>流式生成协议</b>（所有 Agent 的共同骨架）。</li>
+        <li><b><code>qwen_agent/agents/fncall_agent.py</code></b> — 函数调用主循环：生成 → 调工具 → 观察 → 再生成（第 6 节①的代码实现）。</li>
+        <li><b><code>qwen_agent/agents/assistant.py</code></b> — 在 FnCallAgent 上加 RAG / 读文件，<b>最常用</b>的 Agent，建议精读。</li>
+        <li><b><code>qwen_agent/tools/base.py</code></b> — <code>BaseTool</code> 与 <code>@register_tool</code>：工具是怎么注册、怎么被调用的。</li>
+        <li><b><code>qwen_agent/llm/base.py</code></b> — <code>BaseChatModel</code>：模型适配层入口，看 <code>chat()</code> 如何统一各家后端。</li>
+        <li><b><code>qwen_agent/llm/fncall_prompts/nous_fncall_prompt.py</code></b> — 工具调用的 prompt 模板，框架「让普通模型也会用工具」的关键。</li>
+        <li><b><code>qwen_agent/agents/react_chat.py</code></b> — 想看 ReAct 范式（对照第 6 节②的 Thought/Action/Observation 截图）。</li>
+      </ol>
+      <div class="note">心法：<b>架构（第 5 节）= 概念，代码结构（本节）= 这些概念住在树里的哪个文件。</b>读完上面 8 个文件，你就能自己写一个带工具的 Agent 了。</div>
+    </section>
+
+    <!-- ===== 7 ===== -->
+    <section id="s7">
+      <h2>7 · 怎么部署使用 <span class="kbd">官方步骤</span></h2>
+      <p class="lead">环境要求：<strong>Python；GUI 需 ≥ 3.10</strong>。纯函数调用<strong>不需要 GPU</strong>（调云端 API 即可）；代码解释器要 Docker；MCP 的部分 server 要 Node.js。<b>入门建议：最小安装 + 一个 examples 跑通。</b></p>
+
+      <h3>安装</h3>
+      <div class="codewrap"><div class="bar"><span>① pip 安装</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 全功能（GUI + RAG + 代码解释器 + MCP）
+pip install -U "qwen-agent[gui,rag,code_interpreter,mcp]"
+
+# 或最小安装（仅函数调用），推荐先用这个学习
+# pip install -U qwen-agent</code></pre></div>
+
+      <h3>准备模型服务（二选一）</h3>
+      <div class="codewrap"><div class="bar"><span>② 配置模型后端</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># A) 用阿里云 DashScope（最省事）
+export DASHSCOPE_API_KEY="你的key"
+# Windows PowerShell:  $env:DASHSCOPE_API_KEY="..."
+
+# B) 用自部署的 OpenAI 兼容端点（vLLM / Ollama）
+#   llm_cfg = {'model':'qwen3-32b','model_server':'http://localhost:8000/v1','api_key':'EMPTY'}</code></pre></div>
+
+      <h3>最小示例（几十行起一个 Agent）</h3>
+      <div class="codewrap"><div class="bar"><span>③ quickstart.py（摘自官方 README）</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>from qwen_agent.agents import Assistant
+llm_cfg = {'model': 'qwen-max-latest', 'model_type': 'qwen_dashscope'}
+tools = ['code_interpreter']            # 内置工具；也可 @register_tool 自定义
+bot = Assistant(llm=llm_cfg, function_list=tools,
+                files=['./examples/resource/doc.pdf'])  # 给它一个 PDF
+messages = [{'role': 'user', 'content': '总结这份 PDF 并画个柱状图'}]
+for rsp in bot.run(messages=messages):   # 流式输出
+    print(rsp)</code></pre></div>
+
+      <h3>一行起 GUI / 跑官方示例</h3>
+      <div class="codewrap"><div class="bar"><span>④ 网页 Demo &amp; examples</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>from qwen_agent.gui import WebUI
+WebUI(bot).run()                         # 浏览器里和 Agent 对话
+
+# 更多示例（克隆仓库后）：
+python examples/assistant_qwen3.py       # 函数调用
+python examples/assistant_rag.py         # 长文档 RAG
+python examples/assistant_mcp_sqlite_bot.py   # 接 MCP</code></pre></div>
+      <ul class="clean">
+        <li>官方文档站：<a href="https://qwenlm.github.io/Qwen-Agent/en/" target="_blank">qwenlm.github.io/Qwen-Agent</a>（指南 + DeepPlanning 基准）</li>
+        <li>BrowserQwen（浏览器助手）：见仓库 <code>browser_qwen.md</code></li>
+        <li>代码解释器需先装好并启动 <b>Docker</b>；MCP 的部分 server 需 <b>Node.js / uv</b></li>
+      </ul>
+    </section>
+
+    <!-- ===== 8 ===== -->
+    <section id="s8">
+      <h2>8 · 我的实操记录 <span class="kbd todo">待回填</span></h2>
+      <p class="lead">本节按计划<strong>暂不真正安装</strong>（先把脚本和检查准备好，等你决定真装时一键回填本节）。当前 <code>scripts/</code> 目录已生成两个脚本：</p>
+
+      <div class="grid g2">
+        <div class="card"><h4>🔍 scripts/check-env.ps1</h4><p>检查 Python(≥3.10 跑 GUI)、pip、git、（可选）Docker / Node.js、DASHSCOPE_API_KEY 是否就绪。<b>真装前先跑它。</b></p></div>
+        <div class="card"><h4>⬇️ scripts/setup-qwen-agent.ps1</h4><p>建 venv、pip 安装 <code>qwen-agent[全功能]</code>，并提示下一步。<b>默认 dry-run，加 -Run 才真正执行。</b></p></div>
+      </div>
+
+      <h3>建议的真装流程（Windows）</h3>
+      <div class="codewrap"><div class="bar"><span>PowerShell</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 1. 先体检
+./scripts/check-env.ps1
+
+# 2. 预览将要执行的动作（不改动任何东西）
+./scripts/setup-qwen-agent.ps1
+
+# 3. 确认无误后真正执行（建 venv + 装 qwen-agent）
+./scripts/setup-qwen-agent.ps1 -Run</code></pre></div>
+
+      <h3 class="todo">▢ 回填占位（真装后补这里）</h3>
+      <ul class="clean">
+        <li class="todo">环境体检输出（check-env 截图 / 文本）</li>
+        <li class="todo">安装过程中的报错与解决（踩坑日志，尤其 gradio 版本兼容）</li>
+        <li class="todo">最小示例跑通截图（assistant_qwen3.py / WebUI）</li>
+        <li class="todo">代码解释器（Docker 沙箱）实际效果截图</li>
+        <li class="todo">RAG / MCP 示例的实际效果</li>
+      </ul>
+      <div class="note warn">提醒：代码解释器要 <b>Docker</b>、MCP 的部分 server 要 <b>Node.js</b>；学习阶段优先 <b>最小安装 + 云端 DashScope API</b>，跑通函数调用再逐步加 RAG / 沙箱 / MCP。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 9 ===== -->
+    <section id="s9">
+      <h2>9 · 相关 GitHub 项目</h2>
+      <p class="lead">把 Qwen-Agent 放进版图里看：左边是<strong>同组织</strong>里和它配套的兄弟仓库，右边是<strong>外部同类</strong>的主流 Agent 框架。星标与「最后更新」为 <b>GitHub API 实抓于 2026-06-27</b> 的真实数据。</p>
+
+      <h3>同组织相关仓库（一起用更香）</h3>
+      <div class="grid g3">
+        <div class="card"><h4>🧠 Qwen3 / Qwen3-Coder</h4><p><b>功能：</b>Qwen-Agent 的「大脑」——通用与代码模型，用 vLLM 部成 OpenAI 兼容端点即可被调用。<br><b>差异：</b>提供「模型」，Qwen-Agent 提供「编排」。</p><p style="margin-top:8px"><span class="s">⭐27.3k / 16.7k</span> · <a href="https://github.com/QwenLM/Qwen3" target="_blank">Qwen3</a></p></div>
+        <div class="card"><h4>⌨️ qwen-code</h4><p><b>功能：</b>终端编程 Agent（成品 CLI），是「应用」层的另一条线。<br><b>差异：</b>开箱即用的工具 (TS)；Qwen-Agent 是可定制的库 (Python)。</p><p style="margin-top:8px"><span class="s">⭐25.6k</span> · <span class="freshness fresh-hot">2026-06-27</span> · <a href="https://github.com/QwenLM/qwen-code" target="_blank">仓库</a></p></div>
+        <div class="card"><h4>👁️ Qwen3-VL</h4><p><b>功能：</b>视觉语言模型，可作为 Qwen-Agent 里看图类 Worker 的后端。<br><b>差异：</b>感知/模型组件，非 Agent 框架。</p><p style="margin-top:8px"><span class="s">⭐19.5k</span> · <span class="freshness fresh-mid">2026-01-30</span> · <a href="https://github.com/QwenLM/Qwen3-VL" target="_blank">仓库</a></p></div>
+      </div>
+
+      <h3>外部同类：主流 Agent 框架对比</h3>
+      <table>
+        <thead><tr><th>项目</th><th>定位 / 功能</th><th>与 Qwen-Agent 的差异</th><th>星标</th><th>最后更新</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><a href="https://github.com/QwenLM/Qwen-Agent" target="_blank"><b>Qwen-Agent</b></a></td>
+            <td>LLM 智能体框架（LLM/Tool/Agent 三件套 + RAG + MCP）</td>
+            <td style="color:var(--accent2)">基准本体：<b>官方、轻量、与 Qwen 深度配套</b>，是 Qwen Chat 后端；聚焦函数调用 / 工具 / 长文档</td>
+            <td><span class="s">16.6k</span></td>
+            <td><span class="freshness fresh-mid">2026-03-04</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/langchain-ai/langchain" target="_blank">LangChain</a></td>
+            <td>通用 LLM / Agent 工程平台，生态最大</td>
+            <td>组件海量但偏重、模型中立；Qwen-Agent 更聚焦、与 Qwen 配套更顺</td>
+            <td><span class="s">140k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-26</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/langgenius/dify" target="_blank">Dify</a></td>
+            <td>生产级 Agentic 工作流平台，带可视化 GUI</td>
+            <td><b>低代码 GUI + 可托管</b>；Qwen-Agent 是代码库、更偏定制与嵌入</td>
+            <td><span class="s">147k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-27</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/microsoft/autogen" target="_blank">AutoGen</a></td>
+            <td>微软的多智能体对话编程框架</td>
+            <td>核心是<b>多 Agent 会话</b>；Qwen-Agent 核心是单 Agent 函数调用 + 工具（也有 GroupChat）</td>
+            <td><span class="s">59k</span></td>
+            <td><span class="freshness fresh-mid">2026-04-15</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/crewAIInc/crewAI" target="_blank">CrewAI</a></td>
+            <td>角色扮演式多智能体编排</td>
+            <td>主打<b>角色协作</b>、轻量上手；Qwen-Agent 强在工具/RAG 与 Qwen 配套</td>
+            <td><span class="s">54k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-27</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>组织层面：和谁比？（其他开源模型家族）</h3>
+      <table>
+        <thead><tr><th>项目</th><th>定位</th><th>星标</th><th>最后更新</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/deepseek-ai/DeepSeek-V3" target="_blank">DeepSeek-V3</a></td><td>另一中国开源大模型家族的旗舰（对标 Qwen3）</td><td><span class="s">104k</span></td><td><span class="freshness fresh-old">2025-08-28</span></td></tr>
+          <tr><td><a href="https://github.com/meta-llama/llama-models" target="_blank">meta-llama/llama-models</a></td><td>Meta Llama 模型家族的工具/卡片仓库</td><td><span class="s">7.6k</span></td><td><span class="freshness fresh-mid">2026-02-11</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note warn">学习提示：Qwen-Agent（16.6k）虽不及 LangChain/Dify 那种社区巨无霸，但<b>官方维护、是 Qwen Chat 的真实后端</b>、且专为 Qwen 模型调优——要做<b>和 Qwen 配套的工具型 / RAG Agent</b>，它是最顺的范本；要通用生态或可视化托管，再看 LangChain / Dify。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 11 (学习视频) ===== -->
+    <section id="s11">
+      <h2>10 · 学习视频</h2>
+      <p class="lead">真实可点的 YouTube 视频（封面已下载到本地、ID 已校验）。诚实说明：<strong>Qwen 官方没有维护一套权威的「教程视频系列」</strong>，最权威的是官方<a href="https://qwenlm.github.io/" target="_blank">博客</a>与<a href="https://qwenlm.github.io/Qwen-Agent/en/" target="_blank">文档</a>；下面分「项目专属」与「相关主题」两类，均为社区教程。</p>
+
+      <h3>① 项目专属（Qwen-Agent 本体）</h3>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.youtube.com/watch?v=Blpyurdi4dA" target="_blank">
+          <div class="vthumb"><img src="assets/vid-qwenagent.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">框架本体</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">Qwen-Agent: Powerful Multi-Agent Framework — Function Calling, Code Interpreter, and RAG!</div>
+          <div class="vmeta"><span>社区教程</span><span>Function Calling / RAG</span></div></div>
+        </a>
+      </div>
+      <div class="note">为什么只有这一个项目专属视频：Qwen-Agent 偏「框架/工程」，社区视频多围绕「用 Qwen3 + MCP/工具」而非框架本身。下面的相关视频帮你补这条线。</div>
+
+      <h3>② 相关主题（用 Qwen 搭 Agent / 工具调用）</h3>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.youtube.com/watch?v=mNqMHG-58t4" target="_blank">
+          <div class="vthumb"><img src="assets/vid-qwen3mcp.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">对应 MCP/工具</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">How-To Use Qwen3 with MCP and Tool-Use with Ollama</div>
+          <div class="vmeta"><span>Qwen3 + MCP</span><span>本地 Ollama</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=rRfhn6ddQcY" target="_blank">
+          <div class="vthumb"><img src="assets/vid-qwen3breakdown.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">Qwen3 总览</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">NEW Qwen 3 Full Breakdown: FREE API, Local Use, MCP &amp; Agent Testing</div>
+          <div class="vmeta"><span>模型 + Agent 实测</span><span>入门总览</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=QmB2qxcQx88" target="_blank">
+          <div class="vthumb"><img src="assets/vid-modelstudio.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">搭一个 Agent</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">Alibaba Cloud Model Studio Full Tutorial: Build an AI Agent with Qwen3.5 Plus</div>
+          <div class="vmeta"><span>官方平台教程</span><span>从零搭 Agent</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=CWSYLPJz8j0" target="_blank">
+          <div class="vthumb"><img src="assets/vid-qwen3omni.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">多模态背景</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">Qwen 3 Omni — The Open AI Model That Does It ALL</div>
+          <div class="vmeta"><span>全模态模型介绍</span><span>了解生态</span></div></div>
+        </a>
+      </div>
+
+      <h3>③ 文字资料（最权威）</h3>
+      <ul class="clean">
+        <li><a href="https://qwenlm.github.io/" target="_blank">Qwen 官方 Blog</a> — 每个新模型/方法的第一手介绍</li>
+        <li><a href="https://qwenlm.github.io/Qwen-Agent/en/" target="_blank">Qwen-Agent 官方文档</a> — 指南 + DeepPlanning 智能体基准</li>
+        <li>动手最实在的资料其实是<b>仓库的 <code>examples/</code> 目录</b>（39 个示例，从 function_calling 到 RAG 到 MCP，循序渐进），配合<a href="#s6b">第 6b 节</a>的阅读顺序看。</li>
+      </ul>
+      <div class="note warn">封面与链接均已校验可用；若某视频后续被作者下架属正常现象，文字资料（官方 Blog / Docs / examples）是更稳的学习路径。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 10 (术语表) ===== -->
+    <section id="s10">
+      <h2>11 · 术语表 <span class="kbd">可搜索</span></h2>
+      <p class="lead">学新项目最大的拦路虎是黑话。这里收录本手册出现的关键术语，输入关键词即时过滤（中英文都行）。</p>
+      <input class="gsearch" id="gsearch" type="text" placeholder="🔎 搜索术语，如 MoE / 函数调用 / RAG / MCP ..." autocomplete="off" />
+      <div id="glist"></div>
+      <p class="gnone" id="gnone" style="display:none">没有匹配的术语。</p>
+    </section>
+
+    <div style="margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:13px">
+      本手册由公开资料整理，用于学习；内容与数据以 <a href="https://github.com/QwenLM" target="_blank">官方仓库</a> 为准，星标 / 更新日期实抓于 2026-06-27。媒体资源已下载至 <code>./assets/</code>，可离线打开本页。
+    </div>
+  </main>
+</div>
+
+<!-- lightbox overlay -->
+<div class="lb" id="lb">
+  <span class="x" id="lbx">&times;</span>
+  <img id="lbimg" src="" alt="" />
+  <div class="cap" id="lbcap"></div>
+  <div class="hint">点击空白处或按 Esc 关闭</div>
+</div>
+
+<script>
+  // scroll progress
+  const prog=document.getElementById('progress');
+  // scroll-spy
+  const links=[...document.querySelectorAll('nav a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  function onScroll(){
+    const h=document.documentElement;
+    prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+    let idx=0;
+    for(let i=0;i<secs.length;i++){ if(secs[i] && secs[i].getBoundingClientRect().top<=120) idx=i; }
+    links.forEach((a,i)=>a.classList.toggle('active',i===idx));
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+  // copy buttons
+  function cp(btn){
+    const code=btn.closest('.codewrap').querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(()=>{const t=btn.textContent;btn.textContent='已复制 ✓';setTimeout(()=>btn.textContent=t,1400)});
+  }
+  window.cp=cp;
+
+  // ---------- lightbox ----------
+  const lb=document.getElementById('lb'),lbimg=document.getElementById('lbimg'),lbcap=document.getElementById('lbcap');
+  document.querySelectorAll('figure img, .profile .pimg img').forEach(img=>{
+    img.addEventListener('click',e=>{
+      e.stopPropagation();
+      lbimg.src=img.src;
+      const fig=img.closest('figure');
+      const fc=fig?fig.querySelector('figcaption'):null;
+      lbcap.textContent=fc?fc.textContent:(img.alt||'');
+      lb.classList.add('open');
+    });
+  });
+  function closeLb(){lb.classList.remove('open');}
+  lb.addEventListener('click',closeLb);
+  document.getElementById('lbx').addEventListener('click',closeLb);
+  lbimg.addEventListener('click',e=>e.stopPropagation());
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
+
+  // ---------- glossary ----------
+  const GLOSSARY=[
+    {t:"LLM",en:"Large Language Model",c:"模型",d:"大语言模型，处理文本的基础模型。Qwen3 即一个 LLM 系列，是整个生态的地基。"},
+    {t:"VLM",en:"Vision-Language Model",c:"模型",d:"视觉语言模型，能同时理解图像和文字。Qwen3-VL 即看图、读文档、做视觉推理。"},
+    {t:"Omni / 全模态",en:"Omni-modal",c:"模型",d:"原生端到端处理文/图/音/视频的模型。Qwen3-Omni 是其代表。"},
+    {t:"MoE",en:"Mixture-of-Experts",c:"模型",d:"混合专家：模型由多个『专家』子网组成，每次只激活一部分，参数大但算得省。Qwen3 含 MoE 版本。"},
+    {t:"TTS / ASR",en:"Text-to-Speech / Automatic Speech Recognition",c:"语音",d:"语音合成（把文字读出来，Qwen3-TTS）与语音识别（把说话转文字，Qwen3-ASR），互为一对。"},
+    {t:"Embedding / 向量",en:"Embedding",c:"检索",d:"把文本编码成向量以做相似度检索，是 RAG 的地基。Qwen3-Embedding 即此用途。"},
+    {t:"Agent / 智能体",en:"Agent",c:"框架",d:"能自主推理、调用工具、完成多步任务的程序。Qwen-Agent 里 Agent 是把 LLM+工具+记忆编排起来的最上层类。"},
+    {t:"Tool / 工具",en:"Tool",c:"框架",d:"Agent 可调用的能力单元（代码解释器、检索、网搜…）。Qwen-Agent 里继承 BaseTool 并用 @register_tool 注册。"},
+    {t:"Function Calling",en:"函数调用 / 工具调用",c:"方法",d:"让 LLM 输出结构化的『调用某工具及其参数』，框架执行后把结果回灌。Qwen-Agent 的核心机制，默认支持并行调用。"},
+    {t:"ReAct",en:"Reason + Act",c:"方法",d:"边推理边行动：模型交替产出 Thought（想）/ Action（调工具）/ Observation（看结果）。第 6 节截图即此范式。"},
+    {t:"RAG",en:"Retrieval-Augmented Generation",c:"方法",d:"检索增强生成：先从资料里检索相关片段再让模型作答，缓解幻觉、突破上下文长度。Qwen-Agent 内置快速 RAG 与并行长文档问答。"},
+    {t:"MCP",en:"Model Context Protocol",c:"方法",d:"一种让 Agent 标准化接入外部工具/数据 server 的协议。Qwen-Agent 通过 mcp_manager 即插即用地接 filesystem / sqlite / memory 等。"},
+    {t:"Code Interpreter / 代码解释器",en:"",c:"工具",d:"让 Agent 自己写 Python 并在隔离环境执行的工具。Qwen-Agent 基于本地 Docker 容器做沙箱。"},
+    {t:"TIR",en:"Tool-Integrated Reasoning",c:"方法",d:"工具集成推理：把计算交给代码/工具来提升数学等任务正确率。Qwen2.5-Math 与 Qwen-Agent 的 TIRAgent 用到。"},
+    {t:"Assistant",en:"",c:"框架",d:"Qwen-Agent 最常用的内置 Agent：在函数调用之上加了 RAG 与读文件能力，几十行即可起一个会用工具的助手。"},
+    {t:"FnCallAgent",en:"",c:"框架",d:"实现函数调用主循环的 Agent：生成→调工具→观察→再生成，直到给出答案。Assistant 即建立在它之上。"},
+    {t:"GroupChat / Router",en:"",c:"框架",d:"多智能体协作（群聊）与按意图路由到不同 Agent 的内置实现，体现 Qwen-Agent 不止单 Agent。"},
+    {t:"BaseChatModel",en:"",c:"框架",d:"Qwen-Agent 的 LLM 适配基类，统一封装 DashScope / OpenAI 兼容端点 / VL / 本地 transformers 等后端。"},
+    {t:"DashScope",en:"",c:"中间件",d:"阿里云的模型服务平台，Qwen-Agent 默认后端（设 DASHSCOPE_API_KEY 即用）。"},
+    {t:"vLLM / Ollama",en:"",c:"中间件",d:"自部署模型的推理引擎：vLLM 面向高吞吐 GPU，Ollama 面向本地。二者都暴露 OpenAI 兼容端点供 Qwen-Agent 调用。"},
+    {t:"Gradio",en:"",c:"工具",d:"快速搭机器学习 Web Demo 的 Python 库。Qwen-Agent 用 WebUI(bot).run() 一行起网页界面（版本钉死 5.23.1）。"},
+    {t:"BrowserQwen",en:"",c:"应用",d:"基于 Qwen-Agent 的浏览器助手（Chrome 扩展 + 后端），边浏览网页边问答/总结。仓库里 TS/CSS 代码即来自它。"},
+    {t:"qwen-code",en:"",c:"应用",d:"住在终端里的开源 AI 编程 Agent（CLI，TypeScript），由 Qwen3-Coder 模型驱动，与 Qwen-Agent 是『成品工具 vs 可定制框架』的关系。"},
+    {t:"QwQ",en:"",c:"模型",d:"Qwen 的推理模型系列（长思维链），适合需要多步推理的难题。"},
+    {t:"DashScope vs OpenAI 兼容",en:"",c:"概念",d:"两种接模型的方式：前者用阿里云托管服务，后者把自部署模型暴露成 OpenAI 风格 API；Qwen-Agent 两者都支持。"},
+    {t:"Apache-2.0",en:"",c:"许可",d:"宽松开源许可证，可商用、可修改。Qwen 多数仓库（含 Qwen-Agent）采用。"},
+    {t:"Hugging Face / ModelScope",en:"",c:"平台",d:"托管模型权重与数据集的社区平台。Qwen 的权重在 huggingface.co/Qwen 与 modelscope.cn 上分发。"},
+    {t:"Qwen Chat",en:"",c:"应用",d:"Qwen 官方的聊天产品（chat.qwen.ai），其后端正是 Qwen-Agent——说明该框架经得起生产。"}
+  ];
+  const glist=document.getElementById('glist'),gnone=document.getElementById('gnone'),gsearch=document.getElementById('gsearch');
+  function renderG(q){
+    q=(q||'').trim().toLowerCase();
+    let n=0,html='';
+    GLOSSARY.forEach(g=>{
+      const hay=(g.t+' '+g.en+' '+g.d+' '+g.c).toLowerCase();
+      if(q && !hay.includes(q))return;
+      n++;
+      html+=`<div class="gitem"><span class="gcat">${g.c}</span><span class="term">${g.t}</span>${g.en?`<span class="en">${g.en}</span>`:''}<div class="def">${g.d}</div></div>`;
+    });
+    glist.innerHTML=html;
+    gnone.style.display=n?'none':'block';
+  }
+  renderG('');
+  gsearch.addEventListener('input',e=>renderG(e.target.value));
+</script>
+</body>
+</html>

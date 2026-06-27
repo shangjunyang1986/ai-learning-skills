@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OpenAI Whisper 学习手册 · 离线版</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#161922; --panel:#1b1f2a; --panel2:#212636;
+    --line:#2a3042; --txt:#e6e8ee; --muted:#9aa3b5; --dim:#717b90;
+    --accent:#7c5cff; --accent2:#22d3ee; --amber:#f5b94d; --green:#46c98b; --pink:#ff7eb6;
+    --maxw:1500px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:15.5px;
+  }
+  a{color:var(--accent2); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:"SF Mono",Consolas,"Fira Code",monospace; background:#0c0e14; border:1px solid var(--line); padding:1px 6px; border-radius:5px; font-size:.86em; color:#ffd9a8}
+  pre{margin:0}
+  pre code{display:block; padding:16px 18px; overflow-x:auto; line-height:1.6; color:#d6deea; background:#0a0c12}
+
+  /* layout */
+  .wrap{display:flex; max-width:var(--maxw); margin:0 auto; min-height:100vh}
+  /* sidebar */
+  .side{
+    width:288px; flex:0 0 288px; position:sticky; top:0; height:100vh; overflow-y:auto;
+    background:var(--bg2); border-right:1px solid var(--line); padding:26px 18px 40px;
+  }
+  .side::-webkit-scrollbar{width:8px}
+  .side::-webkit-scrollbar-thumb{background:#2c3244; border-radius:8px}
+  .brand{display:flex; align-items:center; gap:11px; margin-bottom:6px}
+  .brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex:0 0 38px}
+  .brand h1{font-size:16px;margin:0;line-height:1.25}
+  .brand p{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
+  .navsec{margin-top:22px; font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--dim); padding:0 10px 6px}
+  nav a{
+    display:flex; gap:10px; align-items:baseline; padding:8px 11px; border-radius:9px;
+    color:var(--muted); font-size:14px; margin:2px 0; border:1px solid transparent;
+  }
+  nav a .n{color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; min-width:22px}
+  nav a:hover{background:var(--panel); color:var(--txt); text-decoration:none}
+  nav a.active{background:linear-gradient(90deg,rgba(124,92,255,.18),rgba(34,211,238,.06)); color:#fff; border-color:#3a3560}
+  nav a.active .n{color:var(--accent2)}
+  .sidefoot{margin-top:26px;padding:14px 11px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .sidefoot a{color:var(--muted)}
+
+  /* content */
+  main{flex:1; min-width:0; padding:46px 56px 120px; max-width:1040px}
+  section{padding-top:30px; margin-top:10px; scroll-margin-top:24px}
+  section > h2{
+    font-size:27px; margin:0 0 4px; letter-spacing:-.01em; display:flex; align-items:center; gap:12px;
+  }
+  section > h2 .kbd{font-size:13px;color:var(--accent2);background:rgba(34,211,238,.1);border:1px solid #244b55;border-radius:7px;padding:2px 9px;font-family:monospace}
+  .lead{color:var(--muted); font-size:16px; margin:6px 0 22px; max-width:80ch}
+  h3{font-size:18px;margin:30px 0 10px;color:#fff}
+  h4{font-size:15px;margin:20px 0 8px;color:#cdd4e2}
+  p{max-width:80ch}
+  hr.div{border:0;border-top:1px solid var(--line);margin:42px 0}
+
+  /* hero */
+  .hero{
+    background:radial-gradient(120% 140% at 0% 0%,rgba(124,92,255,.22),transparent 50%),radial-gradient(120% 140% at 100% 0%,rgba(34,211,238,.14),transparent 45%),var(--panel);
+    border:1px solid var(--line); border-radius:18px; padding:30px 32px; margin-bottom:8px;
+  }
+  .hero h2{border:0;font-size:30px;margin:0 0 8px}
+  .hero .lead{margin-bottom:18px}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:120px}
+  .stat b{display:block;font-size:21px;color:#fff;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  /* cards / grid */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1100px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .card h4{margin-top:0;display:flex;align-items:center;gap:8px}
+  .card p{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);background:var(--bg2)}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;margin:3px 5px 3px 0}
+  .pill.a{background:rgba(124,92,255,.14);color:#c3b4ff;border:1px solid #3a3560}
+  .pill.b{background:rgba(34,211,238,.12);color:#9fe9f5;border:1px solid #1f5562}
+  .pill.c{background:rgba(70,201,139,.12);color:#9fe9c4;border:1px solid #1f5a44}
+  .pill.d{background:rgba(245,185,77,.12);color:#f5d49a;border:1px solid #5a4a23}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}
+  tr:hover td{background:rgba(124,92,255,.04)}
+  td .s{color:var(--amber);font-variant-numeric:tabular-nums;font-weight:600}
+
+  /* figure */
+  figure{margin:20px 0;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;position:relative}
+  figure img{display:block;width:100%;height:auto;cursor:zoom-in}
+  figure::after{content:"🔍 点击放大";position:absolute;top:8px;right:8px;background:rgba(15,17,23,.78);color:#e6e8ee;font-size:11px;padding:3px 9px;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+  figure:hover::after{opacity:1}
+  /* lightbox */
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(6,7,11,.92);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;backdrop-filter:blur(3px)}
+  .lb.open{display:flex}
+  .lb img{max-width:94vw;max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6);cursor:default;animation:lbin .18s ease}
+  @keyframes lbin{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .lb .cap{color:#cdd4e2;font-size:13.5px;margin-top:14px;max-width:80vw;text-align:center}
+  .lb .x{position:absolute;top:18px;right:24px;color:#fff;font-size:30px;line-height:1;cursor:pointer;opacity:.8}
+  .lb .x:hover{opacity:1}
+  .lb .hint{position:absolute;bottom:18px;color:var(--dim);font-size:12px}
+  figure figcaption{background:var(--panel);color:var(--muted);font-size:12.5px;padding:9px 14px;border-top:1px solid var(--line)}
+  .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:900px){.imgrow{grid-template-columns:1fr}}
+
+  /* callout */
+  .note{border-left:3px solid var(--accent);background:var(--panel);border-radius:0 11px 11px 0;padding:13px 16px;margin:16px 0;font-size:14px}
+  .note.warn{border-color:var(--amber)}
+  .note.ok{border-color:var(--green)}
+  .note b{color:#fff}
+
+  /* steps */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+  ol.steps li{position:relative;padding:0 0 4px 40px;margin-bottom:18px}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:#fff}
+
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;font-family:monospace;font-size:13px}
+  .flow .node{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:#cdd4e2}
+  .flow .arr{color:var(--accent);font-size:16px}
+  .flow .loop{background:#0a0c12;color:#f5d49a;border:1px solid #5a4a23}
+
+  .copybtn{float:right;font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:3px 9px;cursor:pointer;margin:-2px 0 6px}
+  .copybtn:hover{color:#fff;border-color:var(--accent)}
+  .codewrap{position:relative;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:14px 0}
+  .codewrap .bar{background:var(--panel);padding:7px 13px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:50;width:0}
+  .todo{color:var(--amber)}
+  ul.clean{list-style:none;padding:0}
+  ul.clean li{padding:6px 0 6px 24px;position:relative;border-bottom:1px solid rgba(42,48,66,.5)}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;color:var(--accent)}
+  /* tree */
+  .tree{background:#0a0c12;border:1px solid var(--line);border-radius:11px;padding:16px 18px;overflow-x:auto;font-family:"SF Mono",Consolas,"Fira Code",monospace;font-size:13px;line-height:1.65;color:#d6deea;margin:14px 0}
+  .tree .d{color:#9fe9f5} .tree .c{color:var(--dim)}
+  /* stack bar */
+  .bartrack{background:#0a0c12;border:1px solid var(--line);border-radius:10px;height:26px;overflow:hidden;display:flex;margin:10px 0}
+  .bartrack .seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#0a0c12;font-weight:700}
+  /* video cards */
+  .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0}
+  @media(max-width:1100px){.vgrid{grid-template-columns:1fr 1fr}}
+  @media(max-width:680px){.vgrid{grid-template-columns:1fr}}
+  .vcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;color:inherit;transition:transform .15s,border-color .15s}
+  .vcard:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
+  .vthumb{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0d0f16}
+  .vthumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+  .vcard:hover .vthumb img{transform:scale(1.05)}
+  .vthumb .play{position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;background:rgba(15,17,23,.66);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.85)}
+  .vthumb .play::after{content:"";border-left:16px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:4px}
+  .vbadge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+  .vbadge.bili{background:#fb7299}
+  .vbadge.yt{background:#ff0000}
+  .vtag{position:absolute;top:8px;right:8px;font-size:10.5px;padding:2px 8px;border-radius:20px;background:rgba(15,17,23,.78);color:#cdd4e2}
+  .vbody{padding:11px 13px}
+  .vtitle{font-size:13.5px;font-weight:600;color:#fff;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+  .vmeta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+  /* glossary */
+  .gsearch{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:12px 16px;font-size:15px;margin:8px 0 18px}
+  .gsearch:focus{outline:none;border-color:var(--accent)}
+  .gitem{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px;margin:9px 0}
+  .gitem .term{font-weight:700;color:#fff;font-size:15px}
+  .gitem .en{color:var(--accent2);font-size:12.5px;font-family:monospace;margin-left:8px}
+  .gitem .def{color:var(--muted);font-size:14px;margin-top:5px}
+  .gitem .gcat{float:right;font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+  .gnone{color:var(--dim);padding:16px 0}
+  .freshness{font-size:12px;font-variant-numeric:tabular-nums}
+  .fresh-hot{color:var(--green)} .fresh-mid{color:var(--amber)} .fresh-old{color:var(--pink)}
+  .mob{display:none}
+  @media(max-width:980px){
+    .side{display:none}
+    .mob{display:flex;position:sticky;top:0;z-index:40;background:var(--bg2);border-bottom:1px solid var(--line);padding:12px 18px;gap:10px;align-items:center}
+    main{padding:24px 20px 90px}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">W</div>
+      <div><h1>OpenAI Whisper 学习手册</h1><p>大规模弱监督的鲁棒语音识别 · 离线版</p></div>
+    </div>
+
+    <div class="navsec">深入 Whisper</div>
+    <nav id="nav">
+      <a href="#s0"><span class="n">0</span>30 秒速览</a>
+      <a href="#s1"><span class="n">1</span>这是什么</a>
+      <a href="#s2"><span class="n">2</span>能力、模型与表现</a>
+      <a href="#s3"><span class="n">3</span>架构组成</a>
+      <a href="#s4"><span class="n">4</span>技术原理</a>
+      <a href="#s5"><span class="n">5</span>代码结构与技术栈</a>
+      <a href="#s6"><span class="n">6</span>怎么部署使用</a>
+      <a href="#s7"><span class="n">7</span>我的实操记录</a>
+    </nav>
+    <div class="navsec">扩展 &amp; 参考</div>
+    <nav id="nav2">
+      <a href="#s8"><span class="n">8</span>相关 GitHub 项目</a>
+      <a href="#s9"><span class="n">9</span>学习视频</a>
+      <a href="#s10"><span class="n">10</span>术语表</a>
+    </nav>
+
+    <div class="sidefoot">
+      官方资源<br>
+      <a href="https://github.com/openai/whisper" target="_blank">GitHub 仓库</a> ·
+      <a href="https://openai.com/blog/whisper" target="_blank">官方博客</a><br>
+      <a href="https://arxiv.org/abs/2212.04356" target="_blank">论文 arXiv:2212.04356</a> ·
+      <a href="https://github.com/openai/whisper/blob/main/model-card.md" target="_blank">Model Card</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mob"><strong>OpenAI Whisper 学习手册</strong><span style="color:var(--muted);font-size:13px">— 屏幕较窄，目录已折叠，向下滚动阅读</span></div>
+
+    <!-- ===== 0 ===== -->
+    <section id="s0">
+      <div class="hero">
+        <h2>OpenAI Whisper 学习手册</h2>
+        <p class="lead">把又长又干的 README 拆成一条清晰的学习路径：从「这是什么」「能做什么」，到「架构怎么搭、代码从哪读起」，再到「怎么在本机跑起来」。Whisper 是 OpenAI 开源的<strong>通用语音识别模型</strong>——用 68 万小时弱监督数据训练，一个模型同时做<strong>多语种转写、语音翻译（→英文）、语种识别、语音活动检测</strong>。</p>
+        <figure style="margin:0 0 6px;background:#fff">
+          <img src="assets/approach.png" alt="Whisper approach 总图" />
+        </figure>
+        <div class="stats">
+          <div class="stat"><b>⭐103.7k</b><span>GitHub 星标</span></div>
+          <div class="stat"><b>680k 小时</b><span>多任务训练音频</span></div>
+          <div class="stat"><b>99 种</b><span>支持语言</span></div>
+          <div class="stat"><b>6 档</b><span>模型 tiny→large/turbo</span></div>
+          <div class="stat"><b>MIT</b><span>代码与权重许可证</span></div>
+        </div>
+      </div>
+      <div class="note">阅读建议：想快速判断「能不能用、怎么用」直接看 <a href="#s1">1</a>·<a href="#s2">2</a>·<a href="#s6">6</a>；想搞懂「它是怎么做到的、代码怎么读」看 <a href="#s3">3</a>·<a href="#s4">4</a>·<a href="#s5">5</a>。数据抓取于 <b>2026-06-27</b>，以<a href="https://github.com/openai/whisper" target="_blank">官方仓库</a>为准。</div>
+    </section>
+
+    <!-- ===== 1 ===== -->
+    <section id="s1">
+      <h2>1 · 这是什么 <span class="kbd">深入开始</span></h2>
+      <p class="lead">一句话：一个<strong>开箱即用的通用语音识别（ASR）模型 + 命令行/Python 库</strong>，把音频转成文字，顺带能翻译、识别语种。</p>
+      <p>Whisper 由 OpenAI 出品，论文《Robust Speech Recognition via Large-Scale Weak Supervision》（<a href="https://arxiv.org/abs/2212.04356" target="_blank">arXiv:2212.04356</a>）。它的核心卖点不是某个新网络结构（用的是标准 Transformer 编码器-解码器），而是<strong>「规模 + 弱监督」</strong>带来的<strong>鲁棒性</strong>：在 68 万小时、横跨多语言/多任务的网络音频上训练，使它<b>开箱就能在各种口音、背景噪声、专业术语下稳定工作</b>，无需针对你的数据微调。代码与模型权重都以 <b>MIT</b> 许可发布，可商用。</p>
+
+      <h3>一个模型，四种任务</h3>
+      <div class="grid g2" style="margin:16px 0">
+        <div class="card"><h4>🗣️ 多语种转写</h4><p>把 99 种语言的语音转成对应语言的文字（speech → same-language text）。</p></div>
+        <div class="card"><h4>🌐 语音翻译</h4><p>把非英语语音直接翻成英文文字（X → English），用 <code>--task translate</code>。</p></div>
+        <div class="card"><h4>🔎 语种识别</h4><p>不知道说的是哪国语言？模型先猜语种（<code>detect_language()</code>）。</p></div>
+        <div class="card"><h4>🔇 语音活动检测</h4><p>区分「有人说话」与「无语音/背景音乐」（VAD），减少幻觉输出。</p></div>
+      </div>
+      <div class="note">官方触点：
+        <a href="https://github.com/openai/whisper" target="_blank">GitHub</a> ·
+        <a href="https://openai.com/blog/whisper" target="_blank">博客</a> ·
+        <a href="https://arxiv.org/abs/2212.04356" target="_blank">论文</a> ·
+        <a href="https://github.com/openai/whisper/blob/main/model-card.md" target="_blank">Model Card</a> ·
+        <a href="https://colab.research.google.com/github/openai/whisper/blob/master/notebooks/LibriSpeech.ipynb" target="_blank">Colab 示例</a>
+      </div>
+    </section>
+
+    <!-- ===== 2 ===== -->
+    <section id="s2">
+      <h2>2 · 能力、模型与表现</h2>
+      <p class="lead">六个模型档位，在<strong>速度 ↔ 精度 ↔ 显存</strong>之间取舍。入门用 <code>turbo</code>（默认）或 <code>base</code> 即可。</p>
+
+      <h3>模型一览（官方 README 数据）</h3>
+      <table>
+        <thead><tr><th>档位</th><th>参数量</th><th>英文专用</th><th>多语种</th><th>所需显存</th><th>相对速度</th></tr></thead>
+        <tbody>
+          <tr><td><b>tiny</b></td><td>39 M</td><td><code>tiny.en</code></td><td><code>tiny</code></td><td>~1 GB</td><td><span class="s">~10x</span></td></tr>
+          <tr><td><b>base</b></td><td>74 M</td><td><code>base.en</code></td><td><code>base</code></td><td>~1 GB</td><td><span class="s">~7x</span></td></tr>
+          <tr><td><b>small</b></td><td>244 M</td><td><code>small.en</code></td><td><code>small</code></td><td>~2 GB</td><td><span class="s">~4x</span></td></tr>
+          <tr><td><b>medium</b></td><td>769 M</td><td><code>medium.en</code></td><td><code>medium</code></td><td>~5 GB</td><td><span class="s">~2x</span></td></tr>
+          <tr><td><b>large</b></td><td>1550 M</td><td>N/A</td><td><code>large</code></td><td>~10 GB</td><td><span class="s">1x</span></td></tr>
+          <tr><td><b>turbo</b></td><td>809 M</td><td>N/A</td><td><code>turbo</code></td><td>~6 GB</td><td><span class="s">~8x</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note ok">读法：<b>.en 英文专用模型</b>在纯英文场景更准（尤其 tiny/base）；<b>turbo</b> 是 <code>large-v3</code> 的优化版——速度接近 base、精度接近 large，但<b>不支持翻译任务</b>（要翻译用 medium/large）。CPU 也能跑 tiny/base/small，large/turbo 建议有 GPU。</div>
+
+      <h3>各语言识别表现（官方图，WER / CER）</h3>
+      <p>下图是 <code>large-v3</code> 与 <code>large-v2</code> 在 Common Voice 15 与 Fleurs 上按语言拆分的<strong>词错误率 WER</strong>（斜体为字符错误率 CER，越低越好）。可见 Whisper 在主流语言上错误率很低，但<b>表现随语言差异很大</b>——小语种明显更难。</p>
+      <figure style="background:#fff"><img src="assets/language-breakdown.svg" alt="Whisper 各语言 WER/CER 表现"><figcaption>large-v3 / large-v2 各语言 WER（越低越好）· 来源：官方仓库 language-breakdown.svg</figcaption></figure>
+    </section>
+
+    <!-- ===== 3 ===== -->
+    <section id="s3">
+      <h2>3 · 架构组成</h2>
+      <p class="lead">标准的 <strong>Transformer 编码器-解码器（seq2seq）</strong>：编码器「听」音频频谱，解码器「写」文字 token；多任务靠一串<strong>特殊 token</strong> 切换。</p>
+      <figure style="background:#fff"><img src="assets/approach.png" alt="Whisper 架构总图"><figcaption>官方 approach 图：左=多任务训练数据；中=seq2seq 网络（编码器/解码器）；下=把所有任务编码成一条 token 序列的「多任务训练格式」</figcaption></figure>
+
+      <div class="grid g3" style="margin-top:8px">
+        <div class="card"><h4>① 音频前端</h4><p>音频→重采样 16kHz→<code>log-Mel 频谱</code>→经 <b>2×Conv1D + GELU</b> 卷积茎下采样，加<b>正弦位置编码</b>，喂给编码器。每次处理 <b>30 秒</b>窗口。</p></div>
+        <div class="card"><h4>② Transformer 编码器</h4><p>若干层 <code>self-attention + MLP</code>，把频谱编码成一串音频特征向量（声学表示）。</p></div>
+        <div class="card"><h4>③ Transformer 解码器</h4><p>自回归生成文字 token：每层 <code>self-attention + cross-attention + MLP</code>，用 <b>cross-attention</b> 去「看」编码器输出，配<b>可学习位置编码</b>。</p></div>
+      </div>
+
+      <h3>多任务训练格式：用特殊 token 把任务串起来</h3>
+      <p>所有任务共用同一个解码器，靠输入序列开头的一串<strong>特殊 token</strong> 来指定「现在干哪件事」。这是 Whisper 设计的精髓：</p>
+      <div class="flow">
+        <span class="node">PREV + 历史文本</span><span class="arr">→</span>
+        <span class="node loop">SOT 转写起始</span><span class="arr">→</span>
+        <span class="node">语种 tag</span><span class="arr">→</span>
+        <span class="node">TRANSCRIBE / TRANSLATE</span><span class="arr">→</span>
+        <span class="node">(NO)TIMESTAMPS</span><span class="arr">→</span>
+        <span class="node">文本 token …</span><span class="arr">→</span>
+        <span class="node loop">EOT 结束</span>
+      </div>
+      <p style="font-size:14px;color:var(--muted)">特殊 token 包括：<code>SOT</code>(转写起始)、<code>&lt;|语种|&gt;</code>、<code>TRANSCRIBE</code> vs <code>TRANSLATE</code>、<code>NO SPEECH</code>(VAD)、<code>NO TIMESTAMPS</code> 或带时间戳的 <code>begin/end time</code> token、<code>EOT</code>(结束)。把「该用哪种任务、哪种语言、要不要时间戳」全部表达成 token，因此一个模型就能多任务。</p>
+
+      <h3>可用模型规模（结构相同，层数/宽度不同）</h3>
+      <div>
+        <span class="pill a">tiny 39M</span><span class="pill a">base 74M</span><span class="pill b">small 244M</span>
+        <span class="pill b">medium 769M</span><span class="pill c">large 1550M</span><span class="pill d">turbo 809M (large-v3 优化版)</span>
+      </div>
+    </section>
+
+    <!-- ===== 4 ===== -->
+    <section id="s4">
+      <h2>4 · 技术原理</h2>
+      <p class="lead">把「一段音频怎么变成文字」拆成四步：切窗+特征 → 编码 → 解码 → 长音频拼接。</p>
+
+      <h3>① 30 秒滑窗 + log-Mel 频谱</h3>
+      <p>模型一次只吃 <b>30 秒</b>。<code>transcribe()</code> 读入整段音频后，用一个<strong>滑动的 30 秒窗口</strong>逐段处理。每段先做 <code>log_mel_spectrogram()</code> 变成对数梅尔频谱（large-v3 用 128 个 mel，其余 80），不足 30 秒就 <code>pad_or_trim()</code> 补零。</p>
+      <div class="flow">
+        <span class="node">音频文件</span><span class="arr">→</span>
+        <span class="node">ffmpeg 解码 16kHz</span><span class="arr">→</span>
+        <span class="node">log-Mel 频谱</span><span class="arr">→</span>
+        <span class="node">pad/trim 到 30s</span><span class="arr">→</span>
+        <span class="node">编码器</span>
+      </div>
+
+      <h3>② 编码器：把声音变成向量</h3>
+      <p>频谱过 <b>2×Conv1D（含一次步长 2 的下采样）+ GELU</b> 形成卷积茎，加正弦位置编码后进入多层 Transformer 编码器，输出一串<strong>声学特征向量</strong>，供解码器反复「回看」。</p>
+
+      <h3>③ 解码器：自回归地「写出」文字</h3>
+      <p>解码器从 <code>SOT</code> 开始逐 token 生成。每步：先做<strong>语种识别</strong>（<code>detect_language()</code> 看首 token 概率），再按特殊 token 决定转写还是翻译。解码策略可选<strong>贪心或 beam search</strong>，并带<strong>温度回退（temperature fallback）</strong>：若某段输出的平均对数概率太低或压缩比异常（疑似重复/幻觉），就升高温度重采样。还会<strong>抑制非法 token</strong>（<code>SuppressTokens</code>）以稳住输出。这些都在 <code>decoding.py</code> 里。</p>
+      <div class="note">为什么会「幻觉」：在长静音或音乐段，模型可能凭语言先验编出文字。Whisper 用 <code>no_speech</code> 概率 + 压缩比/对数概率阈值来检测并跳过，这也是 VAD 任务被并入训练格式的原因。</div>
+
+      <h3>④ 长音频：逐窗解码 + 时间戳拼接</h3>
+      <ol class="steps">
+        <li><b>逐窗推理：</b>每个 30s 窗口解码出带<b>时间戳 token</b> 的文字；时间戳决定窗口如何向前滑动（接着上一段的结尾）。</li>
+        <li><b>上下文延续：</b>上一窗口的文本作为 <code>PREV</code> 提示喂入下一窗口，保持连贯（也支持自定义 <code>initial_prompt</code> 注入专有名词）。</li>
+        <li><b>词级时间戳（可选）：</b><code>timing.py</code> 用<b>cross-attention 权重 + DTW（动态时间规整）</b>把每个词对齐到音频时间，必要时用 <code>triton_ops.py</code> 的 GPU kernel 加速。</li>
+        <li><b>输出：</b><code>utils.py</code> 把结果写成 <code>txt / srt / vtt / tsv / json</code>（字幕直接可用）。</li>
+      </ol>
+    </section>
+
+    <!-- ===== 5 · 代码结构与技术栈 ===== -->
+    <section id="s5">
+      <h2>5 · 代码结构与技术栈 <span class="kbd">从这里上手读码</span></h2>
+      <p class="lead">Whisper 代码<strong>非常小而精</strong>：核心就一个 <code>whisper/</code> 包、十来个 <code>.py</code> 文件、约 16 万字节 Python，没有复杂工程脚手架——很适合逐文件读懂。</p>
+
+      <h3>技术栈：100% Python</h3>
+      <p>GitHub <code>/languages</code> API 显示仓库是纯 Python（159,343 字节）。没有 C/C++/CUDA 源码——GPU 加速来自依赖的 PyTorch / Triton，而非仓库自带。</p>
+      <div class="bartrack"><div class="seg" style="width:100%;background:linear-gradient(90deg,#7c5cff,#22d3ee)">Python 100%</div></div>
+
+      <h3>关键依赖（来自 requirements.txt / pyproject.toml）</h3>
+      <table>
+        <thead><tr><th>依赖</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><b>torch</b> (PyTorch)</td><td>核心：定义 Transformer、跑前向推理、GPU 张量计算。</td></tr>
+          <tr><td><b>tiktoken</b></td><td>OpenAI 的高速 BPE 分词器，把文字 ↔ token（含 Whisper 的多语种/特殊 token）。</td></tr>
+          <tr><td><b>numpy</b></td><td>数值数组，音频/频谱处理的基础。</td></tr>
+          <tr><td><b>numba</b></td><td>把词级时间戳里的 DTW 等热点函数 JIT 编译成机器码加速。</td></tr>
+          <tr><td><b>tqdm</b></td><td>转写进度条。</td></tr>
+          <tr><td><b>more-itertools</b></td><td>迭代器工具，用于分块/滑窗等处理。</td></tr>
+          <tr><td><b>triton</b> <span class="tag">仅 linux x86_64</span></td><td>可选：词级时间戳 DTW 的 GPU kernel；其它平台自动跳过。</td></tr>
+          <tr><td colspan="2" style="color:var(--dim)">系统依赖（非 pip）：<b>ffmpeg</b>（读取/重采样音频，必需）、<b>Rust</b>（极少数平台编译 tiktoken 时才需要）。开发额外依赖：black / flake8 / isort / pytest / scipy。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>顶层目录树（GitHub trees API，未克隆）</h3>
+      <div class="tree"><span class="d">whisper/</span>                  <span class="c"># 仓库根</span>
+├─ <span class="d">whisper/</span>              <span class="c"># ← 核心 Python 包（全部逻辑在这）</span>
+│  ├─ __init__.py        <span class="c"># load_model()、模型注册表 _MODELS、权重下载</span>
+│  ├─ __main__.py        <span class="c"># `python -m whisper` 入口 → transcribe.cli</span>
+│  ├─ audio.py           <span class="c"># load_audio(ffmpeg) / log_mel_spectrogram / pad_or_trim</span>
+│  ├─ model.py           <span class="c"># Whisper 网络本体：AudioEncoder/TextDecoder/Attention</span>
+│  ├─ decoding.py        <span class="c"># 单窗解码：贪心/beam、温度、语种识别、token 抑制（最大文件）</span>
+│  ├─ transcribe.py      <span class="c"># transcribe() 滑窗主循环 + 命令行 cli()</span>
+│  ├─ timing.py          <span class="c"># 词级时间戳（cross-attention + DTW）</span>
+│  ├─ tokenizer.py       <span class="c"># tiktoken 分词器、特殊 token、99 种语言表</span>
+│  ├─ triton_ops.py      <span class="c"># DTW 的 Triton GPU kernel（可选加速）</span>
+│  ├─ utils.py           <span class="c"># 输出写出器：txt / srt / vtt / tsv / json</span>
+│  ├─ normalizers/       <span class="c"># 英文/通用文本规范化（评测对齐用）</span>
+│  └─ assets/            <span class="c"># mel_filters.npz、*.tiktoken 词表</span>
+├─ tests/                <span class="c"># pytest（含样例音频 jfk.flac）</span>
+├─ notebooks/            <span class="c"># LibriSpeech / Multilingual_ASR 示例</span>
+├─ data/                 <span class="c"># 评测数据说明</span>
+├─ model-card.md         <span class="c"># 模型卡（能力/局限/偏见说明）</span>
+├─ pyproject.toml / requirements.txt
+└─ approach.png / language-breakdown.svg  <span class="c"># README 配图</span></div>
+
+      <h3>从这里开始读（建议顺序）</h3>
+      <ol class="steps">
+        <li><b><code>README.md</code></b> — 先建立全貌：安装、CLI 与 Python 两种用法、模型表。</li>
+        <li><b><code>whisper/__init__.py</code></b> — 看 <code>load_model()</code> 如何把 "turbo" 这种名字映射到权重 URL 并下载缓存；<code>_MODELS</code> 注册表一目了然。</li>
+        <li><b><code>whisper/transcribe.py</code></b> — 主流程入口：30 秒滑窗、温度回退、上下文拼接、以及 <code>cli()</code>。读懂它就懂了「一条命令背后发生了什么」。</li>
+        <li><b><code>whisper/audio.py</code></b> — 音频如何经 ffmpeg 变成 log-Mel 频谱（模型的真正输入）。短小好读。</li>
+        <li><b><code>whisper/model.py</code></b> — 网络结构本体：<code>AudioEncoder</code> + <code>TextDecoder</code> + <code>MultiHeadAttention</code> + <code>ModelDimensions</code>。</li>
+        <li><b><code>whisper/decoding.py</code></b> — 最核心也最大：单个 30s 窗口内的解码逻辑、beam/贪心、<code>detect_language()</code>、token 抑制。</li>
+        <li><b><code>whisper/tokenizer.py</code></b> — 多任务序列的「语法」：SOT / 语种 / TRANSCRIBE / 时间戳 / EOT 等特殊 token 定义。</li>
+        <li><b><code>whisper/timing.py</code></b>（进阶）— 想要词级时间戳再看：cross-attention + DTW 对齐。</li>
+      </ol>
+      <div class="note ok">读码窍门：<code>transcribe.py</code>（外层循环）↔ <code>decoding.py</code>（内层单窗）是一对「主从」，对照着读最快建立心智模型；<code>model.py</code> 则可对照 <a href="#s3">第 3 节</a>的架构图逐块对应。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 6 ===== -->
+    <section id="s6">
+      <h2>6 · 怎么部署使用 <span class="kbd">官方步骤</span></h2>
+      <p class="lead">环境要求：<strong>Python 3.8–3.11（pyproject 已声明支持到 3.13）</strong> + <strong>ffmpeg（必需）</strong>。纯 API 不需要 GPU；CPU 能跑 tiny/base/small，large/turbo 建议有 NVIDIA GPU。</p>
+
+      <h3>安装</h3>
+      <div class="codewrap"><div class="bar"><span>① 从 PyPI 安装（推荐）</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 安装 / 升级到最新发行版
+pip install -U openai-whisper
+
+# 或安装仓库最新提交
+# pip install git+https://github.com/openai/whisper.git</code></pre></div>
+      <div class="codewrap"><div class="bar"><span>② 安装 ffmpeg（必需，按系统选其一）</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># Ubuntu / Debian
+sudo apt update &amp;&amp; sudo apt install ffmpeg
+# macOS (Homebrew)
+brew install ffmpeg
+# Windows (Chocolatey)
+choco install ffmpeg
+# Windows (Scoop)
+scoop install ffmpeg</code></pre></div>
+      <div class="note warn">若 <code>pip install</code> 报 tiktoken 相关编译错误：你的平台可能没有预编译 wheel，需要装 <a href="https://www.rust-lang.org/learn/get-started" target="_blank">Rust</a>；若提示 <code>No module named 'setuptools_rust'</code>，先 <code>pip install setuptools-rust</code>。</div>
+
+      <h3>命令行用法</h3>
+      <div class="codewrap"><div class="bar"><span>CLI</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 转写（默认 turbo 模型）
+whisper audio.flac audio.mp3 audio.wav --model turbo
+
+# 指定语言转写
+whisper japanese.wav --language Japanese
+
+# 翻译成英文（turbo 不支持翻译，用 medium/large）
+whisper japanese.wav --model medium --language Japanese --task translate
+
+# 查看全部参数
+whisper --help</code></pre></div>
+
+      <h3>Python 用法</h3>
+      <div class="codewrap"><div class="bar"><span>高层 API：transcribe()</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>import whisper
+
+model = whisper.load_model("turbo")
+result = model.transcribe("audio.mp3")
+print(result["text"])</code></pre></div>
+      <div class="codewrap"><div class="bar"><span>低层 API：detect_language() + decode()</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>import whisper
+
+model = whisper.load_model("turbo")
+
+# 载入并裁/补到 30 秒
+audio = whisper.load_audio("audio.mp3")
+audio = whisper.pad_or_trim(audio)
+
+# 生成 log-Mel 频谱
+mel = whisper.log_mel_spectrogram(audio, n_mels=model.dims.n_mels).to(model.device)
+
+# 识别语种
+_, probs = model.detect_language(mel)
+print(f"Detected language: {max(probs, key=probs.get)}")
+
+# 解码
+options = whisper.DecodingOptions()
+result = whisper.decode(model, mel, options)
+print(result.text)</code></pre></div>
+      <ul class="clean">
+        <li>更多示例与第三方扩展（Web Demo、各平台移植）见官方 <a href="https://github.com/openai/whisper/discussions/categories/show-and-tell" target="_blank">Show and tell 讨论区</a>。</li>
+        <li>全部可用语言见 <a href="https://github.com/openai/whisper/blob/main/whisper/tokenizer.py" target="_blank">tokenizer.py</a>。</li>
+      </ul>
+    </section>
+
+    <!-- ===== 7 ===== -->
+    <section id="s7">
+      <h2>7 · 我的实操记录 <span class="kbd todo">待回填</span></h2>
+      <p class="lead">本节按计划<strong>暂不真正安装</strong>（安装 torch + 下载模型权重体积较大）。已为你生成两个脚本，等你决定真装时一键运行、再把日志回填到本节。</p>
+
+      <div class="grid g2">
+        <div class="card"><h4>🔍 scripts/check-env.ps1</h4><p>只读体检：Python 3.8+、pip、git、<b>ffmpeg（必需）</b>、可选 Rust / NVIDIA GPU、磁盘空间。<b>真装前先跑它。</b></p></div>
+        <div class="card"><h4>⬇️ scripts/setup-whisper.ps1</h4><p>建 venv → <code>pip install -U openai-whisper</code> → 用自带 <code>tests/jfk.flac</code> 跑一次转写。<b>默认 dry-run，加 -Run 才真正执行。</b></p></div>
+      </div>
+
+      <h3>建议的真装流程（Windows PowerShell）</h3>
+      <div class="codewrap"><div class="bar"><span>PowerShell</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 1. 先体检（确认 ffmpeg 已装）
+./scripts/check-env.ps1
+
+# 2. 预览将要执行的动作（不改动任何东西）
+./scripts/setup-whisper.ps1
+
+# 3. 确认无误后真正执行（建 venv + 装 openai-whisper + 跑样例）
+./scripts/setup-whisper.ps1 -Run</code></pre></div>
+
+      <h3 class="todo">▢ 回填占位（真装后补这里）</h3>
+      <ul class="clean">
+        <li class="todo">环境体检输出（check-env 截图 / 文本）</li>
+        <li class="todo">安装过程中的报错与解决（如 ffmpeg 未装 / tiktoken 需 Rust）</li>
+        <li class="todo">jfk.flac 样例转写结果（首次会下载 turbo 权重）</li>
+        <li class="todo">自己的一段音频转写效果 + 字幕（srt/vtt）截图</li>
+        <li class="todo">CPU vs GPU 速度、本机资源占用 / 耗时记录</li>
+      </ul>
+      <div class="note warn">提醒：默认 <code>turbo</code> 不支持翻译任务；要把非英语翻成英文请用 <code>medium</code> 或 <code>large</code>。首次运行会从 OpenAI 的 CDN 下载模型权重（turbo ≈ 1.5GB，large ≈ 3GB），需联网且预留磁盘。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 8 ===== -->
+    <section id="s8">
+      <h2>8 · 相关 GitHub 项目</h2>
+      <p class="lead">Whisper 火到催生了一整个生态：下面是最主流的<strong>重实现 / 加速 / 增强</strong>项目。星标与「最后更新」为抓取于 <b>2026-06-27</b> 的真实 GitHub 数据。</p>
+      <table>
+        <thead><tr><th>项目</th><th>定位 / 功能</th><th>与原版 Whisper 的差异</th><th>星标</th><th>最后更新</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><a href="https://github.com/openai/whisper" target="_blank"><b>openai/whisper</b></a></td>
+            <td>官方原版：PyTorch 参考实现 + CLI + 权重</td>
+            <td style="color:var(--accent2)">基准本体：最权威、最易读；但<b>未做推理优化</b>，大模型偏慢</td>
+            <td><span class="s">103.7k</span></td>
+            <td><span class="freshness fresh-mid">2026-04-15</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/ggml-org/whisper.cpp" target="_blank">whisper.cpp</a></td>
+            <td>C/C++ 移植（ggml），无 Python 依赖</td>
+            <td><b>CPU 上也能实时</b>、可跑在手机/浏览器/嵌入式；量化省内存</td>
+            <td><span class="s">51.1k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-26</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/SYSTRAN/faster-whisper" target="_blank">faster-whisper</a></td>
+            <td>基于 CTranslate2 的重实现</td>
+            <td>同精度下<b>快 4–5 倍、显存更省</b>，API 接近原版，生产常用</td>
+            <td><span class="s">23.9k</span></td>
+            <td><span class="freshness fresh-mid">2025-11-19</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/m-bain/whisperX" target="_blank">WhisperX</a></td>
+            <td>转写 + 精确词级时间戳 + 说话人分割</td>
+            <td>在 Whisper 之上加<b>强制对齐 + diarization</b>，适合做字幕/会议纪要</td>
+            <td><span class="s">22.7k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-26</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/huggingface/transformers" target="_blank">🤗 Transformers</a></td>
+            <td>通用模型库，内置 Whisper 实现</td>
+            <td>提供 <b>pipeline / 批处理 / 微调</b> 生态，便于和其它模型组合</td>
+            <td><span class="s">162k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-27</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/Const-me/Whisper" target="_blank">Const-me/Whisper</a></td>
+            <td>Windows DirectCompute GPGPU 桌面应用</td>
+            <td><b>免装 Python 的 Windows .exe</b>，用 D3D11 加速，适合普通用户</td>
+            <td><span class="s">10.5k</span></td>
+            <td><span class="freshness fresh-mid">2026-05-24</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/sanchit-gandhi/whisper-jax" target="_blank">whisper-jax</a></td>
+            <td>JAX 实现，面向 TPU</td>
+            <td>TPU 上<b>最高 70x</b> 加速；但<b>更新已停在 2024-04</b>，活跃度低</td>
+            <td><span class="s">4.7k</span></td>
+            <td><span class="freshness fresh-old">2024-04-03</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note warn">选型提示：<b>学原理/读代码 → 官方原版</b>（本手册）；<b>生产要快/省 → faster-whisper</b>；<b>CPU/端侧/嵌入式 → whisper.cpp</b>；<b>字幕+说话人分割 → WhisperX</b>；<b>普通 Windows 用户图形界面 → Const-me/Whisper</b>。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 9 学习视频 ===== -->
+    <section id="s9">
+      <h2>9 · 学习视频</h2>
+      <p class="lead">Whisper 极其流行，教程很多。下面是几条可点击的学习视频——<strong>YouTube 封面已下载到本地</strong>（离线可见）；Bilibili 因本环境无法直连其图床、封面未能下载，故以可点链接列出（诚实标注）。</p>
+
+      <h3>① 英文视频（封面已下载）</h3>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.youtube.com/watch?v=3sJlgHNG3pg" target="_blank">
+          <div class="vthumb"><img src="assets/vid-yt-beginners.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">入门概念</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">What is OpenAI Whisper? Speech-to-Text Explained for Beginners</div>
+          <div class="vmeta"><span>概念入门</span><span>YouTube</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=Wm_ib30y0Z0" target="_blank">
+          <div class="vthumb"><img src="assets/vid-yt-8min.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">8 分钟讲透</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">OpenAI Whisper Explained in 8 Minutes（Simplilearn）</div>
+          <div class="vmeta"><span>Simplilearn</span><span>原理速览</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=CfFT4GvCDZk" target="_blank">
+          <div class="vthumb"><img src="assets/vid-yt-asr2025.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">上手教程</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">OpenAI Whisper Open Source ASR | Speech-to-Text Tutorial 2025</div>
+          <div class="vmeta"><span>开源 ASR 实操</span><span>2025</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=JR_-KlC6Ges" target="_blank">
+          <div class="vthumb"><img src="assets/vid-yt-realtime.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">Python 实战</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">Whisper AI Tutorial: Real-Time Speech-to-Text in Python</div>
+          <div class="vmeta"><span>实时转写</span><span>Python</span></div></div>
+        </a>
+      </div>
+
+      <h3>② 中文视频（Bilibili，可点链接 · 封面未下载）</h3>
+      <ul class="clean">
+        <li><a href="https://www.bilibili.com/video/BV1Vte8zLEmw/" target="_blank">【干货】超详细 OpenAI Whisper 本地部署安装与使用超强教程</a> — UP：Ma5老师 · 视频/音频转字幕、翻译，新手向</li>
+        <li><a href="https://www.bilibili.com/video/BV1rAd6YbEoq/" target="_blank">OpenAI Whisper 本地部署！语音转文字，消费级显卡可运行，含可视化页面</a> — UP：FutureAI实验室</li>
+        <li><a href="https://www.bilibili.com/video/BV18V4y1C7M7/" target="_blank">免费开源的语音转文本软件 Whisper 的本地搭建详细教程</a> — Whisper 部署</li>
+        <li><a href="https://www.bilibili.com/video/BV1VM4y1H7GP/" target="_blank">纯内网部署 Whisper：无外网环境下安装 Whisper</a> — 离线/内网场景</li>
+        <li><a href="https://www.bilibili.com/video/BV1Vc411y7d3/" target="_blank">faster-whisper 在 Windows 中的搭建 + 与 openai-whisper 对比</a> — 加速版对照</li>
+      </ul>
+      <div class="note">最实在的「动态」学习资料其实是<b>官方 notebooks/</b>（<a href="https://colab.research.google.com/github/openai/whisper/blob/master/notebooks/LibriSpeech.ipynb" target="_blank">LibriSpeech</a> 与 Multilingual_ASR），配合<a href="#s5">第 5 节</a>的读码顺序，比泛泛看视频更对路。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 10 术语表 ===== -->
+    <section id="s10">
+      <h2>10 · 术语表 <span class="kbd">可搜索</span></h2>
+      <p class="lead">学新项目最大的拦路虎是黑话。这里收录本手册出现的关键术语，输入关键词即时过滤（中英文都行）。</p>
+      <input class="gsearch" id="gsearch" type="text" placeholder="🔎 搜索术语，如 ASR / Mel / 注意力 / 时间戳 ..." autocomplete="off" />
+      <div id="glist">
+        <!-- entries injected by JS from GLOSSARY -->
+      </div>
+      <p class="gnone" id="gnone" style="display:none">没有匹配的术语。</p>
+    </section>
+
+    <div style="margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:13px">
+      本手册由公开资料整理，用于学习；内容与数据以 <a href="https://github.com/openai/whisper" target="_blank">官方仓库</a> 为准（抓取于 2026-06-27）。媒体资源已下载至 <code>./assets/</code>，可离线打开本页。
+    </div>
+  </main>
+</div>
+
+<!-- lightbox overlay -->
+<div class="lb" id="lb">
+  <span class="x" id="lbx">&times;</span>
+  <img id="lbimg" src="" alt="" />
+  <div class="cap" id="lbcap"></div>
+  <div class="hint">点击空白处或按 Esc 关闭</div>
+</div>
+
+<script>
+  // scroll progress
+  const prog=document.getElementById('progress');
+  // scroll-spy
+  const links=[...document.querySelectorAll('nav a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  function onScroll(){
+    const h=document.documentElement;
+    prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+    let idx=0;
+    for(let i=0;i<secs.length;i++){ if(secs[i] && secs[i].getBoundingClientRect().top<=120) idx=i; }
+    links.forEach((a,i)=>a.classList.toggle('active',i===idx));
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+  // copy buttons
+  function cp(btn){
+    const code=btn.closest('.codewrap').querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(()=>{const t=btn.textContent;btn.textContent='已复制 ✓';setTimeout(()=>btn.textContent=t,1400)});
+  }
+  window.cp=cp;
+
+  // ---------- lightbox ----------
+  const lb=document.getElementById('lb'),lbimg=document.getElementById('lbimg'),lbcap=document.getElementById('lbcap');
+  document.querySelectorAll('figure img').forEach(img=>{
+    img.addEventListener('click',e=>{
+      e.stopPropagation();
+      lbimg.src=img.src;
+      const fc=img.closest('figure').querySelector('figcaption');
+      lbcap.textContent=fc?fc.textContent:'';
+      lb.classList.add('open');
+    });
+  });
+  function closeLb(){lb.classList.remove('open');}
+  lb.addEventListener('click',closeLb);
+  document.getElementById('lbx').addEventListener('click',closeLb);
+  lbimg.addEventListener('click',e=>e.stopPropagation());
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
+
+  // ---------- glossary ----------
+  const GLOSSARY=[
+    {t:"ASR",en:"Automatic Speech Recognition",c:"概念",d:"自动语音识别：把语音转成文字。Whisper 就是一个通用 ASR 模型。"},
+    {t:"Whisper",en:"",c:"概念",d:"OpenAI 开源的通用语音识别模型，用 68 万小时弱监督数据训练，一个模型做转写/翻译/语种识别/VAD。"},
+    {t:"弱监督",en:"Weak Supervision",c:"概念",d:"不靠人工精标，而用网络上海量「音频-文本」配对（质量参差）来训练。规模换鲁棒性，是 Whisper 的核心思路。"},
+    {t:"Transformer",en:"",c:"架构",d:"基于注意力机制的神经网络结构。Whisper 用标准的 Transformer 编码器-解码器。"},
+    {t:"seq2seq",en:"Sequence-to-Sequence",c:"架构",d:"序列到序列：输入一个序列（音频特征）、输出另一个序列（文字 token）。编码器读入、解码器写出。"},
+    {t:"编码器 / 解码器",en:"Encoder / Decoder",c:"架构",d:"编码器把音频频谱编成特征向量；解码器自回归地生成文字，并通过 cross-attention 回看编码器输出。"},
+    {t:"自注意力",en:"Self-Attention",c:"架构",d:"序列内部各位置互相加权关注的机制，是 Transformer 的基本单元。"},
+    {t:"交叉注意力",en:"Cross-Attention",c:"架构",d:"解码器用它去「看」编码器的音频特征，把声音对齐到要生成的文字。"},
+    {t:"对数梅尔频谱",en:"Log-Mel Spectrogram",c:"音频",d:"把音频按梅尔（接近人耳的频率刻度）分频并取对数得到的二维特征图，是 Whisper 的模型输入。large-v3 用 128 个 mel，其余 80。"},
+    {t:"Mel",en:"Mel Scale",c:"音频",d:"梅尔刻度：一种贴近人耳感知的非线性频率刻度，低频分得更细。"},
+    {t:"30 秒窗口",en:"30s Window",c:"原理",d:"Whisper 一次只处理 30 秒音频，长音频靠滑动窗口逐段处理再拼接。"},
+    {t:"pad_or_trim",en:"",c:"原理",d:"把音频补零或裁剪到固定 30 秒，使其匹配模型输入长度。"},
+    {t:"Token",en:"",c:"原理",d:"模型处理的最小文本单位（子词）。Whisper 的输出是一串 token，再解码成文字。"},
+    {t:"tiktoken",en:"",c:"工具",d:"OpenAI 的高速 BPE 分词器库，Whisper 用它做文字↔token 的编解码（含多语种与特殊 token）。"},
+    {t:"BPE",en:"Byte-Pair Encoding",c:"原理",d:"字节对编码：把常见字符组合并成子词单元的分词方法，平衡词表大小与覆盖率。"},
+    {t:"特殊 token",en:"Special Tokens",c:"原理",d:"非文字的控制 token，如 SOT(转写起始)、语种 tag、TRANSCRIBE/TRANSLATE、时间戳、EOT(结束)。Whisper 用它们把多任务编码进一条序列。"},
+    {t:"多任务训练格式",en:"Multitask Training Format",c:"原理",d:"用一串特殊 token 指定「该做哪种任务、哪种语言、要不要时间戳」，让单个模型同时具备转写/翻译/语种识别/VAD 能力。"},
+    {t:"语种识别",en:"Language Identification",c:"任务",d:"判断音频说的是哪种语言。Whisper 通过 detect_language() 看首 token 概率分布。"},
+    {t:"VAD",en:"Voice Activity Detection",c:"任务",d:"语音活动检测：判断某段是否有人说话（vs 静音/音乐）。用 no_speech 概率，减少幻觉。"},
+    {t:"语音翻译",en:"Speech Translation",c:"任务",d:"把非英语语音直接翻成英文文字（X→English），用 --task translate。turbo 不支持，需 medium/large。"},
+    {t:"WER",en:"Word Error Rate",c:"评测",d:"词错误率：识别结果与参考文本的词级差异比例，越低越好，是 ASR 的主要指标。"},
+    {t:"CER",en:"Character Error Rate",c:"评测",d:"字符错误率：以字符为单位的错误率，常用于中日韩等无空格分词的语言。"},
+    {t:"BLEU",en:"",c:"评测",d:"机器翻译质量指标，论文中用于评估 Whisper 的语音翻译效果。"},
+    {t:"beam search",en:"",c:"解码",d:"束搜索：每步保留多个候选序列再择优，通常比贪心更准但更慢。Whisper 解码可选。"},
+    {t:"贪心解码",en:"Greedy Decoding",c:"解码",d:"每步只取概率最高的 token，最快但可能非全局最优。"},
+    {t:"温度回退",en:"Temperature Fallback",c:"解码",d:"当某段输出对数概率过低或压缩比异常（疑似重复/幻觉）时，升高采样温度重试，提升鲁棒性。"},
+    {t:"幻觉",en:"Hallucination",c:"解码",d:"模型在静音/噪声段凭语言先验编造文字。Whisper 用 no_speech 概率 + 阈值检测并跳过。"},
+    {t:"词级时间戳",en:"Word-level Timestamps",c:"原理",d:"把每个词对齐到音频的精确时间，用 cross-attention 权重 + DTW 计算（timing.py）。"},
+    {t:"DTW",en:"Dynamic Time Warping",c:"原理",d:"动态时间规整：对齐两条长度不同的时间序列的经典算法，这里用于把文字对齐到音频时间。"},
+    {t:"turbo / large-v3",en:"",c:"模型",d:"turbo 是 large-v3 的优化版：速度接近 base、精度接近 large，但不支持翻译任务。"},
+    {t:".en 模型",en:"English-only",c:"模型",d:"只在英文上训练的版本（tiny.en 等），纯英文场景更准，小模型上差异尤其明显。"},
+    {t:"ffmpeg",en:"",c:"工具",d:"开源音视频处理工具，Whisper 用它读取并重采样音频到 16kHz。属系统依赖，必须单独安装。"},
+    {t:"PyTorch",en:"torch",c:"工具",d:"深度学习框架，Whisper 用它定义网络并跑推理；GPU 加速来自它而非仓库自带 CUDA 代码。"},
+    {t:"Triton",en:"",c:"工具",d:"OpenAI 的 GPU kernel 编译器，Whisper 用它给词级时间戳的 DTW 写 GPU 加速（仅 linux x86_64）。"},
+    {t:"Numba",en:"",c:"工具",d:"把 Python 数值函数 JIT 编译成机器码加速，用于时间戳计算的热点。"}
+  ];
+  const glist=document.getElementById('glist'),gnone=document.getElementById('gnone'),gsearch=document.getElementById('gsearch');
+  function renderG(q){
+    q=(q||'').trim().toLowerCase();
+    let n=0,html='';
+    GLOSSARY.forEach(g=>{
+      const hay=(g.t+' '+g.en+' '+g.d+' '+g.c).toLowerCase();
+      if(q && !hay.includes(q))return;
+      n++;
+      html+=`<div class="gitem"><span class="gcat">${g.c}</span><span class="term">${g.t}</span>${g.en?`<span class="en">${g.en}</span>`:''}<div class="def">${g.d}</div></div>`;
+    });
+    glist.innerHTML=html;
+    gnone.style.display=n?'none':'block';
+  }
+  renderG('');
+  gsearch.addEventListener('input',e=>renderG(e.target.value));
+</script>
+</body>
+</html>
