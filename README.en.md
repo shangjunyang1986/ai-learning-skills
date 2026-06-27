@@ -132,7 +132,7 @@ truth** — improve the design system here, then re-sync into each skill. See
 ## Roadmap
 
 - [x] `github-project-learn` — repos & organizations
-- [x] `domain-learn` — web-researched topic roadmaps with interactive demos (built on rigorous, cited research) — example: [3DGS](samples/3dgs-learn/index.html)
+- [x] `domain-learn` — web-researched topic roadmaps with interactive demos (built on rigorous, cited research) — examples: [3DGS](samples/domain-learn/3dgs-learn/index.html), [diffusion models](samples/domain-learn/diffusion-models-learn/index.html)
 - [ ] `textbook-learn` — book/PDF courses with active recall
 - [ ] Extract the shared design core once the second skill confirms what's truly common
 

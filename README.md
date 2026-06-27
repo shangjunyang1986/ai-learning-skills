@@ -122,7 +122,7 @@ skill。详见 [docs/adding-a-new-skill.md](docs/adding-a-new-skill.md)。
 ## 路线图
 
 - [x] `github-project-learn` —— 仓库与组织
-- [x] `domain-learn` —— 网络调研的领域学习路线（建立在严谨、可溯源的调研之上）+ 可交互 demo（样例：[3DGS](samples/3dgs-learn/index.html)）
+- [x] `domain-learn` —— 网络调研的领域学习路线（建立在严谨、可溯源的调研之上）+ 可交互 demo（样例：[3DGS](samples/domain-learn/3dgs-learn/index.html)、[扩散模型](samples/domain-learn/diffusion-models-learn/index.html)）
 - [ ] `textbook-learn` —— 书 / PDF 的课程化学习，含主动回忆
 - [ ] 等第二个 skill 验证了「真正共享的部分」后，再正式抽出共享内核
 

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>扩散模型 (Diffusion Models) 学习手册</title>
+<style>
+  :root{
+    --bg:#0e1014;--bg2:#15181f;--panel:#1a1e27;--panel2:#202635;
+    --line:#283041;--txt:#e7e9ef;--muted:#99a2b4;--dim:#6f7a90;
+    --accent:#8b7cff;--accent2:#ff7eb6;--amber:#f5b94d;--green:#46c98b;--cyan:#33e0c8;
+    --maxw:1500px;
+  }
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;line-height:1.7;font-size:15.5px}
+  a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+  code{font-family:"SF Mono",Consolas,monospace;background:#0b0d12;border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:.86em;color:#ffd9a8}
+  pre{margin:0}pre code{display:block;padding:16px 18px;overflow-x:auto;line-height:1.6;color:#d6deea;background:#090b10;border:0}
+  .wrap{display:flex;max-width:var(--maxw);margin:0 auto;min-height:100vh}
+  .side{width:292px;flex:0 0 292px;position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg2);border-right:1px solid var(--line);padding:26px 18px 40px}
+  .side::-webkit-scrollbar{width:8px}.side::-webkit-scrollbar-thumb{background:#2c3244;border-radius:8px}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .brand .logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;flex:0 0 40px}
+  .brand h1{font-size:15.5px;margin:0;line-height:1.25}.brand p{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
+  .navsec{margin-top:20px;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);padding:0 10px 6px}
+  nav a{display:flex;gap:10px;align-items:baseline;padding:8px 11px;border-radius:9px;color:var(--muted);font-size:14px;margin:2px 0;border:1px solid transparent}
+  nav a .n{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums;min-width:20px}
+  nav a:hover{background:var(--panel);color:var(--txt);text-decoration:none}
+  nav a.active{background:linear-gradient(90deg,rgba(139,124,255,.18),rgba(255,126,182,.05));color:#fff;border-color:#403566}
+  nav a.active .n{color:var(--accent2)}
+  .sidefoot{margin-top:24px;padding:14px 11px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}.sidefoot a{color:var(--muted)}
+  main{flex:1;min-width:0;padding:46px 56px 120px;max-width:1060px}
+  section{padding-top:30px;margin-top:10px;scroll-margin-top:24px}
+  section>h2{font-size:27px;margin:0 0 4px;letter-spacing:-.01em;display:flex;align-items:center;gap:12px}
+  section>h2 .kbd{font-size:13px;color:var(--accent2);background:rgba(255,126,182,.1);border:1px solid #5a2a40;border-radius:7px;padding:2px 9px;font-family:monospace}
+  .lead{color:var(--muted);font-size:16px;margin:6px 0 22px;max-width:80ch}
+  h3{font-size:18px;margin:30px 0 10px;color:#fff}h4{font-size:15px;margin:18px 0 8px;color:#cdd4e2}
+  p{max-width:82ch}hr.div{border:0;border-top:1px solid var(--line);margin:42px 0}
+  .hero{background:radial-gradient(120% 140% at 0% 0%,rgba(139,124,255,.22),transparent 50%),radial-gradient(120% 140% at 100% 0%,rgba(255,126,182,.14),transparent 45%),var(--panel);border:1px solid var(--line);border-radius:18px;padding:30px 32px;margin-bottom:8px}
+  .hero h2{border:0;font-size:30px;margin:0 0 8px}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:120px}
+  .stat b{display:block;font-size:18px;color:#fff}.stat span{font-size:12px;color:var(--muted)}
+  .grid{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1100px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .card h4{margin-top:0;display:flex;align-items:center;gap:8px}.card p{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;margin:3px 5px 3px 0}
+  .pill.a{background:rgba(139,124,255,.14);color:#cdc4ff;border:1px solid #403566}
+  .pill.b{background:rgba(255,126,182,.12);color:#ffb3d4;border:1px solid #5a2a40}
+  .pill.c{background:rgba(70,201,139,.12);color:#9fe9c4;border:1px solid #1f5a44}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}
+  tr:hover td{background:rgba(139,124,255,.04)}
+  td .s{color:var(--amber);font-variant-numeric:tabular-nums;font-weight:600}
+  figure{margin:20px 0;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;position:relative}
+  figure img{display:block;width:100%;height:auto;cursor:zoom-in}
+  figure figcaption{background:var(--panel);color:var(--muted);font-size:12.5px;padding:9px 14px;border-top:1px solid var(--line)}
+  figure::after{content:"🔍 点击放大";position:absolute;top:8px;right:8px;background:rgba(14,16,20,.8);color:#e7e9ef;font-size:11px;padding:3px 9px;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+  figure:hover::after{opacity:1}
+  .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:900px){.imgrow{grid-template-columns:1fr}}
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(6,7,11,.93);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;backdrop-filter:blur(3px)}
+  .lb.open{display:flex}.lb img{max-width:94vw;max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .lb .cap{color:#cdd4e2;font-size:13.5px;margin-top:14px;max-width:80vw;text-align:center}
+  .lb .x{position:absolute;top:18px;right:24px;color:#fff;font-size:30px;cursor:pointer;opacity:.8}
+  .note{border-left:3px solid var(--accent);background:var(--panel);border-radius:0 11px 11px 0;padding:13px 16px;margin:16px 0;font-size:14px}
+  .note.warn{border-color:var(--amber)}.note.ok{border-color:var(--green)}.note b{color:#fff}
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+  ol.steps li{position:relative;padding:0 0 4px 42px;margin-bottom:18px}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:#fff}
+  .eq{background:#0b0d12;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:8px 0;font-family:"SF Mono",Consolas,monospace;font-size:13.5px;color:#bfe9df;overflow-x:auto}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;font-family:monospace;font-size:13px}
+  .flow .node{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:#cdd4e2}.flow .arr{color:var(--accent);font-size:16px}
+  .codewrap{position:relative;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:14px 0}
+  .codewrap .bar{background:var(--panel);padding:7px 13px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .copybtn{font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:3px 9px;cursor:pointer}.copybtn:hover{color:#fff;border-color:var(--accent)}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:50;width:0}
+  ul.clean{list-style:none;padding:0}ul.clean li{padding:6px 0 6px 24px;position:relative;border-bottom:1px solid rgba(40,48,65,.5)}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;color:var(--accent)}
+  .roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}@media(max-width:1000px){.roadmap{grid-template-columns:1fr 1fr}}
+  .rstage{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 16px;border-top:3px solid var(--accent)}
+  .rstage:nth-child(2){border-top-color:var(--accent2)}.rstage:nth-child(3){border-top-color:var(--green)}.rstage:nth-child(4){border-top-color:var(--amber)}
+  .rstage h4{margin:0 0 8px;color:#fff}.rstage ul{margin:0;padding-left:18px;font-size:13px;color:var(--muted)}.rstage ul li{margin:5px 0}
+  .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0}@media(max-width:1100px){.vgrid{grid-template-columns:1fr 1fr}}@media(max-width:680px){.vgrid{grid-template-columns:1fr}}
+  .vcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;color:inherit;transition:transform .15s,border-color .15s}
+  .vcard:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
+  .vthumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:linear-gradient(135deg,#2a2147,#3a2336)}
+  .vthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .vthumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px}
+  .vthumb .play{position:absolute;inset:0;margin:auto;width:50px;height:50px;border-radius:50%;background:rgba(14,16,20,.66);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.85)}
+  .vthumb .play::after{content:"";border-left:15px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
+  .vbadge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+  .vbadge.yt{background:#ff0000}.vbadge.bili{background:#fb7299}
+  .vtag{position:absolute;top:8px;right:8px;font-size:10.5px;padding:2px 8px;border-radius:20px;background:rgba(14,16,20,.78);color:#cdd4e2}
+  .vbody{padding:11px 13px}.vtitle{font-size:13.5px;font-weight:600;color:#fff;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+  .vmeta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+  .gsearch{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:12px 16px;font-size:15px;margin:8px 0 18px}
+  .gsearch:focus{outline:none;border-color:var(--accent)}
+  .gitem{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px;margin:9px 0}
+  .gitem .term{font-weight:700;color:#fff;font-size:15px}.gitem .en{color:var(--cyan);font-size:12.5px;font-family:monospace;margin-left:8px}
+  .gitem .def{color:var(--muted);font-size:14px;margin-top:5px}.gitem .gcat{float:right;font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+  .gnone{color:var(--dim);padding:16px 0}
+  .demo{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:18px 0;display:grid;grid-template-columns:1fr 280px;gap:18px}
+  @media(max-width:860px){.demo{grid-template-columns:1fr}}
+  .demo canvas{width:100%;height:auto;border-radius:10px;background:#05070b;display:block;border:1px solid var(--line);image-rendering:auto}
+  .demo .stage{font-size:12px;color:var(--dim);margin:6px 2px 0}
+  .ctrl{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .ctrl label{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 5px;font-weight:600}.ctrl label:first-child{margin-top:0}
+  .ctrl input[type=range]{width:100%;accent-color:var(--accent2)}.ctrl .val{color:#fff;font-variant-numeric:tabular-nums}
+  .ctrl button{width:100%;margin-top:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:0;border-radius:9px;padding:9px;font-weight:700;cursor:pointer;font-size:13.5px}
+  .ctrl button.alt{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .ctrl .read{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .ctrl .read b{color:var(--accent2);font-variant-numeric:tabular-nums}
+  .bar2{height:8px;border-radius:5px;background:#0b0d12;overflow:hidden;margin:5px 0 2px;display:flex}
+  .bar2 .sig{background:var(--cyan)}.bar2 .noi{background:var(--accent2)}
+  .mob{display:none}
+  @media(max-width:980px){.side{display:none}.mob{display:flex;position:sticky;top:0;z-index:40;background:var(--bg2);border-bottom:1px solid var(--line);padding:12px 18px;gap:10px;align-items:center}main{padding:24px 20px 90px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <aside class="side">
+    <div class="brand"><div class="logo">∿</div><div><h1>扩散模型 学习手册</h1><p>从入门到实践 · domain-learn 样例</p></div></div>
+    <div class="navsec">认识它</div>
+    <nav>
+      <a href="#s0"><span class="n">0</span>30 秒速览</a>
+      <a href="#s1"><span class="n">1</span>这是什么 &amp; 为什么重要</a>
+      <a href="#s2"><span class="n">2</span>学习路线图</a>
+    </nav>
+    <div class="navsec">搞懂原理</div>
+    <nav>
+      <a href="#s3"><span class="n">3</span>核心原理</a>
+      <a href="#s4"><span class="n">4</span>🎮 动手玩：加噪/去噪</a>
+      <a href="#s5"><span class="n">5</span>里程碑 &amp; 结果</a>
+    </nav>
+    <div class="navsec">动手 &amp; 前沿</div>
+    <nav>
+      <a href="#s6"><span class="n">6</span>开源生态与工具</a>
+      <a href="#s7"><span class="n">7</span>动手实践</a>
+      <a href="#s8"><span class="n">8</span>前沿方向</a>
+    </nav>
+    <div class="navsec">参考</div>
+    <nav>
+      <a href="#s9"><span class="n">9</span>学习视频</a>
+      <a href="#s10"><span class="n">10</span>术语表</a>
+    </nav>
+    <div class="sidefoot">权威出处<br>
+      <a href="https://arxiv.org/abs/2006.11239" target="_blank">DDPM 论文 (2006.11239)</a><br>
+      <a href="https://arxiv.org/abs/2112.10752" target="_blank">Latent Diffusion (2112.10752)</a><br>
+      <a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/" target="_blank">Lilian Weng 数学详解</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mob"><strong>扩散模型 学习手册</strong><span style="color:var(--muted);font-size:13px">— 屏幕较窄，目录已折叠</span></div>
+
+    <!-- 0 -->
+    <section id="s0">
+      <div class="hero">
+        <h2>扩散模型 (Diffusion Models)</h2>
+        <p class="lead">Stable Diffusion、DALL·E 2、Sora 背后的生成范式。一句话：<b>它通过「学会把一张图一步步加噪直到变成纯噪声」的反过程——从纯噪声出发，逐步去噪，"无中生有"地造出图像。</b>训练只需让网络去<b>预测被加进去的噪声</b>。</p>
+        <figure style="margin:6px 0 0"><img src="assets/dm-sd-samples.png" alt="Stable Diffusion samples"><figcaption>Stable Diffusion（潜在扩散模型）文生图样例（来源：CompVis/stable-diffusion）</figcaption></figure>
+        <div class="stats">
+          <div class="stat"><b>NeurIPS 2020</b><span>DDPM · Ho et al.</span></div>
+          <div class="stat"><b>学反向去噪</b><span>U-Net 预测噪声 ε</span></div>
+          <div class="stat"><b>Stable Diffusion</b><span>潜在扩散的产物</span></div>
+          <div class="stat"><b>质量高 · 采样慢</b><span>多步迭代的代价</span></div>
+        </div>
+      </div>
+      <div class="note">用法：<b>0→2</b> 建直觉、规划路线；<b>3→5</b> 搞懂原理（含<a href="#s4">可交互的加噪/去噪 demo</a>）；<b>6→8</b> 动手与追前沿。所有公式/数据/链接来自论文与权威讲解，存疑处已标注。</div>
+    </section>
+
+    <!-- 1 -->
+    <section id="s1">
+      <h2>1 · 这是什么 &amp; 为什么重要</h2>
+      <p class="lead">扩散模型是一类<strong>生成模型</strong>：学习数据分布，从而能<strong>生成全新样本</strong>（图像、音频、视频…）。它的绝招是把"生成"这件难事，拆成许多个"去掉一点噪声"的简单小步。</p>
+      <p>核心直觉：拿一张真实图片，<b>一点点加高斯噪声</b>，加很多步后变成纯静电雪花（前向过程，<b>不需要学习</b>，是固定的数学）。训练一个神经网络去<b>反转这个过程</b>——给它一张带噪图，让它预测"刚加进去的噪声是什么"。要生成新图，就从纯噪声出发，反复用网络去掉一点预测噪声，最终一张清晰图像"浮现"出来。<b>所有的学习，都在这个反向去噪里。</b></p>
+      <figure style="background:#fff"><img src="assets/dm-noising.png" alt="forward noising"><figcaption>前向过程：真实图像 → 逐步加噪 → 纯噪声（来源：Lilian Weng 博客）</figcaption></figure>
+      <h3>和 GAN / VAE 的对比</h3>
+      <table>
+        <thead><tr><th>维度</th><th>扩散模型</th><th>GAN</th><th>VAE</th></tr></thead>
+        <tbody>
+          <tr><td><b>训练稳定性</b></td><td><span class="s">高</span>（单一 MSE 回归损失）</td><td>较低（对抗博弈，易模式崩溃）</td><td>高（ELBO）</td></tr>
+          <tr><td><b>样本质量</b></td><td>顶尖（DDPM CIFAR-10 FID 3.17）</td><td>高（曾长期领先）</td><td>通常较糊</td></tr>
+          <tr><td><b>多样性/覆盖</b></td><td>强（似然族）</td><td>较弱（易模式崩溃）</td><td>较好</td></tr>
+          <tr><td><b>采样速度</b></td><td>慢（要跑很多步）</td><td>快（一次前向）</td><td>快（一次前向）</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:13px;color:var(--dim)">说明：稳定性/多样性/速度为社区共识性质，非单一数字；FID 来自 <a href="https://arxiv.org/abs/2006.11239" target="_blank">DDPM 论文</a>。对比表参考 <a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/" target="_blank">Lilian Weng</a>。</p>
+    </section>
+
+    <!-- 2 -->
+    <section id="s2">
+      <h2>2 · 学习路线图</h2>
+      <p class="lead">扩散模型数学密度不低，按四段走最稳；每段配了对应资源（详链见 <a href="#s9">视频</a> 与各节）。</p>
+      <div class="roadmap">
+        <div class="rstage"><h4>① 入门 · 建直觉</h4><ul>
+          <li>Computerphile《AI 图像生成原理》10 分钟</li>
+          <li>AssemblyAI 入门博客</li>
+          <li>(中文) 李宏毅 Diffusion 课</li>
+          <li>玩本页 <a href="#s4">加噪/去噪 demo</a></li>
+        </ul></div>
+        <div class="rstage"><h4>② 进阶 · 懂数学</h4><ul>
+          <li>黄佳斌《How I Understand Diffusion》</li>
+          <li><a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/" target="_blank">Lilian Weng 全套公式</a></li>
+          <li><a href="https://arxiv.org/abs/2208.11970" target="_blank">Calvin Luo 统一视角</a>（ELBO/三种目标）</li>
+        </ul></div>
+        <div class="rstage"><h4>③ 实践 · 跑起来</h4><ul>
+          <li><a href="https://huggingface.co/blog/annotated-diffusion" target="_blank">HF 注释版 DDPM</a>（PyTorch 从零）</li>
+          <li><a href="https://github.com/huggingface/diffusion-models-class" target="_blank">HF Diffusers 课</a></li>
+          <li>用 🤗 diffusers 跑推理/微调</li>
+        </ul></div>
+        <div class="rstage"><h4>④ 前沿 · 追新</h4><ul>
+          <li><a href="https://arxiv.org/abs/2112.10752" target="_blank">潜在扩散/Stable Diffusion</a></li>
+          <li>无分类器引导、一致性模型</li>
+          <li><a href="https://arxiv.org/abs/2209.00796" target="_blank">综述</a> 建立全景</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <hr class="div">
+
+    <!-- 3 -->
+    <section id="s3">
+      <h2>3 · 核心原理 <span class="kbd">原理</span></h2>
+      <p class="lead">五块拼起来就懂了：前向加噪（固定）、反向去噪（学习）、训练目标（预测噪声）、采样（DDPM/DDIM）、以及让它能听懂文字与跑得起的两块工程（引导 + 潜在空间）。</p>
+      <figure style="background:#fff"><img src="assets/dm-chain.png" alt="forward/reverse Markov chain"><figcaption>前向 q（加噪）与反向 p<sub>θ</sub>（去噪）的马尔可夫链（来源：Lilian Weng 博客 / DDPM）</figcaption></figure>
+      <ol class="steps">
+        <li><b>前向过程（加噪，不学习）。</b>每步加一点高斯噪声，按方差调度 β<sub>t</sub>。关键是有<b>闭式解</b>，可一步直接采到任意噪声等级：
+          <div class="eq">x_t = √(ᾱ_t)·x₀ + √(1−ᾱ_t)·ε,&nbsp;&nbsp; ε~N(0,I),&nbsp; ᾱ_t = ∏(1−β_i)</div>
+          ᾱ_t 从 1（清晰）平滑降到 0（纯噪声）——本页第 4 节的 demo 就是这条公式。</li>
+        <li><b>反向过程（去噪，要学习）。</b>用一个神经网络（通常是 <b>U-Net</b>）<b>预测被加进去的噪声 ε_θ(x_t,t)</b>，从而能从 x_t 估计出更干净的 x_{t-1}。</li>
+        <li><b>训练目标超简单。</b>就是让"预测的噪声"逼近"真实加的噪声"，一个 MSE：
+          <div class="eq">L_simple = E [ ‖ ε − ε_θ(x_t, t) ‖² ]</div>
+          随机取一张图、随机取一个 t、随机加噪，让网络把噪声猜回来即可。</li>
+        <li><b>采样：DDPM vs DDIM。</b>生成时从纯噪声反复去噪。原版 <b>DDPM</b> 随机、要几百上千步；<b>DDIM</b> 用确定性的非马尔可夫过程，<b>同样的训练</b>下可少跑很多步（约 <b>10–50×</b> 加速）。</li>
+        <li><b>让它听懂文字 + 跑得起。</b><b>无分类器引导(Classifier-Free Guidance)</b>：同一网络兼训"有条件/无条件"，采样时按强度 w 外推，把生成往文字描述上拽。<b>潜在扩散(Latent Diffusion)</b>：把整个扩散搬到 VAE 压缩后的<b>潜在空间</b>里跑、用<b>交叉注意力</b>注入文字条件——这就是 Stable Diffusion 又快又强的关键。</li>
+      </ol>
+      <div class="imgrow">
+        <figure style="background:#fff"><img src="assets/dm-algo.png" alt="DDPM algorithm"><figcaption>DDPM 训练与采样算法（来源：Lilian Weng 博客）</figcaption></figure>
+        <figure style="background:#fff"><img src="assets/dm-ldm-arch.png" alt="latent diffusion architecture"><figcaption>潜在扩散架构：VAE 编解码 + U-Net + 交叉注意力条件（来源：Lilian Weng 博客）</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- 4 demo -->
+    <section id="s4">
+      <h2>4 · 🎮 动手玩：加噪 / 去噪 <span class="kbd">可交互</span></h2>
+      <p class="lead">拖动时间步 <b>t</b>：从 <b>t=0</b>（清晰图）到 <b>t=T</b>（纯噪声），就是<strong>前向加噪</strong>过程，严格对应上面那条 <code>x_t=√ᾱ·x₀+√(1−ᾱ)·ε</code>。点「▶ 去噪生成」让 t 从 T 回到 0，看图像如何从噪声里"浮现"出来——这就是<strong>反向生成</strong>的直觉。</p>
+      <div class="demo">
+        <div>
+          <canvas id="diffCanvas" width="380" height="250"></canvas>
+          <div class="stage">下方蓝/粉条 = 当前「信号 √ᾱ」与「噪声 √(1−ᾱ)」的占比。t 越大噪声越多。</div>
+          <div class="bar2"><div class="sig" id="sigBar" style="width:100%"></div><div class="noi" id="noiBar" style="width:0%"></div></div>
+        </div>
+        <div class="ctrl">
+          <label>时间步 t：<span class="val" id="tVal">0</span> / 100</label>
+          <input type="range" id="tRange" min="0" max="100" value="0" step="1">
+          <button id="playBtn">▶ 去噪生成（T→0）</button>
+          <button id="noiseBtn" class="alt">🎲 换一组噪声</button>
+          <div class="read">
+            信号 √ᾱ_t：<b id="sigVal">1.00</b><br>
+            噪声 √(1−ᾱ_t)：<b id="noiVal">0.00</b><br>
+            <span style="font-size:12px;color:var(--dim)">采用 cosine 噪声调度。</span>
+          </div>
+        </div>
+      </div>
+      <div class="note ok">观察：① 前向（拖 t 变大）是<b>真实且确定的数学</b>——任何 t 都能由公式一步算出；② 反向（点播放）这里是<b>沿已知轨迹回放</b>来建立直觉——<b>真正的扩散模型并不知道原图，而是用训练好的 U-Net 在每步"预测噪声"，从纯噪声里一点点猜出图像</b>。这正是"难在反向、学的就是反向"。</div>
+    </section>
+
+    <!-- 5 -->
+    <section id="s5">
+      <h2>5 · 里程碑 &amp; 结果</h2>
+      <p class="lead">从 2020 的 DDPM 到文生图爆发，几条可溯源的主线（均附论文链接）。</p>
+      <table>
+        <thead><tr><th>年份</th><th>工作</th><th>意义</th><th>出处</th></tr></thead>
+        <tbody>
+          <tr><td>2019</td><td>NCSN（分数模型）</td><td>用"估计分数 + 朗之万采样"生成，扩散的另一条根</td><td><a href="https://proceedings.neurips.cc/paper/2019/hash/3001ef257407d5a371a96dcd947c7d93-Abstract.html" target="_blank">NeurIPS'19</a></td></tr>
+          <tr><td><b>2020</b></td><td><b>DDPM</b></td><td>现代扩散奠基；CIFAR-10 <span class="s">FID 3.17 / IS 9.46</span>，证明能比肩 GAN</td><td><a href="https://arxiv.org/abs/2006.11239" target="_blank">2006.11239</a></td></tr>
+          <tr><td>2020</td><td>DDIM</td><td>确定性少步采样，约 10–50× 提速</td><td><a href="https://arxiv.org/abs/2010.02502" target="_blank">2010.02502</a></td></tr>
+          <tr><td>2021</td><td>SDE 统一</td><td>把离散扩散统一进连续随机微分方程视角</td><td><a href="https://arxiv.org/abs/2011.13456" target="_blank">2011.13456</a></td></tr>
+          <tr><td>2022</td><td>无分类器引导</td><td>不靠额外分类器即可强条件生成（文生图关键）</td><td><a href="https://arxiv.org/abs/2207.12598" target="_blank">2207.12598</a></td></tr>
+          <tr><td><b>2022</b></td><td><b>潜在扩散 / Stable Diffusion</b></td><td>潜在空间 + 交叉注意力，开源引爆文生图</td><td><a href="https://arxiv.org/abs/2112.10752" target="_blank">2112.10752</a></td></tr>
+          <tr><td>2023</td><td>一致性模型</td><td>一步/少步生成（CIFAR-10 一步 FID 3.55）</td><td><a href="https://arxiv.org/abs/2303.01469" target="_blank">2303.01469</a></td></tr>
+          <tr><td>2023</td><td>ControlNet</td><td>用边缘/深度/姿态等空间条件精确控制生成</td><td><a href="https://arxiv.org/abs/2302.05543" target="_blank">2302.05543</a></td></tr>
+        </tbody>
+      </table>
+      <div class="note">注：DALL·E 2、Imagen、Sora 等也基于扩散，但本页未逐一核验其原始论文，故不在表中断言细节。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- 6 -->
+    <section id="s6">
+      <h2>6 · 开源生态与工具</h2>
+      <p class="lead">星标/更新均为 GitHub API 真实抓取于 <b>2026-06-27</b>。按用途分组，先看你要干嘛。</p>
+      <h3>① 核心库　② 创作 UI</h3>
+      <table>
+        <thead><tr><th>仓库</th><th>用来干嘛</th><th>星标</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/huggingface/diffusers" target="_blank"><b>huggingface/diffusers</b></a></td><td>事实标准 Python 库：加载/训练/推理各种扩散模型，写代码就用它</td><td><span class="s">33.9k</span></td></tr>
+          <tr><td><a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui" target="_blank">AUTOMATIC1111 webui</a></td><td>经典全能 Stable Diffusion 网页 UI（不写代码也能玩）</td><td><span class="s">163.9k</span></td></tr>
+          <tr><td><a href="https://github.com/comfyanonymous/ComfyUI" target="_blank">ComfyUI</a></td><td>最强节点/图工作流 GUI + API 后端</td><td><span class="s">118.5k</span></td></tr>
+          <tr><td><a href="https://github.com/invoke-ai/InvokeAI" target="_blank">InvokeAI</a></td><td>面向创作者的专业 UI/引擎</td><td><span class="s">27.5k</span></td></tr>
+        </tbody>
+      </table>
+      <h3>③ 条件控制　④ 快速采样　⑤ 基座模型</h3>
+      <table>
+        <thead><tr><th>仓库</th><th>用来干嘛</th><th>星标</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/lllyasviel/ControlNet" target="_blank">ControlNet</a></td><td>用边缘/深度/姿态等空间条件精确控制生成</td><td><span class="s">34.0k</span></td></tr>
+          <tr><td><a href="https://github.com/openai/consistency_models" target="_blank">consistency_models</a></td><td>一步/少步生成研究代码（OpenAI）</td><td><span class="s">6.5k</span></td></tr>
+          <tr><td><a href="https://github.com/luosiallen/latent-consistency-model" target="_blank">latent-consistency-model</a></td><td>SD 上 2–4 步出图</td><td><span class="s">4.6k</span></td></tr>
+          <tr><td><a href="https://github.com/CompVis/stable-diffusion" target="_blank">CompVis/stable-diffusion</a></td><td>初代潜在文生图模型参考代码</td><td><span class="s">73.1k</span></td></tr>
+          <tr><td><a href="https://github.com/Stability-AI/generative-models" target="_blank">Stability-AI/generative-models</a></td><td>SDXL / Stable Video Diffusion 等（活跃基座）</td><td><span class="s">27.2k</span></td></tr>
+        </tbody>
+      </table>
+      <h3>不想装环境？在线试</h3>
+      <ul class="clean">
+        <li><a href="https://huggingface.co/spaces/latent-consistency/lcm" target="_blank">HuggingFace · LCM 实时出图 Space</a>（几步成图，最直观）</li>
+        <li><a href="https://huggingface.co/spaces?search=stable+diffusion" target="_blank">HuggingFace Spaces · 搜 stable diffusion</a>（一堆现成 demo）</li>
+        <li>训练/微调（LoRA、DreamBooth）：<a href="https://github.com/kohya-ss/sd-scripts" target="_blank">kohya-ss/sd-scripts</a>（⭐7.1k）</li>
+      </ul>
+      <p style="font-size:12.5px;color:var(--dim)">注：SD 2.x 旧基座仓库 <code>Stability-AI/stablediffusion</code> 已无法访问（删除/转私），其谱系由 <code>generative-models</code> 接续。</p>
+    </section>
+
+    <!-- 7 -->
+    <section id="s7">
+      <h2>7 · 动手实践</h2>
+      <p class="lead">最快路径：用 🤗 <b>diffusers</b> 几行代码跑文生图；想吃透就跟 HF 的「注释版 DDPM」从零搭一遍。</p>
+      <div class="codewrap"><div class="bar"><span>用 diffusers 跑 Stable Diffusion（需 GPU + 模型权重）</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>pip install diffusers transformers accelerate torch
+
+from diffusers import StableDiffusionPipeline
+import torch
+pipe = StableDiffusionPipeline.from_pretrained(
+    "stable-diffusion-v1-5/stable-diffusion-v1-5", torch_dtype=torch.float16
+).to("cuda")
+img = pipe("a cozy cabin in a snowy forest, golden hour").images[0]
+img.save("out.png")</code></pre></div>
+      <ul class="clean">
+        <li>从零理解实现：<a href="https://huggingface.co/blog/annotated-diffusion" target="_blank">The Annotated Diffusion Model</a>（PyTorch 在 Fashion-MNIST 上搭 DDPM）</li>
+        <li>系统课程：<a href="https://github.com/huggingface/diffusion-models-class" target="_blank">HF Diffusion Models Course</a>（4 单元：Diffusers→从零→微调引导→Stable Diffusion）</li>
+        <li>不写代码玩：装 <a href="https://github.com/comfyanonymous/ComfyUI" target="_blank">ComfyUI</a> 或 <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui" target="_blank">A1111 webui</a></li>
+      </ul>
+      <div class="note warn">本页是<b>学习样例</b>，未在本机真正跑模型（文生图需 GPU + 数 GB 权重）。真要跑：先 <code>pip install diffusers</code>，用上面的最小脚本验证；显存不够就用在线 Space 或 LCM 少步模型。</div>
+    </section>
+
+    <!-- 8 -->
+    <section id="s8">
+      <h2>8 · 前沿方向</h2>
+      <div class="grid g2">
+        <div class="card"><h4>⚡ 更快采样</h4><p><a href="https://arxiv.org/abs/2303.01469" target="_blank">一致性模型</a> / <a href="https://arxiv.org/abs/2310.04378" target="_blank">潜在一致性模型(LCM)</a>——把几十步压到 1–4 步，逼近实时生成。</p></div>
+        <div class="card"><h4>🎮 可控生成</h4><p><a href="https://arxiv.org/abs/2302.05543" target="_blank">ControlNet</a>——用边缘/深度/姿态/分割图做空间条件，精确控制构图。</p></div>
+        <div class="card"><h4>🎬 视频扩散</h4><p><a href="https://arxiv.org/abs/2204.03458" target="_blank">Video Diffusion Models</a> 及后续——把扩散扩展到时间维生成视频（Sora 等的方向）。</p></div>
+        <div class="card"><h4>🗺️ 全景与综述</h4><p><a href="https://arxiv.org/abs/2209.00796" target="_blank">综述</a>（高效采样/似然/结构化数据/应用）+ <a href="https://arxiv.org/abs/2208.11970" target="_blank">统一视角教程</a>。</p></div>
+      </div>
+    </section>
+
+    <hr class="div">
+
+    <!-- 9 -->
+    <section id="s9">
+      <h2>9 · 学习视频</h2>
+      <p class="lead">YouTube（英文，封面已下载到本地）+ Bilibili（中文，链接）。</p>
+      <h3>英文（YouTube）</h3>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.youtube.com/watch?v=1CIpzeNxIhU" target="_blank"><div class="vthumb"><img src="assets/vid-computerphile.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">入门直觉</span><span class="play"></span></div><div class="vbody"><div class="vtitle">How AI Image Generators Work (Stable Diffusion / DALL·E)</div><div class="vmeta"><span>Computerphile</span><span>入门</span></div></div></a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=i2qSxMVeVLI" target="_blank"><div class="vthumb"><img src="assets/vid-jiabin.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">直觉→数学</span><span class="play"></span></div><div class="vbody"><div class="vtitle">How I Understand Diffusion Models</div><div class="vmeta"><span>Jia-Bin Huang</span><span>进阶</span></div></div></a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=HoKDTa5jHvg" target="_blank"><div class="vthumb"><img src="assets/vid-outlier.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">数学推导</span><span class="play"></span></div><div class="vbody"><div class="vtitle">Diffusion Models | Paper Explanation | Math Explained</div><div class="vmeta"><span>Outlier</span><span>进阶</span></div></div></a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=-lz30by8-sU" target="_blank"><div class="vthumb"><img src="assets/vid-comp-code.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">代码实践</span><span class="play"></span></div><div class="vbody"><div class="vtitle">Stable Diffusion in Code (AI Image Generation)</div><div class="vmeta"><span>Computerphile</span><span>实践</span></div></div></a>
+        <a class="vcard" href="https://www.youtube.com/watch?v=W-O7AZNzbzQ" target="_blank"><div class="vthumb"><img src="assets/vid-yannic.jpg" alt=""><span class="vbadge yt">YouTube</span><span class="vtag">论文精讲</span><span class="play"></span></div><div class="vbody"><div class="vtitle">DDPM — Diffusion Models Beat GANs（论文讲解）</div><div class="vmeta"><span>Yannic Kilcher*</span><span>前沿</span></div></div></a>
+      </div>
+      <p style="font-size:12px;color:var(--dim);margin-top:-4px">* Yannic Kilcher 频道为高置信推断（页面未暴露上传者字段）。</p>
+      <h3>中文（Bilibili）</h3>
+      <p style="font-size:13px;color:var(--dim);margin-top:-6px">本环境无法直连 B 站抓封面，下面是搜索得到的真实链接。李宏毅那门是最受推荐的中文入门。</p>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.bilibili.com/video/BV14c411J7f2/" target="_blank"><div class="vthumb"><span class="ph">🎓</span><span class="vbadge bili">B站</span><span class="vtag">最受推荐</span><span class="play"></span></div><div class="vbody"><div class="vtitle">扩散模型 Diffusion Model【李宏毅2023】</div><div class="vmeta"><span>李宏毅</span><span>入门→进阶</span></div></div></a>
+        <a class="vcard" href="https://www.bilibili.com/video/BV1xih7ecEMb/" target="_blank"><div class="vthumb"><span class="ph">📐</span><span class="vbadge bili">B站</span><span class="vtag">公式推导</span><span class="play"></span></div><div class="vbody"><div class="vtitle">【大白话】一文理清 Diffusion Model（原理图解+公式推导）</div><div class="vmeta"><span>原理+推导</span><span>进阶</span></div></div></a>
+        <a class="vcard" href="https://www.bilibili.com/video/BV1Yu411x7mg/" target="_blank"><div class="vthumb"><span class="ph">🖼️</span><span class="vbadge bili">B站</span><span class="vtag">Stable Diffusion</span><span class="play"></span></div><div class="vbody"><div class="vtitle">[零基础] Stable Diffusion 原理详解</div><div class="vmeta"><span>LDM 原理</span><span>前沿</span></div></div></a>
+      </div>
+    </section>
+
+    <!-- 10 glossary -->
+    <section id="s10">
+      <h2>10 · 术语表 <span class="kbd">可搜索</span></h2>
+      <p class="lead">扩散模型黑话不少，这里按本页用到的词收录，输入关键词即时过滤。</p>
+      <input class="gsearch" id="gsearch" type="text" placeholder="🔎 搜索术语，如 DDPM / 噪声调度 / U-Net / 引导 ..." autocomplete="off">
+      <div id="glist"></div>
+      <p class="gnone" id="gnone" style="display:none">没有匹配的术语。</p>
+    </section>
+
+    <div style="margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:13px">
+      本手册由公开资料整理（论文 / 官方页 / GitHub API / Lilian Weng 博客），用于学习；公式与细节以 <a href="https://arxiv.org/abs/2006.11239" target="_blank">DDPM 原论文</a> 与 <a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/" target="_blank">Lilian Weng 详解</a> 为准。本页由 <code>ai-learning-skills</code> 家族的 <b>domain-learn</b> skill 生成。
+    </div>
+  </main>
+</div>
+
+<div class="lb" id="lb"><span class="x" id="lbx">&times;</span><img id="lbimg" src="" alt=""><div class="cap" id="lbcap"></div></div>
+
+<script>
+  const prog=document.getElementById('progress');
+  const links=[...document.querySelectorAll('nav a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  function onScroll(){const h=document.documentElement;prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';let idx=0;for(let i=0;i<secs.length;i++){if(secs[i]&&secs[i].getBoundingClientRect().top<=120)idx=i;}links.forEach((a,i)=>a.classList.toggle('active',i===idx));}
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  function cp(btn){const code=btn.closest('.codewrap').querySelector('code').innerText;navigator.clipboard.writeText(code).then(()=>{const t=btn.textContent;btn.textContent='已复制 ✓';setTimeout(()=>btn.textContent=t,1400)});}
+  window.cp=cp;
+  const lb=document.getElementById('lb'),lbimg=document.getElementById('lbimg'),lbcap=document.getElementById('lbcap');
+  document.querySelectorAll('figure img').forEach(img=>img.addEventListener('click',e=>{e.stopPropagation();lbimg.src=img.src;const fc=img.closest('figure').querySelector('figcaption');lbcap.textContent=fc?fc.textContent:'';lb.classList.add('open');}));
+  function closeLb(){lb.classList.remove('open');}
+  lb.addEventListener('click',closeLb);document.getElementById('lbx').addEventListener('click',closeLb);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
+
+  // ---------- forward/reverse diffusion demo ----------
+  (function(){
+    const cv=document.getElementById('diffCanvas'),ctx=cv.getContext('2d');
+    const W=cv.width,H=cv.height,N=W*H;
+    // build a clean procedural target (x0)
+    const off=document.createElement('canvas');off.width=W;off.height=H;const o=off.getContext('2d');
+    const g=o.createLinearGradient(0,0,W,H);g.addColorStop(0,'#22408a');g.addColorStop(.5,'#7d3f86');g.addColorStop(1,'#d98b3f');o.fillStyle=g;o.fillRect(0,0,W,H);
+    function blob(cx,cy,r,col){const rg=o.createRadialGradient(cx,cy,2,cx,cy,r);rg.addColorStop(0,col);rg.addColorStop(1,'rgba(0,0,0,0)');o.fillStyle=rg;o.fillRect(0,0,W,H);}
+    blob(W*.72,H*.3,80,'#ffe9a8');blob(W*.25,H*.7,60,'#2bd6a8');blob(W*.5,H*.55,46,'#ff9ec8');
+    o.fillStyle='rgba(15,20,18,.5)';o.beginPath();o.moveTo(0,H);o.quadraticCurveTo(W*.5,H*.6,W,H*.88);o.lineTo(W,H);o.closePath();o.fill();
+    const x0=o.getImageData(0,0,W,H).data; // clean pixels
+    // precompute gaussian noise per channel (Box-Muller), reproducible
+    let noise=new Float32Array(N*3);
+    function genNoise(seed){let s=seed>>>0;function u(){s=(s*1664525+1013904223)>>>0;return (s>>>0)/4294967296;}for(let i=0;i<N*3;i++){let a=Math.max(1e-7,u()),b=u();noise[i]=Math.sqrt(-2*Math.log(a))*Math.cos(6.2831853*b);}}
+    genNoise(12345);
+    const img=ctx.createImageData(W,H);
+    const T=100,sOff=0.008;
+    function abar(t){ // cosine schedule, t in [0,T]
+      const f=ti=>Math.cos((ti/T+sOff)/(1+sOff)*Math.PI/2)**2;
+      return f(t)/f(0);
+    }
+    function render(t){
+      const ab=Math.min(1,Math.max(0,abar(t)));
+      const sa=Math.sqrt(ab), sn=Math.sqrt(1-ab);
+      const d=img.data;
+      for(let p=0;p<N;p++){
+        for(let c=0;c<3;c++){
+          const x0c=(x0[p*4+c]/255)*2-1;            // [-1,1]
+          let v=sa*x0c+sn*noise[p*3+c];             // x_t in normalized space
+          d[p*4+c]=Math.max(0,Math.min(255,(v+1)/2*255));
+        }
+        d[p*4+3]=255;
+      }
+      ctx.putImageData(img,0,0);
+      document.getElementById('tVal').textContent=t;
+      document.getElementById('sigVal').textContent=sa.toFixed(2);
+      document.getElementById('noiVal').textContent=sn.toFixed(2);
+      document.getElementById('sigBar').style.width=(sa*100).toFixed(0)+'%';
+      document.getElementById('noiBar').style.width=(sn*100).toFixed(0)+'%';
+    }
+    const range=document.getElementById('tRange');
+    range.addEventListener('input',()=>render(+range.value));
+    document.getElementById('noiseBtn').addEventListener('click',()=>{seedc=(seedc+9973)>>>0;genNoise(seedc);render(+range.value);});
+    let seedc=12345, anim=null;
+    document.getElementById('playBtn').addEventListener('click',()=>{
+      if(anim){cancelAnimationFrame(anim);anim=null;}
+      let t=T;range.value=T;render(T);
+      const step=()=>{t-=1.5;if(t<=0){t=0;render(0);range.value=0;anim=null;return;}render(Math.round(t));range.value=Math.round(t);anim=requestAnimationFrame(step);};
+      anim=requestAnimationFrame(step);
+    });
+    render(0);
+  })();
+
+  // ---------- glossary ----------
+  const GLOSSARY=[
+    {t:"扩散模型",en:"Diffusion Model",c:"核心",d:"通过学习「反转一个逐步加噪过程」来生成数据的生成模型。从纯噪声出发逐步去噪得到样本。"},
+    {t:"前向过程",en:"Forward / Diffusion Process",c:"原理",d:"固定不学习的加噪过程：逐步往数据里加高斯噪声，T 步后变成纯噪声。有闭式解可一步采到任意 t。"},
+    {t:"反向过程",en:"Reverse / Denoising Process",c:"原理",d:"要学习的去噪过程：神经网络从带噪图里一步步去掉噪声，最终生成清晰样本。扩散模型的全部学习都在这。"},
+    {t:"DDPM",en:"Denoising Diffusion Probabilistic Models",c:"里程碑",d:"2020 年奠定现代扩散范式的工作（Ho 等）：用 MSE 让网络预测噪声，质量比肩 GAN。"},
+    {t:"DDIM",en:"Denoising Diffusion Implicit Models",c:"采样",d:"确定性、非马尔可夫的采样方式，训练不变但能少跑很多步，约 10–50× 加速。"},
+    {t:"噪声调度",en:"Noise Schedule (β_t / ᾱ_t)",c:"原理",d:"控制每步加多少噪声的曲线。ᾱ_t 从 1（清晰）平滑降到 0（纯噪声），决定信号/噪声占比。"},
+    {t:"U-Net",en:"",c:"架构",d:"扩散模型最常用的去噪网络结构：带跳连的编码-解码器，输入带噪图与时间步 t，输出预测的噪声。"},
+    {t:"噪声预测",en:"ε-prediction",c:"原理",d:"训练目标的核心：让网络预测「这步被加进去的噪声 ε」，损失就是预测噪声与真实噪声的 MSE。"},
+    {t:"分数 / Score",en:"Score",c:"原理",d:"对数概率密度的梯度 ∇log p(x)。分数模型(NCSN)与扩散在数学上等价，是另一条根。"},
+    {t:"朗之万动力学",en:"Langevin Dynamics",c:"原理",d:"用分数 + 噪声反复迭代来从分布中采样的方法，分数模型生成所依赖。"},
+    {t:"无分类器引导",en:"Classifier-Free Guidance",c:"条件",d:"同一网络兼训有条件/无条件，采样时按强度 w 外推，把生成往文字/条件上拽。文生图的关键技巧。"},
+    {t:"引导强度",en:"Guidance Scale (w)",c:"条件",d:"控制「多听话」。越大越贴合提示词但多样性下降；常见 SD 默认 7.5 左右。"},
+    {t:"潜在扩散",en:"Latent Diffusion (LDM)",c:"里程碑",d:"把扩散放进 VAE 压缩后的潜在空间里跑，大幅省算力。Stable Diffusion 的基础。"},
+    {t:"VAE",en:"Variational Autoencoder",c:"架构",d:"变分自编码器，把图像编码进低维潜空间再解码。LDM 用它把扩散搬进潜空间。"},
+    {t:"交叉注意力",en:"Cross-Attention",c:"架构",d:"把文字等条件信息注入 U-Net 的机制，让生成「看着提示词」画。"},
+    {t:"Stable Diffusion",en:"",c:"模型",d:"基于潜在扩散的开源文生图模型，引爆了 AIGC 应用生态。"},
+    {t:"ControlNet",en:"",c:"前沿",d:"给扩散加空间条件控制（边缘/深度/姿态/分割），让构图可精确指定。"},
+    {t:"一致性模型",en:"Consistency Models",c:"前沿",d:"让模型一步或少数几步就能从噪声直接映射到清晰样本，逼近实时生成。"},
+    {t:"FID",en:"Fréchet Inception Distance",c:"指标",d:"衡量生成图与真实图分布的距离，越低越好。DDPM 在 CIFAR-10 达 3.17。"},
+    {t:"IS",en:"Inception Score",c:"指标",d:"衡量生成图清晰度与多样性的早期指标，越高越好。"},
+    {t:"文生图",en:"Text-to-Image",c:"应用",d:"输入文字描述生成对应图像，扩散模型最出圈的应用（Stable Diffusion / DALL·E 2）。"},
+    {t:"ELBO",en:"Evidence Lower Bound",c:"原理",d:"变分推断里被优化的下界。扩散的训练目标可由 ELBO 推导并简化成预测噪声的 MSE。"}
+  ];
+  const glist=document.getElementById('glist'),gnone=document.getElementById('gnone'),gsearch=document.getElementById('gsearch');
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function renderG(q){q=(q||'').trim().toLowerCase();let n=0,html='';GLOSSARY.forEach(g=>{const hay=(g.t+' '+g.en+' '+g.d+' '+g.c).toLowerCase();if(q&&!hay.includes(q))return;n++;html+=`<div class="gitem"><span class="gcat">${g.c}</span><span class="term">${g.t}</span>${g.en?`<span class="en">${g.en}</span>`:''}<div class="def">${g.d}</div></div>`;});glist.innerHTML=html;gnone.style.display=n?'none':'block';}
+  renderG('');gsearch.addEventListener('input',e=>renderG(e.target.value));
+</script>
+</body>
+</html>
