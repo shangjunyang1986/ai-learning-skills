@@ -1,0 +1,21 @@
+{
+  "skill_name": "github-project-learn",
+  "evals": [
+    {
+      "id": 0,
+      "name": "single-repo-whisper",
+      "prompt": "我想学习 https://github.com/openai/whisper 这个项目，但只看 README 又长又枯燥。帮我把它做成一个方便学习、可以离线打开的网页，左边目录右边内容，最好把项目里的架构图之类的官方图片也下载下来。",
+      "expected_output": "A folder with a self-contained index.html (left TOC + right content), an assets/ folder containing downloaded real images from the whisper repo (e.g. the approach/architecture diagram), covering what whisper is, architecture, how to install/use. Single-repo mode (no org overview layer).",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "org-qwenlm",
+      "prompt": "https://github.com/QwenLM 这个组织我觉得很厉害，想系统了解下他们都做了什么、各个项目啥关系、我该先学哪个。帮我搞懂它，做成一个方便学习的页面。",
+      "expected_output": "A folder with a self-contained index.html in ORG mode: an organization overview layer (positioning + a table/map of QwenLM's repos with a 'start here' selection guide) plus a deep-dive on one flagship repo (e.g. Qwen), with real stars and downloaded media in assets/. Left TOC + right content, offline-openable.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

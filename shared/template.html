@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Om AI Lab 学习手册 · 重点：OmAgent</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#161922; --panel:#1b1f2a; --panel2:#212636;
+    --line:#2a3042; --txt:#e6e8ee; --muted:#9aa3b5; --dim:#717b90;
+    --accent:#7c5cff; --accent2:#22d3ee; --amber:#f5b94d; --green:#46c98b; --pink:#ff7eb6;
+    --maxw:1500px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:15.5px;
+  }
+  a{color:var(--accent2); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:"SF Mono",Consolas,"Fira Code",monospace; background:#0c0e14; border:1px solid var(--line); padding:1px 6px; border-radius:5px; font-size:.86em; color:#ffd9a8}
+  pre{margin:0}
+  pre code{display:block; padding:16px 18px; overflow-x:auto; line-height:1.6; color:#d6deea; background:#0a0c12}
+
+  /* layout */
+  .wrap{display:flex; max-width:var(--maxw); margin:0 auto; min-height:100vh}
+  /* sidebar */
+  .side{
+    width:288px; flex:0 0 288px; position:sticky; top:0; height:100vh; overflow-y:auto;
+    background:var(--bg2); border-right:1px solid var(--line); padding:26px 18px 40px;
+  }
+  .side::-webkit-scrollbar{width:8px}
+  .side::-webkit-scrollbar-thumb{background:#2c3244; border-radius:8px}
+  .brand{display:flex; align-items:center; gap:11px; margin-bottom:6px}
+  .brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex:0 0 38px}
+  .brand h1{font-size:16px;margin:0;line-height:1.25}
+  .brand p{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
+  .navsec{margin-top:22px; font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--dim); padding:0 10px 6px}
+  nav a{
+    display:flex; gap:10px; align-items:baseline; padding:8px 11px; border-radius:9px;
+    color:var(--muted); font-size:14px; margin:2px 0; border:1px solid transparent;
+  }
+  nav a .n{color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; min-width:22px}
+  nav a:hover{background:var(--panel); color:var(--txt); text-decoration:none}
+  nav a.active{background:linear-gradient(90deg,rgba(124,92,255,.18),rgba(34,211,238,.06)); color:#fff; border-color:#3a3560}
+  nav a.active .n{color:var(--accent2)}
+  .sidefoot{margin-top:26px;padding:14px 11px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .sidefoot a{color:var(--muted)}
+
+  /* content */
+  main{flex:1; min-width:0; padding:46px 56px 120px; max-width:1040px}
+  section{padding-top:30px; margin-top:10px; scroll-margin-top:24px}
+  section > h2{
+    font-size:27px; margin:0 0 4px; letter-spacing:-.01em; display:flex; align-items:center; gap:12px;
+  }
+  section > h2 .kbd{font-size:13px;color:var(--accent2);background:rgba(34,211,238,.1);border:1px solid #244b55;border-radius:7px;padding:2px 9px;font-family:monospace}
+  .lead{color:var(--muted); font-size:16px; margin:6px 0 22px; max-width:80ch}
+  h3{font-size:18px;margin:30px 0 10px;color:#fff}
+  h4{font-size:15px;margin:20px 0 8px;color:#cdd4e2}
+  p{max-width:80ch}
+  hr.div{border:0;border-top:1px solid var(--line);margin:42px 0}
+
+  /* hero */
+  .hero{
+    background:radial-gradient(120% 140% at 0% 0%,rgba(124,92,255,.22),transparent 50%),radial-gradient(120% 140% at 100% 0%,rgba(34,211,238,.14),transparent 45%),var(--panel);
+    border:1px solid var(--line); border-radius:18px; padding:30px 32px; margin-bottom:8px;
+  }
+  .hero h2{border:0;font-size:30px;margin:0 0 8px}
+  .hero .lead{margin-bottom:18px}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:120px}
+  .stat b{display:block;font-size:21px;color:#fff;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  /* cards / grid */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1100px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .card h4{margin-top:0;display:flex;align-items:center;gap:8px}
+  .card p{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);background:var(--bg2)}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;margin:3px 5px 3px 0}
+  .pill.a{background:rgba(124,92,255,.14);color:#c3b4ff;border:1px solid #3a3560}
+  .pill.b{background:rgba(34,211,238,.12);color:#9fe9f5;border:1px solid #1f5562}
+  .pill.c{background:rgba(70,201,139,.12);color:#9fe9c4;border:1px solid #1f5a44}
+  .pill.d{background:rgba(245,185,77,.12);color:#f5d49a;border:1px solid #5a4a23}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}
+  tr:hover td{background:rgba(124,92,255,.04)}
+  td .s{color:var(--amber);font-variant-numeric:tabular-nums;font-weight:600}
+
+  /* figure */
+  figure{margin:20px 0;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;position:relative}
+  figure img{display:block;width:100%;height:auto;cursor:zoom-in}
+  figure::after{content:"🔍 点击放大";position:absolute;top:8px;right:8px;background:rgba(15,17,23,.78);color:#e6e8ee;font-size:11px;padding:3px 9px;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+  figure:hover::after{opacity:1}
+  /* lightbox */
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(6,7,11,.92);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:zoom-out;backdrop-filter:blur(3px)}
+  .lb.open{display:flex}
+  .lb img{max-width:94vw;max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6);cursor:default;animation:lbin .18s ease}
+  @keyframes lbin{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .lb .cap{color:#cdd4e2;font-size:13.5px;margin-top:14px;max-width:80vw;text-align:center}
+  .lb .x{position:absolute;top:18px;right:24px;color:#fff;font-size:30px;line-height:1;cursor:pointer;opacity:.8}
+  .lb .x:hover{opacity:1}
+  .lb .hint{position:absolute;bottom:18px;color:var(--dim);font-size:12px}
+  figure figcaption{background:var(--panel);color:var(--muted);font-size:12.5px;padding:9px 14px;border-top:1px solid var(--line)}
+  .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:900px){.imgrow{grid-template-columns:1fr}}
+
+  /* callout */
+  .note{border-left:3px solid var(--accent);background:var(--panel);border-radius:0 11px 11px 0;padding:13px 16px;margin:16px 0;font-size:14px}
+  .note.warn{border-color:var(--amber)}
+  .note.ok{border-color:var(--green)}
+  .note b{color:#fff}
+
+  /* steps */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+  ol.steps li{position:relative;padding:0 0 4px 40px;margin-bottom:18px}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:#fff}
+
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;font-family:monospace;font-size:13px}
+  .flow .node{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:#cdd4e2}
+  .flow .arr{color:var(--accent);font-size:16px}
+  .flow .loop{background:#0a0c12;color:#f5d49a;border:1px solid #5a4a23}
+
+  .copybtn{float:right;font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:3px 9px;cursor:pointer;margin:-2px 0 6px}
+  .copybtn:hover{color:#fff;border-color:var(--accent)}
+  .codewrap{position:relative;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:14px 0}
+  .codewrap .bar{background:var(--panel);padding:7px 13px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:50;width:0}
+  .todo{color:var(--amber)}
+  ul.clean{list-style:none;padding:0}
+  ul.clean li{padding:6px 0 6px 24px;position:relative;border-bottom:1px solid rgba(42,48,66,.5)}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;color:var(--accent)}
+  /* video cards */
+  .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0}
+  @media(max-width:1100px){.vgrid{grid-template-columns:1fr 1fr}}
+  @media(max-width:680px){.vgrid{grid-template-columns:1fr}}
+  .vcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;color:inherit;transition:transform .15s,border-color .15s}
+  .vcard:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
+  .vthumb{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0d0f16}
+  .vthumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+  .vcard:hover .vthumb img{transform:scale(1.05)}
+  .vthumb .play{position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;background:rgba(15,17,23,.66);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.85)}
+  .vthumb .play::after{content:"";border-left:16px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:4px}
+  .vbadge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+  .vbadge.bili{background:#fb7299}
+  .vbadge.yt{background:#ff0000}
+  .vtag{position:absolute;top:8px;right:8px;font-size:10.5px;padding:2px 8px;border-radius:20px;background:rgba(15,17,23,.78);color:#cdd4e2}
+  .vbody{padding:11px 13px}
+  .vtitle{font-size:13.5px;font-weight:600;color:#fff;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+  .vmeta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+  /* glossary */
+  .gsearch{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:12px 16px;font-size:15px;margin:8px 0 18px}
+  .gsearch:focus{outline:none;border-color:var(--accent)}
+  .gitem{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px;margin:9px 0}
+  .gitem .term{font-weight:700;color:#fff;font-size:15px}
+  .gitem .en{color:var(--accent2);font-size:12.5px;font-family:monospace;margin-left:8px}
+  .gitem .def{color:var(--muted);font-size:14px;margin-top:5px}
+  .gitem .gcat{float:right;font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+  .gnone{color:var(--dim);padding:16px 0}
+  .freshness{font-size:12px;font-variant-numeric:tabular-nums}
+  .fresh-hot{color:var(--green)} .fresh-mid{color:var(--amber)} .fresh-old{color:var(--pink)}
+  .mob{display:none}
+  @media(max-width:980px){
+    .side{display:none}
+    .mob{display:flex;position:sticky;top:0;z-index:40;background:var(--bg2);border-bottom:1px solid var(--line);padding:12px 18px;gap:10px;align-items:center}
+    main{padding:24px 20px 90px}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">Om</div>
+      <div><h1>Om AI Lab 学习手册</h1><p>开放多模态 AGI 研究 · 重点拆解 OmAgent</p></div>
+    </div>
+
+    <div class="navsec">组织全景</div>
+    <nav id="nav">
+      <a href="#s0"><span class="n">0</span>30 秒速览</a>
+      <a href="#s1"><span class="n">1</span>Om AI Lab 是什么</a>
+      <a href="#s2"><span class="n">2</span>项目全景地图</a>
+    </nav>
+    <div class="navsec">OmAgent 深入</div>
+    <nav id="nav2">
+      <a href="#s3"><span class="n">3</span>这是什么</a>
+      <a href="#s4"><span class="n">4</span>面向领域 &amp; 亮点</a>
+      <a href="#s5"><span class="n">5</span>架构组成</a>
+      <a href="#s6"><span class="n">6</span>技术原理</a>
+      <a href="#s7"><span class="n">7</span>怎么部署使用</a>
+      <a href="#s8"><span class="n">8</span>我的实操记录</a>
+    </nav>
+    <div class="navsec">扩展 &amp; 参考</div>
+    <nav id="nav3">
+      <a href="#s9"><span class="n">9</span>相关 GitHub 项目</a>
+      <a href="#s11"><span class="n">10</span>学习视频</a>
+      <a href="#s10"><span class="n">11</span>术语表</a>
+    </nav>
+
+    <div class="sidefoot">
+      官方资源<br>
+      <a href="https://github.com/om-ai-lab" target="_blank">GitHub 组织</a> ·
+      <a href="https://om-ai-lab.github.io" target="_blank">官网</a><br>
+      <a href="https://github.com/om-ai-lab/OmAgent" target="_blank">OmAgent 仓库</a> ·
+      <a href="https://arxiv.org/abs/2406.16620" target="_blank">论文</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mob"><strong>Om AI Lab 学习手册</strong><span style="color:var(--muted);font-size:13px">— 屏幕较窄，目录已折叠，向下滚动阅读</span></div>
+
+    <!-- ===== 0 ===== -->
+    <section id="s0">
+      <div class="hero">
+        <h2>Om AI Lab 学习手册</h2>
+        <p class="lead">一个「开放多模态 AGI 研究」实验室的全景导览，外加旗下最适合做应用的 <b>OmAgent</b>（EMNLP-2024 多模态智能体框架）的逐层拆解。从「这是什么」一路到「怎么在本机跑起来」。</p>
+        <figure style="margin:0 0 6px;background:#0d0f16">
+          <img src="assets/omagent-banner.png" alt="OmAgent banner" />
+        </figure>
+        <div class="stats">
+          <div class="stat"><b>24+</b><span>组织开源仓库</span></div>
+          <div class="stat"><b>⭐6k</b><span>旗舰 VLM-R1</span></div>
+          <div class="stat"><b>⭐2.7k</b><span>OmAgent（本手册重点）</span></div>
+          <div class="stat"><b>EMNLP-24</b><span>OmAgent 录用会议</span></div>
+          <div class="stat"><b>Apache-2.0</b><span>OmAgent 许可证</span></div>
+        </div>
+      </div>
+      <div class="note">阅读建议：<b>0→2</b> 帮你判断「这个 lab 值不值得投入、先学哪个仓库」；<b>3→8</b> 是对 OmAgent 的深入，可按需直达 <a href="#s7">第 7 节</a> 直接动手。</div>
+    </section>
+
+    <!-- ===== 1 ===== -->
+    <section id="s1">
+      <h2>1 · Om AI Lab 是什么</h2>
+      <p class="lead">一句话：一个聚焦<strong>空间智能（Spatial Intelligence）与具身 AI</strong>的开源多模态研究团队。</p>
+      <p>Om AI Lab 的核心主张是把<strong>高层逻辑推理</strong>（LLM/VLM 式的「思考」）与<strong>细粒度视觉感知</strong>（开放词汇检测、视觉定位 grounding、图像缩放探索）<strong>打通</strong>，推动模型从「应试式完成任务」走向「面向真实场景的复杂问题求解」。它的产出横跨整条技术栈：</p>
+      <div class="grid g2" style="margin:16px 0">
+        <div class="card"><h4>🧠 强化学习 VLM</h4><p>VLM-R1 用 RL 提升视觉理解，是组织的人气旗舰。</p></div>
+        <div class="card"><h4>🎯 实时开放词汇检测</h4><p>OmDet 端到端、实时、可检测任意类别。</p></div>
+        <div class="card"><h4>🤖 多模态智能体框架</h4><p>OmAgent 把 Agent 工程化、可量产（本手册重点）。</p></div>
+        <div class="card"><h4>📊 评测基准集群</h4><p>OVDEval / VL-CheckList / open-agent-leaderboard 等。</p></div>
+      </div>
+      <p>团队学术产出密集（EMNLP / AAAI / TGRS 等），同时把成果做成高 star、面向生产的开源仓库——既「发论文」也「能落地」。</p>
+      <div class="note">官方触点：
+        <a href="https://github.com/om-ai-lab" target="_blank">GitHub</a> ·
+        <a href="https://om-ai-lab.github.io" target="_blank">官网</a> ·
+        <a href="https://huggingface.co/omlab" target="_blank">HuggingFace（omlab）</a> ·
+        <a href="https://x.com/OmAI_lab" target="_blank">X / Twitter</a>
+      </div>
+    </section>
+
+    <!-- ===== 2 ===== -->
+    <section id="s2">
+      <h2>2 · 项目全景地图</h2>
+      <p class="lead">24+ 个仓库不必逐个看。按方向归类，并给出「你想干 X，先学哪个」的选型建议。</p>
+
+      <table>
+        <thead><tr><th>仓库</th><th>干什么</th><th>方向</th><th>Star</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/om-ai-lab/VLM-R1" target="_blank"><b>VLM-R1</b></a></td><td>用强化学习提升视觉理解（旗舰）</td><td><span class="pill b">VLM</span></td><td><span class="s">~6k</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/OmAgent" target="_blank"><b>OmAgent</b></a></td><td>构建多模态语言智能体，原型→生产 · EMNLP-2024</td><td><span class="pill a">Agent</span></td><td><span class="s">~2.7k</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/OmDet" target="_blank"><b>OmDet</b></a></td><td>实时、端到端开放词汇目标检测</td><td><span class="pill c">检测</span></td><td><span class="s">~1.4k</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/VLM-FO1" target="_blank">VLM-FO1</a></td><td>打通高层推理与细粒度感知</td><td><span class="pill b">VLM</span></td><td><span class="s">322</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/RS5M" target="_blank">RS5M</a></td><td>大规模遥感视觉-语言数据集 · TGRS</td><td><span class="pill d">遥感</span></td><td><span class="s">313</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/OmTrackVLA" target="_blank">OmTrackVLA</a></td><td>可复现的跟踪类 VLA 研究</td><td><span class="pill a">Agent/VLA</span></td><td><span class="s">220</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/VL-CheckList" target="_blank">VL-CheckList</a></td><td>评测视觉-语言预训练模型 · EMNLP 2022</td><td><span class="pill" style="background:rgba(255,126,182,.12);color:#ffb3d4;border:1px solid #5a2a40">评测</span></td><td><span class="s">139</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/ZoomEye" target="_blank">ZoomEye</a></td><td>树状图像探索实现「类人缩放」· EMNLP-2025 Oral</td><td><span class="pill b">VLM</span></td><td><span class="s">91</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/GroundVLP" target="_blank">GroundVLP</a></td><td>零样本视觉定位 · AAAI 2024</td><td><span class="pill c">检测</span></td><td><span class="s">74</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/OVDEval" target="_blank">OVDEval</a></td><td>开放词汇检测综合评测基准 · AAAI 2024</td><td><span class="pill" style="background:rgba(255,126,182,.12);color:#ffb3d4;border:1px solid #5a2a40">评测</span></td><td><span class="s">64</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/open-agent-leaderboard" target="_blank">open-agent-leaderboard</a></td><td>可复现的语言智能体研究 / 排行榜</td><td><span class="pill" style="background:rgba(255,126,182,.12);color:#ffb3d4;border:1px solid #5a2a40">评测</span></td><td><span class="s">36</span></td></tr>
+          <tr><td><a href="https://github.com/om-ai-lab/ImageRAG" target="_blank">ImageRAG</a></td><td>超高分辨率遥感影像分析 · GRSM</td><td><span class="pill d">遥感</span></td><td><span class="s">32</span></td></tr>
+          <tr><td colspan="4" style="color:var(--dim)">其余：VLX-Flow（流式视频理解）、OmChat / OmModel（多模态模型）、awesome-RSVLM（资源清单）、Probing-VLM-VGM、habitat-lab（具身，fork）…</td></tr>
+        </tbody>
+      </table>
+
+      <h3>选型地图：你想干什么，先学哪个？</h3>
+      <div class="grid g2">
+        <div class="card"><h4>🤖 做多模态 Agent 应用</h4><p><b>先学 OmAgent</b>（本手册重点）。要做具身/跟踪再看 OmTrackVLA、habitat-lab；想给 Agent 打分看 open-agent-leaderboard。</p></div>
+        <div class="card"><h4>🧠 训练 / 微调 VLM（尤其 RL）</h4><p><b>先学 VLM-R1</b>（旗舰）。再看 VLM-FO1（推理+细粒度感知）、ZoomEye（类人缩放）、OmChat / OmModel。</p></div>
+        <div class="card"><h4>🎯 目标检测 / 开放词汇 &amp; 定位</h4><p><b>先学 OmDet</b>（实时开放词汇）。再看 GroundVLP（零样本定位）。</p></div>
+        <div class="card"><h4>📊 评测 / 基准</h4><p><b>先学 OVDEval + VL-CheckList</b>。Agent 评测看 open-agent-leaderboard。</p></div>
+      </div>
+
+      <h3>组织代表作一览（官方配图）</h3>
+      <div class="imgrow">
+        <figure><img src="assets/org-omagent.png" alt="OmAgent 架构"><figcaption>OmAgent · 多模态智能体框架总图</figcaption></figure>
+        <figure style="background:#0d0f16"><img src="assets/org-vlmr1-coco.png" alt="VLM-R1 COCO"><figcaption>VLM-R1 · COCO 上的强化学习结果</figcaption></figure>
+        <figure><img src="assets/org-vlmfo1-od.jpg" alt="VLM-FO1 检测"><figcaption>VLM-FO1 · 推理驱动的细粒度检测</figcaption></figure>
+        <figure style="background:#0d0f16"><img src="assets/org-vlx-flow.png" alt="VLX-Flow"><figcaption>VLX-Flow · 流式 / 连续视频理解</figcaption></figure>
+      </div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 3 ===== -->
+    <section id="s3">
+      <h2>3 · OmAgent 这是什么 <span class="kbd">深入开始</span></h2>
+      <p class="lead">一个让你<strong>轻松构建多模态语言智能体</strong>的 Python 库——把 worker 编排、任务队列、节点优化这些工程脏活藏在简洁接口背后，让你专注于「定义 Agent 干什么」。</p>
+      <p>智能体可以对 <b>文本 / 图像 / 视频 / 音频</b> 进行推理与任务执行。OmAgent 由 Om AI Lab 出品，<b>Apache-2.0</b> 许可，论文录用于 <b>EMNLP-2024</b>（<a href="https://arxiv.org/abs/2406.16620" target="_blank">arXiv:2406.16620</a>）。它最被津津乐道的两个场景是：<b>长视频（小时级）理解</b> 和 <b>端侧（手机）个人助手</b>。</p>
+
+      <h3>三个官方 Demo</h3>
+      <div class="grid g3">
+        <div class="card"><span class="tag">Demo 1</span><h4 style="margin-top:8px">长视频问答</h4><p>Gradio 网页：上传一段小时级视频，直接对内容提问。</p></div>
+        <div class="card"><span class="tag">Demo 2</span><h4 style="margin-top:8px">手机个人助手</h4><p>多模态端侧助手，官方对标 Google「Astra」。</p></div>
+        <div class="card"><span class="tag">Demo 3</span><h4 style="margin-top:8px">推理算子对比</h4><p>同一框架下横评 CoT / ReAct / PoT 等算法（含成本）。</p></div>
+      </div>
+      <div class="imgrow">
+        <figure style="background:#0d0f16"><img src="assets/omagent-simplevqa.png" alt="Simple VQA 网页"><figcaption>SimpleVQA · 最小可视问答示例的网页界面</figcaption></figure>
+        <figure style="background:#0d0f16"><img src="assets/omagent-app.png" alt="手机助手"><figcaption>移动端个人助手 · 多模态实时交互</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- ===== 4 ===== -->
+    <section id="s4">
+      <h2>4 · 面向领域 &amp; 亮点</h2>
+      <p class="lead">问题域：<strong>多模态 AI 智能体</strong>——在文本/图像/视频/音频上做推理与任务执行，尤其擅长长视频理解与端侧助手。</p>
+
+      <h3>新颖 / 真正有用的点</h3>
+      <ul class="clean">
+        <li><b>图（Graph）式工作流编排引擎</b> + 多种记忆类型（短期 STM / 长期 LTM）。</li>
+        <li><b>原生支持 VLM</b>、实时 API、计算机视觉模型，以及<b>手机设备连接</b>。</li>
+        <li>内置可切换的<b>推理算子</b>：ReAct-Pro、CoT、自洽 CoT（SC-CoT）、程序化思维 PoT，乃至 ToT / GoT / RAP / V* / ZoomEye。</li>
+        <li><b>本地模型部署</b>：通过 Ollama 或 LocalAI 跑本地模型，不必依赖云端 API。</li>
+        <li><b>全分布式架构</b> + 可选 <b>lite 轻量模式</b>（无需任何中间件即可起步）。</li>
+        <li>面向复杂/长视频的<b>分而治之（Divide-and-Conquer, DnC）</b>方法论。</li>
+      </ul>
+
+      <h3>实测效果：推理算子横评（Open Agent Leaderboard, gpt-3.5-turbo）</h3>
+      <p>同一框架下把不同推理策略放在 GSM8K / AQuA 上对比，既看正确率也看美元成本——这正是「框架化」带来的价值：换算子像换零件。</p>
+      <table>
+        <thead><tr><th>算法</th><th>平均分</th><th>GSM8K 分</th><th>GSM8K 成本</th><th>AQuA 分</th><th>AQuA 成本</th></tr></thead>
+        <tbody>
+          <tr><td><b>SC-CoT</b></td><td><span class="s">73.69%</span></td><td>80.06%</td><td>$5.02</td><td>67.32%</td><td>$0.65</td></tr>
+          <tr><td>CoT</td><td>69.86%</td><td>78.70%</td><td>$0.68</td><td>61.02%</td><td>$0.10</td></tr>
+          <tr><td>ReAct-Pro</td><td>69.74%</td><td>74.91%</td><td>$3.46</td><td>64.57%</td><td>$0.49</td></tr>
+          <tr><td>PoT</td><td>64.42%</td><td>76.88%</td><td>$0.69</td><td>51.97%</td><td>$0.16</td></tr>
+          <tr><td style="color:var(--dim)">IO（基线）</td><td style="color:var(--dim)">38.40%</td><td style="color:var(--dim)">37.83%</td><td style="color:var(--dim)">$0.33</td><td style="color:var(--dim)">38.98%</td><td style="color:var(--dim)">$0.04</td></tr>
+        </tbody>
+      </table>
+      <div class="note ok">读法：SC-CoT 精度最高但贵（自洽要多次采样）；CoT 性价比突出。<b>结论不是「哪个最好」，而是「框架让你按预算选算子」。</b></div>
+    </section>
+
+    <!-- ===== 5 ===== -->
+    <section id="s5">
+      <h2>5 · 架构组成</h2>
+      <p class="lead">三层结构：底层 <b>资源 &amp; 算子</b> → 中层 <b>Worker（带模型与记忆）</b> → 上层 <b>Workflow（任务编排）</b>。</p>
+      <figure><img src="assets/org-omagent.png" alt="OmAgent 完整架构"><figcaption>OmAgent 总架构：左侧 Workflow/Worker，底部 Operators，右侧以 DnC 为例的完整工作流</figcaption></figure>
+
+      <div class="grid g3" style="margin-top:8px">
+        <div class="card"><h4>① 资源层</h4><p>模型：Ollama / OpenAI；外部工具：人脸识别、抽帧、网搜、Rewinder、文件读写；状态存储 Redis；向量库 Vector DB。</p></div>
+        <div class="card"><h4>② Worker（节点）</h4><p>每个 Worker 内含 <code>LLM</code> + <code>VLM</code> + <code>STM</code>(短期记忆) + <code>LTM</code>(长期记忆)，是工作流里一个可复用的执行单元。</p></div>
+        <div class="card"><h4>③ Workflow</h4><p>把多个 Task/Worker 编排成图（DAG）：<code>Task1 → Task2 → … → TaskN</code>，支持顺序、分支、循环。</p></div>
+      </div>
+
+      <h3>算子库（Operators）</h3>
+      <p>工作流之下是一组可插拔的推理算子，决定 Worker「怎么想」：</p>
+      <div>
+        <span class="pill a">CoT</span><span class="pill a">SC-CoT</span><span class="pill b">ToT</span><span class="pill b">ReAct</span><span class="pill c">PoT</span>
+        <span class="pill c">DnC</span><span class="pill d">GoT</span><span class="pill d">RAP</span><span class="pill a">V*</span><span class="pill b">ZoomEye</span>
+      </div>
+
+      <h3>运行模式：lite vs full</h3>
+      <table>
+        <thead><tr><th>模式</th><th>中间件</th><th>适用</th></tr></thead>
+        <tbody>
+          <tr><td><b>lite 轻量</b></td><td>无需中间件</td><td>快速起步、跑示例、学习——<b>推荐入门用这个</b></td></tr>
+          <tr><td><b>full 完整</b></td><td>Redis（状态）+ Milvus（向量库）+ Conductor（工作流编排，类 Netflix Conductor）</td><td>分布式、可量产部署</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===== 6 ===== -->
+    <section id="s6">
+      <h2>6 · 技术原理</h2>
+      <p class="lead">把「Agent 怎么跑起来」拆成四件事：工作流引擎、可切换算子、模型服务、长上下文的分治+RAG。</p>
+
+      <h3>① 工作流引擎：一张 Worker 的有向图</h3>
+      <p>工作流是由「Worker（节点）」组成的图/DAG，靠任务队列驱动；full 模式下用 Conductor 做编排后端。下面是官方「以 DnC 为例」的完整工作流：</p>
+      <div class="flow">
+        <span class="node">start</span><span class="arr">→</span>
+        <span class="node">video_preprocess</span><span class="arr">→</span>
+        <span class="node">video_qa</span><span class="arr">→</span>
+        <span class="node">construct_dnc_payload</span><span class="arr">→</span>
+        <span class="node loop">dncloop_task [DO_WHILE]</span>
+      </div>
+      <div class="flow" style="padding-left:20px">
+        <span style="color:var(--dim)">循环体：</span>
+        <span class="node">structure_update</span><span class="arr">→</span>
+        <span class="node">task_conqueror</span><span class="arr">→</span>
+        <span class="node">switch_task</span>
+        <span style="color:var(--muted)">(default / complex→<span class="node" style="display:inline">task_divider</span> / failed→<span class="node" style="display:inline">task_rescue</span>)</span>
+        <span class="arr">→</span><span class="node">task_exit_monitor</span><span class="arr">↺</span>
+      </div>
+      <div class="flow" style="padding-left:20px">
+        <span class="arr">→</span><span class="node">task_conclude</span><span class="arr">→</span><span class="node">final</span>
+      </div>
+      <p style="font-size:14px;color:var(--muted)">关键点：<code>switch_task</code> 根据任务状态分流——简单任务直接做（default）、复杂任务<b>拆分</b>（task_divider）、失败任务<b>救援重试</b>（task_rescue），再由 <code>DO_WHILE</code> 循环逼近答案，最后 <code>task_conclude</code> 汇总。这就是「分而治之」的工程化落地。</p>
+
+      <h3>② 可切换的智能体算子</h3>
+      <p>CoT / SC-CoT / ReAct-Pro / PoT 等被实现成可互换的算子，所以你能像 <a href="#s4">第 4 节那张表</a>一样，在同一任务上横评不同推理策略的精度与成本。</p>
+
+      <h3>③ 模型服务：云端 + 本地都行</h3>
+      <p>既支持远程（OpenAI 兼容端点，自定义 key/endpoint），也支持本地（Ollama、LocalAI），并原生接入 VLM 与 CV 模型。</p>
+
+      <h3>④ 长视频理解：Video2RAG（分治 + 带时间戳的 RAG）</h3>
+      <figure><img src="assets/omagent-arch.png" alt="Video2RAG 管线"><figcaption>Video2RAG：视频 → 场景检测 / 人脸识别 / ASR → MLLM 生成带时间戳的场景描述 → 入向量库；提问时抽时间戳 + 检索 + DnC 循环综合出答案</figcaption></figure>
+      <ol class="steps">
+        <li><b>预处理：</b>检测场景边界把视频切块，按间隔抽帧；音频经 ASR 转文字；用 VLM 总结每段内容，全部写入<b>向量库</b>（每条带时间戳）。</li>
+        <li><b>问答：</b>用户提问触发——从向量库<b>按查询检索</b>相关信息，并定位相关片段的<b>大致时间戳</b>。</li>
+        <li><b>执行：</b>用<b>分治任务树（DnC Loop）</b>对问题逐步求解，最后<b>结论综合</b>成答案。</li>
+      </ol>
+      <figure style="background:#0d0f16;max-width:420px"><img src="assets/omagent-video-workflow.png" alt="视频理解工作流"><figcaption>视频理解示例的实际工作流节点（DO_WHILE 分治循环）</figcaption></figure>
+    </section>
+
+    <!-- ===== 7 ===== -->
+    <section id="s7">
+      <h2>7 · 怎么部署使用 <span class="kbd">官方步骤</span></h2>
+      <p class="lead">环境要求：<strong>Python ≥ 3.10</strong>。纯 API 调用<strong>不强制要 GPU</strong>；本地模型（Ollama/LocalAI）可选；full 模式才需要 Docker 中间件。<b>入门建议走 lite 模式 + SimpleVQA 示例。</b></p>
+
+      <h3>安装</h3>
+      <div class="codewrap"><div class="bar"><span>① 安装核心库</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 从 PyPI 安装
+pip install omagent-core
+
+# 或从源码可编辑安装
+# pip install -e omagent-core</code></pre></div>
+
+      <h3>跑通最小示例（SimpleVQA）</h3>
+      <ol class="steps">
+        <li><b>编译容器配置</b>
+          <div class="codewrap"><div class="bar"><span>② compile</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>cd examples/step1_simpleVQA
+python compile_container.py</code></pre></div>
+        </li>
+        <li><b>配置 LLM</b>（在 <code>gpt.yml</code> 里，或用环境变量）
+          <div class="codewrap"><div class="bar"><span>③ 环境变量</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>export custom_openai_key="your_openai_api_key"
+export custom_openai_endpoint="your_openai_endpoint"
+# Windows PowerShell:
+# $env:custom_openai_key="..."; $env:custom_openai_endpoint="..."</code></pre></div>
+        </li>
+        <li><b>启动网页 Demo</b>，浏览器打开 <code>http://127.0.0.1:7860</code>
+          <div class="codewrap"><div class="bar"><span>④ run</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>cd examples/step1_simpleVQA
+python run_webpage.py</code></pre></div>
+        </li>
+      </ol>
+
+      <h3>进阶：长视频理解示例</h3>
+      <div class="codewrap"><div class="bar"><span>examples/video_understanding</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code>python run_webpage.py   # 浏览器上传视频并提问
+python run_cli.py       # 命令行，先给视频路径</code></pre></div>
+      <ul class="clean">
+        <li>本地模型教程：<code>docs/concepts/models/Ollama.md</code>、<code>examples/video_understanding/docs/local-ai.md</code></li>
+        <li>手机助手教程：<code>docs/tutorials/agent_with_app.md</code></li>
+        <li>文档站：<a href="https://www.om-agent.com/" target="_blank">om-agent.com</a>（注：会跳转到 <code>om-agent.cn</code>，该域名曾有证书问题，优先用 GitHub 仓库内的 docs）</li>
+      </ul>
+    </section>
+
+    <!-- ===== 8 ===== -->
+    <section id="s8">
+      <h2>8 · 我的实操记录 <span class="kbd todo">待回填</span></h2>
+      <p class="lead">本节按计划<strong>暂不真正安装</strong>（这些是带大模型的研究项目，先把脚本和检查准备好，等你决定真装时一键回填本节）。当前目录已生成两个脚本：</p>
+
+      <div class="grid g2">
+        <div class="card"><h4>🔍 scripts/check-env.ps1</h4><p>检查 Python ≥3.10、pip、git、（可选）Docker / Ollama 是否就绪，并打印诊断。<b>真装前先跑它。</b></p></div>
+        <div class="card"><h4>⬇️ scripts/setup-omagent.ps1</h4><p>git clone OmAgent 到当前目录、创建 venv、装 omagent-core、并提示下一步。<b>默认 dry-run，加 -Run 才真正执行。</b></p></div>
+      </div>
+
+      <h3>建议的真装流程（Windows）</h3>
+      <div class="codewrap"><div class="bar"><span>PowerShell</span><button class="copybtn" onclick="cp(this)">复制</button></div>
+<pre><code># 1. 先体检
+./scripts/check-env.ps1
+
+# 2. 预览将要执行的动作（不改动任何东西）
+./scripts/setup-omagent.ps1
+
+# 3. 确认无误后真正执行（克隆 + 建 venv + 安装）
+./scripts/setup-omagent.ps1 -Run</code></pre></div>
+
+      <h3 class="todo">▢ 回填占位（真装后补这里）</h3>
+      <ul class="clean">
+        <li class="todo">环境体检输出（check-env 截图 / 文本）</li>
+        <li class="todo">安装过程中的报错与解决（踩坑日志）</li>
+        <li class="todo">SimpleVQA 跑通截图（127.0.0.1:7860）</li>
+        <li class="todo">长视频理解 demo 的实际效果截图</li>
+        <li class="todo">本机资源占用 / 耗时记录</li>
+      </ul>
+      <div class="note warn">提醒：full 模式需要 Docker 起 Redis + Milvus + Conductor，Windows 上较重；学习阶段优先 <b>lite 模式 + 云端 API</b>，跑通再考虑本地模型与分布式。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 9 ===== -->
+    <section id="s9">
+      <h2>9 · 相关 GitHub 项目</h2>
+      <p class="lead">把 OmAgent 放进 Agent 框架的版图里看——左边是它在<strong>同组织</strong>的兄弟仓库，右边是<strong>外部同类</strong>的主流框架。星标与「最后更新」为抓取于 <b>2026-06-27</b> 的真实数据。</p>
+
+      <h3>同组织相关仓库（一起用更香）</h3>
+      <div class="grid g3">
+        <div class="card"><h4>📊 open-agent-leaderboard</h4><p><b>功能：</b>可复现的 Agent 评测/排行榜，第 4 节那张算子横评表就出自它。<br><b>差异：</b>评测工具，不是框架本体。</p><p style="margin-top:8px"><span class="s">⭐36</span> · <span class="freshness fresh-mid">更新 2025-06-25</span> · <a href="https://github.com/om-ai-lab/open-agent-leaderboard" target="_blank">仓库</a></p></div>
+        <div class="card"><h4>🧩 OmModel / OmChat</h4><p><b>功能：</b>Om AI Lab 自家的多模态模型套件，可作为 OmAgent 的 VLM 后端。<br><b>差异：</b>提供「模型」，OmAgent 提供「编排」。</p><p style="margin-top:8px"><span class="s">⭐45 / 19</span> · <a href="https://github.com/om-ai-lab/OmModel" target="_blank">OmModel</a></p></div>
+        <div class="card"><h4>🎯 OmDet</h4><p><b>功能：</b>实时开放词汇检测，可作为 Worker 里的 CV 工具（如抽帧后做目标检测）。<br><b>差异：</b>感知组件，非 Agent 框架。</p><p style="margin-top:8px"><span class="s">⭐1.4k</span> · <a href="https://github.com/om-ai-lab/OmDet" target="_blank">仓库</a></p></div>
+      </div>
+
+      <h3>外部同类：主流 Agent 框架对比</h3>
+      <table>
+        <thead><tr><th>项目</th><th>定位 / 功能</th><th>与 OmAgent 的差异</th><th>星标</th><th>最后更新</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><a href="https://github.com/om-ai-lab/OmAgent" target="_blank"><b>OmAgent</b></a></td>
+            <td>多模态语言智能体框架（图工作流 + 算子 + 记忆）</td>
+            <td style="color:var(--accent2)">基准本体：<b>多模态优先</b>（视频/图/音），长视频 DnC、原生 VLM/CV/手机；研究取向</td>
+            <td><span class="s">2.7k</span></td>
+            <td><span class="freshness fresh-old">2025-03-19</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/langchain-ai/langchain" target="_blank">LangChain</a></td>
+            <td>通用 LLM 应用 / Agent 工程平台，生态最大</td>
+            <td><b>文本优先</b>、组件海量但偏重；OmAgent 更聚焦多模态与视频</td>
+            <td><span class="s">140k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-26</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/langgenius/dify" target="_blank">Dify</a></td>
+            <td>生产级 Agentic 工作流平台，带可视化 GUI</td>
+            <td><b>低代码 GUI + 可托管</b>；OmAgent 是代码库、更偏研究与定制</td>
+            <td><span class="s">147k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-27</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/Significant-Gravitas/AutoGPT" target="_blank">AutoGPT</a></td>
+            <td>自治智能体平台，面向「让人人可用 AI」</td>
+            <td>强调<b>自治/低门槛</b>；OmAgent 强调多模态管线与算子可控</td>
+            <td><span class="s">185k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-27</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/geekan/MetaGPT" target="_blank">MetaGPT</a></td>
+            <td>多智能体「软件公司」，角色协作写软件</td>
+            <td><b>多 Agent 角色分工</b>专精软件开发；OmAgent 面向通用多模态任务</td>
+            <td><span class="s">69k</span></td>
+            <td><span class="freshness fresh-mid">2026-01-21</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/microsoft/autogen" target="_blank">AutoGen</a></td>
+            <td>微软的多智能体对话编程框架</td>
+            <td>核心是<b>多 Agent 会话</b>；OmAgent 核心是图工作流 + 多模态感知</td>
+            <td><span class="s">59k</span></td>
+            <td><span class="freshness fresh-mid">2026-04-15</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/crewAIInc/crewAI" target="_blank">CrewAI</a></td>
+            <td>角色扮演式自治 Agent 编排</td>
+            <td>主打<b>角色协作</b>、轻量上手；OmAgent 强在多模态与长视频</td>
+            <td><span class="s">54k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-27</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://github.com/run-llama/llama_index" target="_blank">LlamaIndex</a></td>
+            <td>文档 Agent / RAG &amp; OCR 平台</td>
+            <td><b>数据/RAG 中心</b>；OmAgent 的 RAG 是其一环（Video2RAG），范围更偏多模态 Agent</td>
+            <td><span class="s">50k</span></td>
+            <td><span class="freshness fresh-hot">2026-06-26</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note warn">学习提示：OmAgent 星标（2.7k）远小于通用框架，<b>最后更新停在 2025-03</b>——说明它是<b>研究取向、更新不频繁</b>的框架，胜在「多模态 + 长视频 + 论文级方法」。要做生产级、社区活跃的通用 Agent，Dify / LangChain 更稳；要学<b>多模态智能体的设计思路与长视频处理</b>，OmAgent 是极好的范本。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 11 (学习视频) ===== -->
+    <section id="s11">
+      <h2>10 · 学习视频</h2>
+      <p class="lead">真实可点的学习视频（封面已下载到本地）。诚实说明：OmAgent 偏研究型项目，<strong>目前没有专门的视频教程</strong>，连 YouTube/英文都搜不到独立视频——所以这里分成「项目相关」与「相关主题」两类，后者帮你补多模态 Agent 的背景。</p>
+
+      <h3>① 项目相关（团队 / 作者本人）</h3>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.bilibili.com/video/BV1UCqnBPE9C/" target="_blank">
+          <div class="vthumb"><img src="assets/vid-omagent-ceo.jpg" alt=""><span class="vbadge bili">B站</span><span class="vtag">作者本人</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">联汇科技CEO赵天成：AI Agent 从"数字辅助"到"物理劳作"，可靠性是核心</div>
+          <div class="vmeta"><span>赵天成（OmAgent 作者）</span><span>2024-11-13</span></div></div>
+        </a>
+      </div>
+      <div class="note">为什么只有这一个：OmAgent 第一作者团队来自<b>联汇科技 + 浙大滨江研究院</b>，赵天成（Tiancheng Zhao）是论文作者兼公司 CEO，这个 talk 是离项目最近的官方口径视频。</div>
+
+      <h3>② 相关主题（补多模态 Agent 背景）</h3>
+      <div class="vgrid">
+        <a class="vcard" href="https://www.bilibili.com/video/BV1SqAVzLEci/" target="_blank">
+          <div class="vthumb"><img src="assets/vid-framework-map.jpg" alt=""><span class="vbadge bili">B站</span><span class="vtag">选型地图</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">2026 AI Agent 框架终极指南：选型地图，10 大框架五大范式一期讲透</div>
+          <div class="vmeta"><span>唐国梁Tommy</span><span>3.8万播放</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.bilibili.com/video/BV1CDHQzdEfg/" target="_blank">
+          <div class="vthumb"><img src="assets/vid-mmrag.jpg" alt=""><span class="vbadge bili">B站</span><span class="vtag">对应 Video2RAG</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">多模态 PDF 检索 + 图文并茂回复，企业级多模态 RAG 系统开发实战</div>
+          <div class="vmeta"><span>九天Hector</span><span>多模态RAG</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.bilibili.com/video/BV1X7zGY4E8e/" target="_blank">
+          <div class="vthumb"><img src="assets/vid-dify-mm.jpg" alt=""><span class="vbadge bili">B站</span><span class="vtag">对照 Dify</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">亲测 Dify 大模型智能体的多模态等高级功能配置</div>
+          <div class="vmeta"><span>scool199</span><span>同类框架实操</span></div></div>
+        </a>
+        <a class="vcard" href="https://www.bilibili.com/video/BV1eUsUz3EKE/" target="_blank">
+          <div class="vthumb"><img src="assets/vid-langchain-mm.jpg" alt=""><span class="vbadge bili">B站</span><span class="vtag">对照 LangChain</span><span class="play"></span></div>
+          <div class="vbody"><div class="vtitle">最新 LangChain1.0 搭建图文、音频、PDF 多模态问答系统</div>
+          <div class="vmeta"><span>木羽Cheney</span><span>同类框架实操</span></div></div>
+        </a>
+      </div>
+
+      <h3>③ 英文深入资料（非视频，YouTube 暂无独立视频）</h3>
+      <ul class="clean">
+        <li><a href="https://aclanthology.org/2024.emnlp-main.559/" target="_blank">EMNLP-2024 论文（ACL Anthology）</a> — 官方方法的同行评审版本，最权威</li>
+        <li><a href="https://arxiv.org/abs/2406.16620" target="_blank">arXiv:2406.16620</a> — 预印本，含完整图与实验</li>
+        <li><a href="https://www.marktechpost.com/2025/01/18/meet-omagent-a-new-python-library-for-building-multimodal-language-agents/" target="_blank">MarkTechPost 解读</a> · <a href="https://medium.com/@vijaygadhave2014/omagent-explained-a-new-python-library-for-multimodal-language-agents-fd39b6c31cd3" target="_blank">Medium 图文讲解</a></li>
+      </ul>
+      <div class="note warn">最实在的「动态」学习资料其实是<b>官方 GitHub 的 examples 目录</b>（SimpleVQA → 视频理解 → 手机助手，循序渐进），配合<a href="#s6">第 6 节</a>的原理拆解，比看泛泛的视频更对路。</div>
+    </section>
+
+    <hr class="div">
+
+    <!-- ===== 10 (术语表) ===== -->
+    <section id="s10">
+      <h2>11 · 术语表 <span class="kbd">可搜索</span></h2>
+      <p class="lead">学新项目最大的拦路虎是黑话。这里收录本手册出现的关键术语，输入关键词即时过滤（中英文都行）。</p>
+      <input class="gsearch" id="gsearch" type="text" placeholder="🔎 搜索术语，如 VLM / RAG / 思维链 / 分治 ..." autocomplete="off" />
+      <div id="glist">
+        <!-- entries injected by JS from GLOSSARY -->
+      </div>
+      <p class="gnone" id="gnone" style="display:none">没有匹配的术语。</p>
+    </section>
+
+    <div style="margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:13px">
+      本手册由公开资料整理，用于学习；内容与数据以 <a href="https://github.com/om-ai-lab/OmAgent" target="_blank">官方仓库</a> 为准。媒体资源已下载至 <code>./assets/</code>，可离线打开本页。
+    </div>
+  </main>
+</div>
+
+<!-- lightbox overlay -->
+<div class="lb" id="lb">
+  <span class="x" id="lbx">&times;</span>
+  <img id="lbimg" src="" alt="" />
+  <div class="cap" id="lbcap"></div>
+  <div class="hint">点击空白处或按 Esc 关闭</div>
+</div>
+
+<script>
+  // scroll progress
+  const prog=document.getElementById('progress');
+  // scroll-spy
+  const links=[...document.querySelectorAll('nav a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  function onScroll(){
+    const h=document.documentElement;
+    prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+    let idx=0;
+    for(let i=0;i<secs.length;i++){ if(secs[i] && secs[i].getBoundingClientRect().top<=120) idx=i; }
+    links.forEach((a,i)=>a.classList.toggle('active',i===idx));
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+  // copy buttons
+  function cp(btn){
+    const code=btn.closest('.codewrap').querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(()=>{const t=btn.textContent;btn.textContent='已复制 ✓';setTimeout(()=>btn.textContent=t,1400)});
+  }
+  window.cp=cp;
+
+  // ---------- lightbox ----------
+  const lb=document.getElementById('lb'),lbimg=document.getElementById('lbimg'),lbcap=document.getElementById('lbcap');
+  document.querySelectorAll('figure img').forEach(img=>{
+    img.addEventListener('click',e=>{
+      e.stopPropagation();
+      lbimg.src=img.src;
+      const fc=img.closest('figure').querySelector('figcaption');
+      lbcap.textContent=fc?fc.textContent:'';
+      lb.classList.add('open');
+    });
+  });
+  function closeLb(){lb.classList.remove('open');}
+  lb.addEventListener('click',closeLb);
+  document.getElementById('lbx').addEventListener('click',closeLb);
+  lbimg.addEventListener('click',e=>e.stopPropagation());
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
+
+  // ---------- glossary ----------
+  const GLOSSARY=[
+    {t:"VLM",en:"Vision-Language Model",c:"模型",d:"视觉语言模型：能同时理解图像和文字的模型，可看图回答、描述、推理。OmAgent 原生支持 VLM。"},
+    {t:"MLLM",en:"Multimodal LLM",c:"模型",d:"多模态大语言模型：在 LLM 基础上接入图像/视频/音频等模态。Video2RAG 里用它给视频片段生成场景描述。"},
+    {t:"LLM",en:"Large Language Model",c:"模型",d:"大语言模型：处理文本的基础模型（如 GPT 系列）。每个 Worker 内含 LLM 用于推理。"},
+    {t:"VLA",en:"Vision-Language-Action",c:"模型",d:"视觉-语言-动作模型：把感知与动作连起来，常用于具身/机器人。OmTrackVLA 即跟踪类 VLA。"},
+    {t:"开放词汇检测",en:"Open-Vocabulary Detection",c:"视觉",d:"不局限于固定类别表，可检测「任意文字描述」的目标。OmDet 的核心能力。"},
+    {t:"视觉定位",en:"Visual Grounding",c:"视觉",d:"把一句话指向图像中的具体区域（框出来）。GroundVLP 做零样本视觉定位。"},
+    {t:"ASR",en:"Automatic Speech Recognition",c:"视觉",d:"自动语音识别：把视频/音频里的说话转成文字。Video2RAG 用它处理音轨。"},
+    {t:"RAG",en:"Retrieval-Augmented Generation",c:"方法",d:"检索增强生成：先从知识库检索相关内容，再让模型据此作答，缓解幻觉、突破上下文长度。"},
+    {t:"Video2RAG",en:"",c:"方法",d:"OmAgent 处理长视频的管线：视频→切块/抽帧/ASR/VLM 摘要→带时间戳入向量库→提问时检索+分治求解。"},
+    {t:"分而治之",en:"Divide-and-Conquer (DnC)",c:"方法",d:"把复杂/超长任务拆成小任务逐个解决再汇总。OmAgent 用 DnC 循环（DO_WHILE）处理小时级视频问答。"},
+    {t:"具身 AI",en:"Embodied AI",c:"概念",d:"让智能体拥有「身体」、在环境中感知与行动（如机器人、仿真 agent）。Om AI Lab 的重点方向之一。"},
+    {t:"空间智能",en:"Spatial Intelligence",c:"概念",d:"对空间关系、位置、几何的理解能力，是从「看懂图」走向「在世界中行动」的关键。"},
+    {t:"工作流 / DAG",en:"Workflow / Directed Acyclic Graph",c:"框架",d:"把任务编排成有向无环图，节点间按依赖执行。OmAgent 的工作流引擎核心抽象。"},
+    {t:"Worker",en:"",c:"框架",d:"工作流图里的一个执行节点，OmAgent 中每个 Worker 内含 LLM+VLM+STM+LTM，可复用组合。"},
+    {t:"Operator / 算子",en:"",c:"框架",d:"决定 Worker「怎么想」的可插拔推理策略，如 CoT、ReAct、PoT，可像换零件一样替换横评。"},
+    {t:"STM / LTM",en:"Short/Long-Term Memory",c:"框架",d:"短期记忆 STM 存当前任务上下文；长期记忆 LTM 常由向量库支撑，跨任务保留知识。"},
+    {t:"CoT",en:"Chain-of-Thought",c:"推理算子",d:"思维链：让模型「一步步想」再给答案，显著提升推理类任务准确率。"},
+    {t:"SC-CoT",en:"Self-Consistency CoT",c:"推理算子",d:"自洽思维链：对同一问题多次采样思维链，投票取多数答案，更准但更贵。表中精度最高。"},
+    {t:"ToT",en:"Tree-of-Thought",c:"推理算子",d:"思维树：把推理展开成树并搜索多条分支，适合需要探索/回溯的难题。"},
+    {t:"GoT",en:"Graph-of-Thought",c:"推理算子",d:"思维图：用图结构组织中间想法，允许想法间合并/复用，比线性链更灵活。"},
+    {t:"PoT",en:"Program-of-Thought",c:"推理算子",d:"程序化思维：让模型写代码并执行来求解（尤其数学），把计算交给解释器。"},
+    {t:"ReAct / ReAct-Pro",en:"Reason + Act",c:"推理算子",d:"边推理边调用工具/动作，观察结果再继续，是「会用工具的 Agent」的经典范式。"},
+    {t:"RAP",en:"Reasoning via Planning",c:"推理算子",d:"把推理当作带世界模型的规划过程（搜索 + 模拟），提升多步决策质量。"},
+    {t:"V* / ZoomEye",en:"",c:"推理算子",d:"视觉「缩放」类算子：像人一样在高分辨率图像里逐步放大关注区域，找细节再作答。ZoomEye 是其代表作。"},
+    {t:"Conductor",en:"",c:"中间件",d:"工作流编排引擎（源自 Netflix Conductor 思路），OmAgent full 模式用它做分布式任务编排。"},
+    {t:"Milvus",en:"",c:"中间件",d:"开源向量数据库，存储嵌入向量并支持相似度检索，是 RAG/长期记忆的存储后端。"},
+    {t:"Redis",en:"",c:"中间件",d:"内存数据库，OmAgent full 模式用它存储运行状态。"},
+    {t:"Ollama / LocalAI",en:"",c:"工具",d:"在本地跑开源大模型的运行时，让 OmAgent 不依赖云端 API 也能用模型。"},
+    {t:"Gradio",en:"",c:"工具",d:"快速搭机器学习 Web Demo 的 Python 库，OmAgent 示例的网页界面（127.0.0.1:7860）就是它。"},
+    {t:"RL",en:"Reinforcement Learning",c:"方法",d:"强化学习：靠奖励信号训练模型行为。VLM-R1 用 RL 提升视觉理解。"},
+    {t:"EMNLP / AAAI / TGRS",en:"",c:"概念",d:"顶级学术会议/期刊。OmAgent 录用于 EMNLP-2024，是其方法经过同行评审的信号。"}
+  ];
+  const glist=document.getElementById('glist'),gnone=document.getElementById('gnone'),gsearch=document.getElementById('gsearch');
+  function renderG(q){
+    q=(q||'').trim().toLowerCase();
+    let n=0,html='';
+    GLOSSARY.forEach(g=>{
+      const hay=(g.t+' '+g.en+' '+g.d+' '+g.c).toLowerCase();
+      if(q && !hay.includes(q))return;
+      n++;
+      html+=`<div class="gitem"><span class="gcat">${g.c}</span><span class="term">${g.t}</span>${g.en?`<span class="en">${g.en}</span>`:''}<div class="def">${g.d}</div></div>`;
+    });
+    glist.innerHTML=html;
+    gnone.style.display=n?'none':'block';
+  }
+  renderG('');
+  gsearch.addEventListener('input',e=>renderG(e.target.value));
+</script>
+</body>
+</html>

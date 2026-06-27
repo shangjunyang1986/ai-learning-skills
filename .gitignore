@@ -1,0 +1,17 @@
+# Eval / benchmark workspaces
+*-workspace/
+# NOTE: generated output sites are named "<thing>-learn/". We do NOT blanket-ignore
+# that suffix, because the skills themselves are also named "*-learn" (github-project-learn,
+# domain-learn, ...). If you generate a learning page INTO this repo, ignore that path here.
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+# Python
+__pycache__/
+*.pyc
+# Node
+node_modules/
+# Local scratch
+scratchpad/
+*.tmp
