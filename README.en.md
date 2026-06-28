@@ -69,6 +69,12 @@ A folder with no build step, no server, fully offline:
 
 Then just say something like *"help me learn github.com/openai/whisper"* and the skill triggers.
 
+## Notes
+
+- **Not just Claude Code.** Written in the **standard skill format** (`SKILL.md` + `references/` + `scripts/` + `assets/`), so any tool that supports it can use these — Claude Code, Codex, Gemini, OpenCode, etc.
+- **For personal use only.**
+- **Not token-optimized — it can burn tokens.** On metered plans (Claude Pro, Codex Plus, …), keep an eye on your token usage.
+
 ## Roadmap
 
 The four source skills + the `/learn` entry are all done (see the table above and [`samples/`](samples/)). Next:

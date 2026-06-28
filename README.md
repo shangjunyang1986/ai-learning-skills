@@ -67,6 +67,12 @@
 
 装好后对 Claude 说一句，比如 *「帮我学习 github.com/openai/whisper」*，对应 skill 自动触发。
 
+## 使用须知
+
+- **不止于 Claude Code。** 这套 skill 按**标准 skill 格式**（`SKILL.md` + `references/` + `scripts/` + `assets/`）编写——凡是支持该格式的工具都能用：Claude Code、Codex、Gemini、OpenCode 等。
+- **仅供个人使用。**
+- **未做 token 优化，可能比较费 token。** 用 Claude Pro / Codex Plus 等有额度方案的，建议随时留意 token 消耗情况。
+
 ## 路线图
 
 四个来源 skill + `/learn` 入口都已完成（见上表与 [`samples/`](samples/)）。接下来：
