@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<!-- landing page for GitHub Pages root (README is not auto-rendered because of .nojekyll) -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ai-learning-skills · 把任何来源变成可离线分享的学习网页</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#161922; --panel:#1b1f2a; --line:#2a3042; --txt:#e6e8ee;
+    --muted:#9aa3b5; --dim:#717b90; --accent:#7c5cff; --accent2:#22d3ee;
+    --gh:#7c5cff; --domain:#22d3ee; --book:#46c98b; --paper:#f5b94d; --other:#9aa3b5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);line-height:1.65;font-size:15px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--accent2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 26px 90px}
+  header.top{background:radial-gradient(120% 140% at 0% 0%,rgba(124,92,255,.22),transparent 50%),radial-gradient(120% 140% at 100% 0%,rgba(34,211,238,.14),transparent 45%),var(--panel);
+    border:1px solid var(--line);border-radius:18px;padding:30px 32px;margin-bottom:24px}
+  .brand{display:flex;align-items:center;gap:13px;margin-bottom:10px}
+  .brand .logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex:0 0 46px}
+  .brand h1{font-size:23px;margin:0}
+  .brand .repo{font-size:12.5px;color:var(--muted);margin-top:2px}
+  header.top p.lead{color:#d7dbe6;font-size:16px;max-width:70ch;margin:6px 0 0}
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;padding:9px 15px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:#e6e8ee}
+  .btn.primary{background:linear-gradient(90deg,rgba(124,92,255,.25),rgba(34,211,238,.12));border-color:#3a3560;color:#fff}
+  .btn:hover{border-color:var(--accent);text-decoration:none}
+  h2.sec{font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:30px 0 14px;font-weight:700}
+  .note{color:var(--muted);font-size:14px;margin:-4px 0 16px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .14s,border-color .14s;color:inherit}
+  .card:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
+  .card .thumb{aspect-ratio:16/10;background:#0d0f16;overflow:hidden;position:relative}
+  .card .thumb img{width:100%;height:100%;object-fit:cover;display:block;background:#fff}
+  .card .badge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;color:#0d0f16}
+  .b-gh{background:var(--gh);color:#fff}.b-domain{background:var(--domain)}.b-book{background:var(--book)}.b-paper{background:var(--paper)}.b-other{background:var(--other)}
+  .card .body{padding:13px 15px}
+  .card .t{font-size:14.5px;font-weight:600;color:#fff}
+  .card .d{font-size:12.5px;color:var(--muted);margin-top:5px}
+  .skills{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:680px){.skills{grid-template-columns:1fr}}
+  .srow{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 16px}
+  .srow b{color:#fff}.srow span{color:var(--muted);font-size:13.5px}
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--dim);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">AL</div>
+      <div><h1>ai-learning-skills</h1><div class="repo">github.com/shangjunyang1986/ai-learning-skills</div></div>
+    </div>
+    <p class="lead">用 AI 把一个 <b>GitHub 项目 / 论文 / 技术书 / 陌生领域</b>，快速变成一份<b>带图、可交互、能离线打开和分享</b>的学习网页。为快速上手、个人学习而生——刻意轻量，一个自包含 HTML，双击即开。</p>
+    <div class="btns">
+      <a class="btn primary" href="https://github.com/shangjunyang1986/ai-learning-skills" target="_blank">⭐ 在 GitHub 查看</a>
+      <a class="btn" href="#samples">↓ 直接看样例</a>
+      <a class="btn" href="https://github.com/shangjunyang1986/ai-learning-skills#安装与使用" target="_blank">📦 怎么安装</a>
+    </div>
+  </header>
+
+  <h2 class="sec" id="samples">样例 · 点开就能在浏览器里交互</h2>
+  <p class="note">下面都是用这套 skill <b>真实生成</b>的学习页（媒体已下载、可离线）。点任意一张卡片直接体验。</p>
+  <div class="grid">
+    <a class="card" href="samples/github-project-learn/whisper-learn/">
+      <div class="thumb"><img src="docs/images/03-single-repo-whisper.png" alt=""><span class="badge b-gh">项目</span></div>
+      <div class="body"><div class="t">OpenAI Whisper</div><div class="d">单仓库：是什么 / 架构 / 原理 / 代码结构 / 部署</div></div>
+    </a>
+    <a class="card" href="samples/github-project-learn/qwenlm-learn/">
+      <div class="thumb"><img src="docs/images/02-org-mode-qwen.png" alt=""><span class="badge b-gh">组织</span></div>
+      <div class="body"><div class="t">QwenLM（通义千问）</div><div class="d">整个组织：全景选型 + 重点仓库详解 + 旗舰深入</div></div>
+    </a>
+    <a class="card" href="samples/domain-learn/3dgs-learn/">
+      <div class="thumb"><img src="docs/images/3dgs-hero.png" alt=""><span class="badge b-domain">领域</span></div>
+      <div class="body"><div class="t">3D 高斯泼溅</div><div class="d">入门→实践路线 + 可交互「2D 高斯泼溅」demo</div></div>
+    </a>
+    <a class="card" href="samples/textbook-learn/d2l-learn/">
+      <div class="thumb"><img src="docs/images/d2l-chapter.png" alt=""><span class="badge b-book">书</span></div>
+      <div class="body"><div class="t">《动手学深度学习》</div><div class="d">逐章精讲 + 例题 + 自评测验 + 进度追踪</div></div>
+    </a>
+    <a class="card" href="samples/paper-learn/attention-learn/">
+      <div class="thumb"><img src="docs/images/paper-demo.png" alt=""><span class="badge b-paper">论文</span></div>
+      <div class="body"><div class="t">Attention Is All You Need</div><div class="d">逐图拆方法 + 可交互注意力 demo + 批判性阅读</div></div>
+    </a>
+    <a class="card" href="samples/learn-hub/">
+      <div class="thumb"><img src="docs/images/learn-hub.png" alt=""><span class="badge b-other">hub</span></div>
+      <div class="body"><div class="t">学习库 hub</div><div class="d">把所有学习页聚合成一个离线书架（可选附属）</div></div>
+    </a>
+  </div>
+
+  <h2 class="sec">四个 skill（按来源）+ 一个总入口</h2>
+  <div class="skills">
+    <div class="srow"><b>github-project-learn</b> · <span>一个 GitHub 仓库或整个组织</span></div>
+    <div class="srow"><b>domain-learn</b> · <span>一个开放领域 → 入门→实践路线 + 可交互 demo</span></div>
+    <div class="srow"><b>textbook-learn</b> · <span>一本技术书 / PDF → 按章拆课程 + 测验</span></div>
+    <div class="srow"><b>paper-learn</b> · <span>一篇论文 / arXiv → 逐图拆方法 + 机制 demo + 批判性阅读</span></div>
+    <div class="srow" style="grid-column:1/-1"><b>/learn</b> · <span>总入口：丢任何来源，自动判型分流到上面对应的 skill（模糊先问一句）</span></div>
+  </div>
+
+  <footer>
+    标准 skill 格式（Claude Code / Codex / Gemini / OpenCode 等可用）· 仅供个人使用 · 未做 token 优化，注意消耗 · MIT 许可证 ·
+    <a href="https://github.com/shangjunyang1986/ai-learning-skills" target="_blank">源码与完整说明 →</a>
+  </footer>
+</div>
+</body>
+</html>
