@@ -62,8 +62,10 @@
 
 ## 安装与使用
 
-- **打包文件**：从 Release 下载 `.skill`，拖进 Claude Code 的 skill 安装器。
-- **从源码**：`cp -r skills/<name> ~/.claude/skills/`。
+两种方式：
+
+- **从源码手动拷贝**：把某个 skill 文件夹放进你的 skills 目录，例如 `cp -r skills/<name> ~/.claude/skills/`。
+- **让工具自动装**：在 Claude Code / Codex 等里，把本仓库（或某个 `skills/<name>` 文件夹）指给它，说一句「帮我安装这个 skill」，它会替你拷到对应的 skills 目录。
 
 装好后对 Claude 说一句，比如 *「帮我学习 github.com/openai/whisper」*，对应 skill 自动触发。
 

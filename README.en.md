@@ -64,8 +64,10 @@ A folder with no build step, no server, fully offline:
 
 ## Install & use
 
-- **Packaged `.skill`**: download from a Release, drag it into Claude Code's skill installer.
-- **From source**: `cp -r skills/<name> ~/.claude/skills/`.
+Two ways:
+
+- **Copy from source**: put a skill folder into your skills directory, e.g. `cp -r skills/<name> ~/.claude/skills/`.
+- **Let the tool install it**: in Claude Code / Codex / etc., point the agent at this repo (or a `skills/<name>` folder) and say "install this skill" — it copies it into the right skills directory for you.
 
 Then just say something like *"help me learn github.com/openai/whisper"* and the skill triggers.
 
