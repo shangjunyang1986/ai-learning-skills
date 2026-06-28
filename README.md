@@ -2,6 +2,8 @@
 
 # ai-learning-skills
 
+[![license MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE) ![Claude Code skill](https://img.shields.io/badge/Claude_Code-skill-7c5cff) ![also Codex · Gemini · OpenCode](https://img.shields.io/badge/also-Codex_Gemini_OpenCode-22d3ee) ![output offline single HTML](https://img.shields.io/badge/output-offline_single_HTML-46c98b) ![personal use](https://img.shields.io/badge/use-personal-f5b94d)
+
 > 用 AI 把一个 **GitHub 项目 / 论文 / 技术书 / 陌生领域**，快速变成一份**带图、可交互、能离线打开和分享**的学习网页。
 > 为**快速上手、个人学习**而生——刻意轻量：一个自包含 HTML，双击即开，可单独用、也可合并用。
 
@@ -64,10 +66,15 @@
 
 两种方式：
 
-- **从源码手动拷贝**：把某个 skill 文件夹放进你的 skills 目录，例如 `cp -r skills/<name> ~/.claude/skills/`。
-- **让工具自动装**：在 Claude Code / Codex 等里，把本仓库（或某个 `skills/<name>` 文件夹）指给它，说一句「帮我安装这个 skill」，它会替你拷到对应的 skills 目录。
+- **从源码手动拷贝**——克隆后把某个 skill 文件夹放进你的 skills 目录：
+  ```bash
+  git clone https://github.com/shangjunyang1986/ai-learning-skills
+  cp -r ai-learning-skills/skills/<name> ~/.claude/skills/     # <name> 如 paper-learn
+  ```
+- **让工具自动装**——在 Claude Code / Codex 等里，把仓库地址指给它让它帮你装。例如对它说：
+  > 帮我安装 `https://github.com/shangjunyang1986/ai-learning-skills` 里的 `paper-learn` 这个 skill。
 
-装好后对 Claude 说一句，比如 *「帮我学习 github.com/openai/whisper」*，对应 skill 自动触发。
+装好后对它说一句，比如 *「帮我学习 github.com/openai/whisper」*，对应 skill 自动触发。
 
 ## 使用须知
 

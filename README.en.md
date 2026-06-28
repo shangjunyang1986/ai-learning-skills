@@ -2,6 +2,8 @@
 
 # ai-learning-skills
 
+[![license MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE) ![Claude Code skill](https://img.shields.io/badge/Claude_Code-skill-7c5cff) ![also Codex · Gemini · OpenCode](https://img.shields.io/badge/also-Codex_Gemini_OpenCode-22d3ee) ![output offline single HTML](https://img.shields.io/badge/output-offline_single_HTML-46c98b) ![personal use](https://img.shields.io/badge/use-personal-f5b94d)
+
 > Use AI to turn a **GitHub project / paper / technical book / unfamiliar field** into an
 > **interactive, offline, shareable learning page** — fast.
 > Built for **getting up to speed and personal learning** — deliberately lightweight: one
@@ -66,8 +68,13 @@ A folder with no build step, no server, fully offline:
 
 Two ways:
 
-- **Copy from source**: put a skill folder into your skills directory, e.g. `cp -r skills/<name> ~/.claude/skills/`.
-- **Let the tool install it**: in Claude Code / Codex / etc., point the agent at this repo (or a `skills/<name>` folder) and say "install this skill" — it copies it into the right skills directory for you.
+- **Copy from source** — clone, then put a skill folder into your skills directory:
+  ```bash
+  git clone https://github.com/shangjunyang1986/ai-learning-skills
+  cp -r ai-learning-skills/skills/<name> ~/.claude/skills/     # <name> e.g. paper-learn
+  ```
+- **Let the tool install it** — in Claude Code / Codex / etc., point the agent at the repo and ask. For example, tell it:
+  > Install the `paper-learn` skill from `https://github.com/shangjunyang1986/ai-learning-skills`.
 
 Then just say something like *"help me learn github.com/openai/whisper"* and the skill triggers.
 
