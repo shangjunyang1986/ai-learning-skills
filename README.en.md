@@ -41,8 +41,6 @@ These skills let AI **digest, fact-check, and organize** the source into a struc
 
 One front door, **[`/learn`](skills/learn)**: hand it any source and it auto-detects the type and routes to the right skill (asking one question when ambiguous). Each skill is also **self-contained and individually installable** — you don't need the whole repo to use one. And it's **faithful, never fabricated**: every number is from a real fetch, and if a thing doesn't exist the page says so.
 
-> See real output now: [`samples/`](samples/) has offline-openable examples for every skill (just double-click `index.html`).
-
 ## Preview
 
 A **single repo** and a **whole organization** automatically get different structures:
@@ -53,6 +51,19 @@ A **single repo** and a **whole organization** automatically get different struc
 | Straight to the deep dive: what-it-is / architecture / principle / code structure / deploy | An extra layer: project map + selection guide + a profile per key repo + flagship deep dive |
 
 Built into every page: sticky TOC with scroll-spy, click-to-zoom images, copy buttons on code, a searchable glossary.
+
+## Samples (view live)
+
+Learning pages **really generated** by these skills, deployed as a site — **click and they open, interactive, right in your browser** (live ~1 min after first deploy). More cases + screenshots in [`samples/`](samples/).
+
+| Case | Skill | Open live |
+|------|-------|-----------|
+| OpenAI Whisper (single repo) | github-project-learn | [▶ open](https://shangjunyang1986.github.io/ai-learning-skills/samples/github-project-learn/whisper-learn/) |
+| QwenLM (whole org) | github-project-learn | [▶ open](https://shangjunyang1986.github.io/ai-learning-skills/samples/github-project-learn/qwenlm-learn/) |
+| 3D Gaussian Splatting (interactive demo) | domain-learn | [▶ open](https://shangjunyang1986.github.io/ai-learning-skills/samples/domain-learn/3dgs-learn/) |
+| Dive into Deep Learning (chapters + quizzes) | textbook-learn | [▶ open](https://shangjunyang1986.github.io/ai-learning-skills/samples/textbook-learn/d2l-learn/) |
+| Attention Is All You Need (attention demo + critical reading) | paper-learn | [▶ open](https://shangjunyang1986.github.io/ai-learning-skills/samples/paper-learn/attention-learn/) |
+| Learning-library hub | learn | [▶ open](https://shangjunyang1986.github.io/ai-learning-skills/samples/learn-hub/) |
 
 ## What the output looks like
 
@@ -66,15 +77,22 @@ A folder with no build step, no server, fully offline:
 
 ## Install & use
 
-Two ways:
+Two ways, take your pick.
 
-- **Copy from source** — clone, then put a skill folder into your skills directory:
-  ```bash
-  git clone https://github.com/shangjunyang1986/ai-learning-skills
-  cp -r ai-learning-skills/skills/<name> ~/.claude/skills/     # <name> e.g. paper-learn
-  ```
-- **Let the tool install it** — in Claude Code / Codex / etc., point the agent at the repo and ask. For example, tell it:
-  > Install the `paper-learn` skill from `https://github.com/shangjunyang1986/ai-learning-skills`.
+**Option A · let the tool install it (easiest)** — in Claude Code / Codex / etc., just tell it:
+
+- **Whole set**: "Install **all skills** from `https://github.com/shangjunyang1986/ai-learning-skills` into my skills directory."
+- **Just one**: "Install only the `paper-learn` skill from that repo."
+
+**Option B · copy from source** — clone, then copy into your skills directory (Claude Code uses `~/.claude/skills/`; other tools may differ):
+
+```bash
+git clone https://github.com/shangjunyang1986/ai-learning-skills
+cd ai-learning-skills
+
+cp -r skills/* ~/.claude/skills/             # whole set (four skills + the /learn entry)
+cp -r skills/paper-learn ~/.claude/skills/   # or: just one
+```
 
 Then just say something like *"help me learn github.com/openai/whisper"* and the skill triggers.
 

@@ -39,8 +39,6 @@
 
 一个总入口 **[`/learn`](skills/learn)**：丢任何来源，自动判型分流到上面对应的 skill（模糊先问一句）。每个 skill 也能**独立安装、单独触发**——用一个不需要整个仓库。坚持**真实不编造**：数据全来自真实抓取，没有就如实说明。
 
-> 真实产出直接打开看：[`samples/`](samples/) 里每个 skill 都有离线案例（双击 `index.html`）。
-
 ## 效果预览
 
 **单仓库** 与 **整个组织** 自动走不同结构：
@@ -51,6 +49,19 @@
 | 直接深入：是什么 / 架构 / 原理 / 代码结构 / 部署 | 多一层：全景选型 +「重点仓库逐个详解」+ 旗舰深入 |
 
 每页内置：吸顶目录 + 滚动高亮、图片点击放大、代码一键复制、术语表实时搜索。
+
+## 样例（在线就能看）
+
+下面是用本套 skill **真实生成**的学习页，已部署成网页，**点开就能在浏览器里直接看、直接交互**（首次部署约 1 分钟后生效）。更多案例与截图见 [`samples/`](samples/)。
+
+| 案例 | 用的 skill | 在线打开 |
+|------|-----------|---------|
+| OpenAI Whisper（单仓库） | github-project-learn | [▶ 打开](https://shangjunyang1986.github.io/ai-learning-skills/samples/github-project-learn/whisper-learn/) |
+| QwenLM（整个组织） | github-project-learn | [▶ 打开](https://shangjunyang1986.github.io/ai-learning-skills/samples/github-project-learn/qwenlm-learn/) |
+| 3D 高斯泼溅（含可交互 demo） | domain-learn | [▶ 打开](https://shangjunyang1986.github.io/ai-learning-skills/samples/domain-learn/3dgs-learn/) |
+| 《动手学深度学习》（逐章 + 测验） | textbook-learn | [▶ 打开](https://shangjunyang1986.github.io/ai-learning-skills/samples/textbook-learn/d2l-learn/) |
+| Attention Is All You Need（注意力 demo + 批判性阅读） | paper-learn | [▶ 打开](https://shangjunyang1986.github.io/ai-learning-skills/samples/paper-learn/attention-learn/) |
+| 学习库 hub（聚合所有页） | learn | [▶ 打开](https://shangjunyang1986.github.io/ai-learning-skills/samples/learn-hub/) |
 
 ## 产出长什么样
 
@@ -64,17 +75,24 @@
 
 ## 安装与使用
 
-两种方式：
+两种方式，任选其一。
 
-- **从源码手动拷贝**——克隆后把某个 skill 文件夹放进你的 skills 目录：
-  ```bash
-  git clone https://github.com/shangjunyang1986/ai-learning-skills
-  cp -r ai-learning-skills/skills/<name> ~/.claude/skills/     # <name> 如 paper-learn
-  ```
-- **让工具自动装**——在 Claude Code / Codex 等里，把仓库地址指给它让它帮你装。例如对它说：
-  > 帮我安装 `https://github.com/shangjunyang1986/ai-learning-skills` 里的 `paper-learn` 这个 skill。
+**方式 A · 让工具自动装（最省事）**——在 Claude Code / Codex 等里直接对它说：
 
-装好后对它说一句，比如 *「帮我学习 github.com/openai/whisper」*，对应 skill 自动触发。
+- **装整套**：「帮我把 `https://github.com/shangjunyang1986/ai-learning-skills` 里的**所有 skill** 装到我的 skills 目录。」
+- **只装一个**：「帮我安装该仓库里的 `paper-learn` 这**一个** skill。」
+
+**方式 B · 从源码手动拷贝**——先克隆，再拷进你的 skills 目录（Claude Code 是 `~/.claude/skills/`，其它工具目录可能不同）：
+
+```bash
+git clone https://github.com/shangjunyang1986/ai-learning-skills
+cd ai-learning-skills
+
+cp -r skills/* ~/.claude/skills/             # 装整套（四个 skill + /learn 入口）
+cp -r skills/paper-learn ~/.claude/skills/   # 或：只装一个
+```
+
+装好后对它说一句话就能用，比如 *「帮我学习 github.com/openai/whisper」*，对应 skill 自动触发。
 
 ## 使用须知
 
